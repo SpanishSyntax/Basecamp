@@ -641,7 +641,7 @@ def update_gitignore(
     new_sections: list[str] = []
 
     # 1. Frost Global Environment Ignores (The SSOT Hook)
-    frost_ignore_path = os.environ.get("FROST_IGNORES")
+    frost_ignore_path = Path.home() / ".config/frost/global_ignores"
     if frost_ignore_path and os.path.exists(frost_ignore_path):
         frost_content = Path(frost_ignore_path).read_text(encoding="utf-8")
         frost_rules = [
