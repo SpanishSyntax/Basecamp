@@ -74,7 +74,15 @@ def build_builtin_role_registry(folder_name: str) -> dict[str, Role]:
                 "clang-tools",
             ],
             hooks=[fmt_status("⚡", "C", "GCC/Clang + clangd")],
-            ignores=["build/", "bin/", "*.o", "*.a", "*.so", "compile_commands.json", ".cache/"],
+            ignores=[
+                "build/",
+                "bin/",
+                "*.o",
+                "*.a",
+                "*.so",
+                "compile_commands.json",
+                ".cache/",
+            ],
         ),
         "cpp": Role(
             category="Systems",
@@ -89,7 +97,15 @@ def build_builtin_role_registry(folder_name: str) -> dict[str, Role]:
                 "clang-tools",
             ],
             hooks=[fmt_status("⚡", "C++", "GCC/Clang + clangd")],
-            ignores=["build/", "bin/", "*.o", "*.a", "*.so", "compile_commands.json", ".cache/"],
+            ignores=[
+                "build/",
+                "bin/",
+                "*.o",
+                "*.a",
+                "*.so",
+                "compile_commands.json",
+                ".cache/",
+            ],
         ),
         "go": Role(
             category="Systems",
@@ -161,7 +177,7 @@ def build_builtin_role_registry(folder_name: str) -> dict[str, Role]:
                 "ty",
             ],
             hooks=[
-                'export PYTHONPATH="$PWD''${PYTHONPATH:+:$PYTHONPATH}"',
+                'export PYTHONPATH="$PWD${PYTHONPATH:+:$PYTHONPATH}"',
                 "export UV_PYTHON_DOWNLOADS=never",
                 "[ -f pyproject.toml ] && uv sync",
                 (
@@ -171,7 +187,15 @@ def build_builtin_role_registry(folder_name: str) -> dict[str, Role]:
                 "[ -d .venv ] && source .venv/bin/activate",
                 fmt_status("🐍", "Python", "uv + ruff + ty"),
             ],
-            ignores=["__pycache__/", "*.py[cod]", ".venv/", ".ruff_cache/", "dist/", "build/", "*.egg-info/"],
+            ignores=[
+                "__pycache__/",
+                "*.py[cod]",
+                ".venv/",
+                ".ruff_cache/",
+                "dist/",
+                "build/",
+                "*.egg-info/",
+            ],
         ),
         "mathvis": Role(
             category="Data & Scientific",
@@ -183,13 +207,20 @@ def build_builtin_role_registry(folder_name: str) -> dict[str, Role]:
                 "ty",
             ],
             hooks=[
-                'export PYTHONPATH="$PWD''${PYTHONPATH:+:$PYTHONPATH}"',
+                'export PYTHONPATH="$PWD${PYTHONPATH:+:$PYTHONPATH}"',
                 "export UV_PYTHON_DOWNLOADS=never",
                 "[ -f pyproject.toml ] && uv sync",
                 "[ -d .venv ] && source .venv/bin/activate",
                 fmt_status("📐", "Mathvis", "πthon 3.14 + Scientific Stack"),
             ],
-            ignores=["__pycache__/", "*.py[cod]", ".venv/", ".ruff_cache/", "dist/", "build/"],
+            ignores=[
+                "__pycache__/",
+                "*.py[cod]",
+                ".venv/",
+                ".ruff_cache/",
+                "dist/",
+                "build/",
+            ],
         ),
         "julia": Role(
             category="Data & Scientific",
@@ -322,7 +353,15 @@ def build_builtin_role_registry(folder_name: str) -> dict[str, Role]:
             hooks=[
                 fmt_status("📜", "LaTeX", "Tectonic + texlab"),
             ],
-            ignores=["*.aux", "*.log", "*.out", "*.toc", "*.synctex.gz", "*.fdb_latexmk", "*.fls"],
+            ignores=[
+                "*.aux",
+                "*.log",
+                "*.out",
+                "*.toc",
+                "*.synctex.gz",
+                "*.fdb_latexmk",
+                "*.fls",
+            ],
         ),
         "folio": Role(
             category="Typesetting",
@@ -379,7 +418,9 @@ BUILTIN_ALIASES = {
 
 def load_user_config() -> tuple[dict[str, Role], dict[str, str], list[Path]]:
     """Loads custom roles, aliases, and templates from ~/.config/flaker/roles.toml."""
-    config_dir = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config")) / "flaker"
+    config_dir = (
+        Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config")) / "flaker"
+    )
     roles_file = config_dir / "roles.toml"
     extra_roles: dict[str, Role] = {}
     extra_aliases: dict[str, str] = {}
@@ -486,14 +527,24 @@ def display_roles_list(roles_db: dict[str, Role], aliases: dict[str, str]) -> No
             print(f"{r_col} {a_col} {role.category:<20} {role.description}")
 
     print(ui.blue("=" * 96))
-    ui.info(f"Run '{ui.bold('flaker info <role>')}' for packages, hooks, and starter files.\n", symbol="💡")
+    ui.info(
+        f"Run '{ui.bold('flaker info <role>')}' for packages, hooks, and starter files.\n",
+        symbol="💡",
+    )
 
 
-def display_role_info(role_name: str, roles_db: dict[str, Role], aliases: dict[str, str], assets_dirs: list[Path]) -> None:
+def display_role_info(
+    role_name: str,
+    roles_db: dict[str, Role],
+    aliases: dict[str, str],
+    assets_dirs: list[Path],
+) -> None:
     """Displays detailed configuration and packages for a given role."""
     resolved_name = aliases.get(role_name, role_name)
     if resolved_name not in roles_db:
-        ui.error(f"Unknown role '{role_name}'. Run 'flaker list' to see available roles.")
+        ui.error(
+            f"Unknown role '{role_name}'. Run 'flaker list' to see available roles."
+        )
         sys.exit(1)
 
     role = roles_db[resolved_name]
@@ -501,7 +552,9 @@ def display_role_info(role_name: str, roles_db: dict[str, Role], aliases: dict[s
 
     ui.header(f"Role Information: {resolved_name}", width=76)
     print(f"  {ui.bold('Category')}    : {role.category}")
-    print(f"  {ui.bold('Aliases')}     : {', '.join(rev_aliases) if rev_aliases else ui.dim('none')}")
+    print(
+        f"  {ui.bold('Aliases')}     : {', '.join(rev_aliases) if rev_aliases else ui.dim('none')}"
+    )
     print(f"  {ui.bold('Summary')}     : {role.description}")
     print(f"\n  {ui.bold('Packages Included in DevShell:')}")
     for pkg in role.pkgs:
@@ -522,15 +575,27 @@ def display_role_info(role_name: str, roles_db: dict[str, Role], aliases: dict[s
             if pdir.exists() or sdir.exists():
                 if pdir.exists():
                     for f in pdir.glob("**/*"):
-                        if f.is_file() and "__pycache__" not in f.parts and f.suffix not in (".pyc", ".pyo"):
+                        if (
+                            f.is_file()
+                            and "__pycache__" not in f.parts
+                            and f.suffix not in (".pyc", ".pyo")
+                        ):
                             project_files.append(str(f.relative_to(pdir)))
                 if sdir.exists():
                     for f in sdir.glob("**/*"):
-                        if f.is_file() and "__pycache__" not in f.parts and f.suffix not in (".pyc", ".pyo"):
+                        if (
+                            f.is_file()
+                            and "__pycache__" not in f.parts
+                            and f.suffix not in (".pyc", ".pyo")
+                        ):
                             starter_files.append(str(f.relative_to(sdir)))
             else:
                 for f in rdir.glob("**/*"):
-                    if f.is_file() and "__pycache__" not in f.parts and f.suffix not in (".pyc", ".pyo"):
+                    if (
+                        f.is_file()
+                        and "__pycache__" not in f.parts
+                        and f.suffix not in (".pyc", ".pyo")
+                    ):
                         starter_files.append(str(f.relative_to(rdir)))
             break
 
@@ -567,7 +632,11 @@ def update_gitignore(
     if gitignore_path.exists():
         existing_content = gitignore_path.read_text(encoding="utf-8")
 
-    existing_lines = {line.strip() for line in existing_content.splitlines() if line.strip() and not line.strip().startswith("#")}
+    existing_lines = {
+        line.strip()
+        for line in existing_content.splitlines()
+        if line.strip() and not line.strip().startswith("#")
+    }
 
     new_sections: list[str] = []
 
@@ -575,26 +644,34 @@ def update_gitignore(
     frost_ignore_path = os.environ.get("FROST_IGNORES")
     if frost_ignore_path and os.path.exists(frost_ignore_path):
         frost_content = Path(frost_ignore_path).read_text(encoding="utf-8")
-        frost_rules = [line.strip() for line in frost_content.splitlines() if line.strip() and not line.startswith("#")]
+        frost_rules = [
+            line.strip()
+            for line in frost_content.splitlines()
+            if line.strip() and not line.startswith("#")
+        ]
         missing_frost = [r for r in frost_rules if r not in existing_lines]
         if missing_frost:
-            new_sections.append("# Frost Global Environment\n" + "\n".join(missing_frost))
-            existing_lines.update(missing_frost) # Deduplicate
+            new_sections.append(
+                "# Frost Global Environment\n" + "\n".join(missing_frost)
+            )
+            existing_lines.update(missing_frost)  # Deduplicate
 
     # 2. Base Nix & Direnv rules
     base_rules = [".direnv/", "result", "result-*"]
     missing_base = [r for r in base_rules if r not in existing_lines]
     if missing_base:
         new_sections.append("# Nix & Direnv\n" + "\n".join(missing_base))
-        existing_lines.update(missing_base) # Deduplicate
+        existing_lines.update(missing_base)  # Deduplicate
 
     # 3. Role-specific rules
     for r in resolved_roles:
         if r in roles_db and roles_db[r].ignores:
             missing = [ign for ign in roles_db[r].ignores if ign not in existing_lines]
             if missing:
-                new_sections.append(f"# {roles_db[r].category} ({r})\n" + "\n".join(missing))
-                existing_lines.update(missing) # Deduplicate
+                new_sections.append(
+                    f"# {roles_db[r].category} ({r})\n" + "\n".join(missing)
+                )
+                existing_lines.update(missing)  # Deduplicate
 
     if not new_sections:
         return False
@@ -696,7 +773,9 @@ def prepare_flake_env(
     )
 
     if dry_run:
-        ui.subheader(f"[DRY RUN] Generated flake.nix (Channel: {nixpkgs_url})", width=76)
+        ui.subheader(
+            f"[DRY RUN] Generated flake.nix (Channel: {nixpkgs_url})", width=76
+        )
         print(rendered)
         if not no_direnv:
             ui.subheader("[DRY RUN] Generated .envrc", width=76)
@@ -713,7 +792,11 @@ def prepare_flake_env(
 
     update_gitignore(project_root, resolved_roles, roles_db, dry_run=False)
 
-    msg = f"Generated flake.nix at {project_root}" if no_direnv else f"Generated flake.nix and .envrc at {project_root}"
+    msg = (
+        f"Generated flake.nix at {project_root}"
+        if no_direnv
+        else f"Generated flake.nix and .envrc at {project_root}"
+    )
     ui.success(msg)
 
     if auto_git:
@@ -768,14 +851,19 @@ def scaffold_assets(
             for src_dir in subdirs_to_copy:
                 for template_file in src_dir.glob("**/*"):
                     if template_file.is_file():
-                        if "__pycache__" in template_file.parts or template_file.suffix in (".pyc", ".pyo"):
+                        if (
+                            "__pycache__" in template_file.parts
+                            or template_file.suffix in (".pyc", ".pyo")
+                        ):
                             continue
 
                         relative_path = template_file.relative_to(src_dir)
                         dest_path = target_dir / relative_path
 
                         if dry_run:
-                            ui.info(f"[DRY RUN] Would scaffold {relative_path} into {dest_path}")
+                            ui.info(
+                                f"[DRY RUN] Would scaffold {relative_path} into {dest_path}"
+                            )
                             scaffolded_any = True
                             continue
 
@@ -791,7 +879,11 @@ def scaffold_assets(
                 break
 
     if scaffolded_any and not dry_run:
-        scope_desc = "project foundation" if scope == "project" else ("starter" if scope == "starter" else "")
+        scope_desc = (
+            "project foundation"
+            if scope == "project"
+            else ("starter" if scope == "starter" else "")
+        )
         ui.success(f"Scaffolded {scope_desc} assets into {target_dir}")
         if auto_git:
             stage_git_files(project_root or target_dir, created_files)
@@ -806,7 +898,9 @@ def run_interactive_mode(
     project_root: Path,
 ) -> tuple[str, list[str]]:
     """Interactive role and command selector using arrow/spacebar menus."""
-    is_subfolder = (project_root != current_dir) and (project_root / "flake.nix").exists()
+    is_subfolder = (project_root != current_dir) and (
+        project_root / "flake.nix"
+    ).exists()
     has_root_flake = (project_root / "flake.nix").exists()
 
     if is_subfolder:
@@ -816,25 +910,65 @@ def run_interactive_mode(
             rel = current_dir.name
         ui.info(f"Existing workspace detected at {ui.bold(str(project_root))}")
         cmd_options = [
-            ("new", f"Create starter file in ./{rel}/", "Drops starter script in current directory"),
-            ("shell", "Update DevShell environment at root", "flake.nix, .envrc, and .gitignore"),
-            ("project", "Scaffold project foundation files", "Scaffold root configs to workspace root"),
-            ("init", "Re-initialize workspace", "Full bootstrap (DevShell + project foundation + starter)"),
+            (
+                "new",
+                f"Create starter file in ./{rel}/",
+                "Drops starter script in current directory",
+            ),
+            (
+                "shell",
+                "Update DevShell environment at root",
+                "flake.nix, .envrc, and .gitignore",
+            ),
+            (
+                "project",
+                "Scaffold project foundation files",
+                "Scaffold root configs to workspace root",
+            ),
+            (
+                "init",
+                "Re-initialize workspace",
+                "Full bootstrap (DevShell + project foundation + starter)",
+            ),
         ]
     elif has_root_flake:
         ui.info(f"Active workspace detected at {ui.bold(str(project_root))}")
         cmd_options = [
-            ("new", "Create a starter file in current directory", "Drop starter script (main.py, plot.py, etc.)"),
+            (
+                "new",
+                "Create a starter file in current directory",
+                "Drop starter script (main.py, plot.py, etc.)",
+            ),
             ("init", "Re-initialize workspace", "DevShell + root configs + starter"),
-            ("shell", "DevShell environment only", "flake.nix, .envrc, and .gitignore at root"),
-            ("project", "Scaffold project foundation files", "Scaffold root configs to project root"),
+            (
+                "shell",
+                "DevShell environment only",
+                "flake.nix, .envrc, and .gitignore at root",
+            ),
+            (
+                "project",
+                "Scaffold project foundation files",
+                "Scaffold root configs to project root",
+            ),
         ]
     else:
         cmd_options = [
-            ("init", "Initialize full workspace", "DevShell flake.nix + project root configs + starter"),
-            ("shell", "DevShell environment only", "flake.nix, .envrc, and .gitignore at root"),
+            (
+                "init",
+                "Initialize full workspace",
+                "DevShell flake.nix + project root configs + starter",
+            ),
+            (
+                "shell",
+                "DevShell environment only",
+                "flake.nix, .envrc, and .gitignore at root",
+            ),
             ("new", "Drop starter files into current directory", "Starter script only"),
-            ("project", "Scaffold project foundation files", "Root configs only (pyproject.toml, template.typ)"),
+            (
+                "project",
+                "Scaffold project foundation files",
+                "Root configs only (pyproject.toml, template.typ)",
+            ),
         ]
 
     chosen_cmd = ui.select("What would you like to do?", cmd_options)
@@ -980,12 +1114,16 @@ def main() -> None:
     # Interactive trigger if no arguments provided in a TTY
     if not filtered_args:
         if sys.stdin.isatty():
-            command, raw_roles = run_interactive_mode(roles_db, aliases, current_dir, project_root)
+            command, raw_roles = run_interactive_mode(
+                roles_db, aliases, current_dir, project_root
+            )
         else:
             print_help()
             sys.exit(1)
     elif filtered_args[0] == "interactive":
-        command, raw_roles = run_interactive_mode(roles_db, aliases, current_dir, project_root)
+        command, raw_roles = run_interactive_mode(
+            roles_db, aliases, current_dir, project_root
+        )
     else:
         command = COMMAND_ALIASES.get(filtered_args[0], filtered_args[0])
         raw_roles = filtered_args[1:]
@@ -999,15 +1137,21 @@ def main() -> None:
                     for r in sorted_roles
                 ]
                 if command == "new":
-                    chosen_role = ui.select("Select role for starter file:", role_options)
+                    chosen_role = ui.select(
+                        "Select role for starter file:", role_options
+                    )
                     raw_roles = [chosen_role]
                 else:
-                    raw_roles = ui.multiselect(f"Select roles for flaker {command}:", role_options)
+                    raw_roles = ui.multiselect(
+                        f"Select roles for flaker {command}:", role_options
+                    )
                     if not raw_roles:
                         ui.warn("No roles selected. Exiting.")
                         sys.exit(0)
             else:
-                ui.error(f"Missing roles for command '{command}'. Example: flaker {command} python")
+                ui.error(
+                    f"Missing roles for command '{command}'. Example: flaker {command} python"
+                )
                 sys.exit(1)
 
     # Enforce valid commands
