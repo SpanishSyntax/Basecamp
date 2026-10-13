@@ -561,7 +561,7 @@ def update_gitignore(
     roles_db: dict[str, Role],
     dry_run: bool = False,
 ) -> bool:
-    """Creates or updates .gitignore with standard Nix/direnv and role-specific ignores."""
+    """Creates or updates .gitignore with standard Nix/direnv, Frost SSOT, and role-specific ignores."""
     gitignore_path = project_root / ".gitignore"
     existing_content = ""
     if gitignore_path.exists():
@@ -571,18 +571,30 @@ def update_gitignore(
 
     new_sections: list[str] = []
 
-    # Base Nix & Direnv rules
+    # 1. Frost Global Environment Ignores (The SSOT Hook)
+    frost_ignore_path = os.environ.get("FROST_IGNORES")
+    if frost_ignore_path and os.path.exists(frost_ignore_path):
+        frost_content = Path(frost_ignore_path).read_text(encoding="utf-8")
+        frost_rules = [line.strip() for line in frost_content.splitlines() if line.strip() and not line.startswith("#")]
+        missing_frost = [r for r in frost_rules if r not in existing_lines]
+        if missing_frost:
+            new_sections.append("# Frost Global Environment\n" + "\n".join(missing_frost))
+            existing_lines.update(missing_frost) # Deduplicate
+
+    # 2. Base Nix & Direnv rules
     base_rules = [".direnv/", "result", "result-*"]
     missing_base = [r for r in base_rules if r not in existing_lines]
     if missing_base:
         new_sections.append("# Nix & Direnv\n" + "\n".join(missing_base))
+        existing_lines.update(missing_base) # Deduplicate
 
-    # Role-specific rules
+    # 3. Role-specific rules
     for r in resolved_roles:
         if r in roles_db and roles_db[r].ignores:
             missing = [ign for ign in roles_db[r].ignores if ign not in existing_lines]
             if missing:
                 new_sections.append(f"# {roles_db[r].category} ({r})\n" + "\n".join(missing))
+                existing_lines.update(missing) # Deduplicate
 
     if not new_sections:
         return False
