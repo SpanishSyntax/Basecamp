@@ -74,9 +74,15 @@
         flaker = flakerPackage;
       };
 
-      apps.default = {
-        type = "app";
-        program = "${flakerPackage}/bin/flaker";
+      apps = {
+        default = {
+          type = "app";
+          program = "${flakerPackage}/bin/flaker";
+        };
+        flaker = {
+          type = "app";
+          program = "${flakerPackage}/bin/flaker";
+        };
       };
 
       devShells.default = pkgs.mkShell {
@@ -88,8 +94,15 @@
       };
     })
     // {
-      homeManagerModules = {
-        default = self.homeManagerModules.flaker;
+      overlays = {
+        default = final: prev: {
+          flaker = self.packages.${prev.stdenv.hostPlatform.system}.default;
+        };
+        flaker = self.overlays.default;
+      };
+
+      nixosModules = {
+        default = self.nixosModules.flaker;
         flaker = {
           config,
           lib,
@@ -111,7 +124,46 @@
           };
 
           config = lib.mkIf cfg.enable {
+            environment.systemPackages = [cfg.package];
+          };
+        };
+      };
+
+      homeManagerModules = {
+        default = self.homeManagerModules.flaker;
+        flaker = {
+          config,
+          lib,
+          pkgs,
+          ...
+        }: let
+          cfg = config.programs.flaker;
+          tomlFormat = pkgs.formats.toml {};
+          system = pkgs.stdenv.hostPlatform.system;
+          defaultFlaker = self.packages.${system}.default;
+        in {
+          options.programs.flaker = {
+            enable = lib.mkEnableOption "Flaker - Single-File Nix-Shell & Development Workspace Creator";
+
+            package = lib.mkOption {
+              type = lib.types.package;
+              default = defaultFlaker;
+              description = "The Flaker package to use.";
+            };
+
+            settings = lib.mkOption {
+              type = tomlFormat.type;
+              default = {};
+              description = "Custom roles and aliases written to ~/.config/flaker/roles.toml.";
+            };
+          };
+
+          config = lib.mkIf cfg.enable {
             home.packages = [cfg.package];
+
+            xdg.configFile."flaker/roles.toml" = lib.mkIf (cfg.settings != {}) {
+              source = tomlFormat.generate "roles.toml" cfg.settings;
+            };
           };
         };
       };

@@ -5,6 +5,7 @@ import tomllib
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from flaker import __version__
 from flaker.ui import ui
 
 
@@ -1009,7 +1010,7 @@ def main() -> None:
         sys.exit(0)
 
     if any(a in ("-V", "--version", "-v", "version") for a in sys.argv[1:]):
-        print(f"{ui.badge()} {ui.bold('v0.3.0')}")
+        print(f"{ui.badge()} {ui.bold(f'v{__version__}')}")
         sys.exit(0)
 
     # Smart Paths & Asset Discovery
@@ -1091,7 +1092,7 @@ def main() -> None:
             print_help()
             sys.exit(0)
         elif arg in ("-V", "--version", "-v"):
-            print(f"{ui.badge()} {ui.bold('v0.3.0')}")
+            print(f"{ui.badge()} {ui.bold(f'v{__version__}')}")
             sys.exit(0)
         else:
             filtered_args.append(arg)
