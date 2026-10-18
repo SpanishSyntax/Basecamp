@@ -1,0 +1,59 @@
+% ========================================================
+% MODULAR LATEX PACKAGE MANIFEST (packages.tex)
+% Centralized package configuration for math, TikZ, tables, & code
+% ========================================================
+
+% --- 1. Core Typography, Fonts & Localization ---
+\usepackage{fontspec}
+\setmainfont{TeX Gyre Pagella}
+\setmonofont{JetBrainsMono NFM} 
+\usepackage[english]{babel} 
+\usepackage{microtype}                  % Improved kerning and micro-typography
+
+% --- 2. Mathematical Sciences & Physics ---
+\usepackage{amsmath, amssymb, amsfonts} % Core AMS mathematical symbols & environments
+\usepackage{mathtools}                  % Mathematical tools and extensions
+\usepackage{bm}                         % Bold mathematical symbols (\bm{\alpha})
+\usepackage{diffcoeff}                  % Clean derivative notation (\diff{y}{x})
+\usepackage{siunitx}                    % Comprehensive SI units formatting (\qty{10}{\meter\per\second})
+
+% --- 3. Vector Graphics, Plotting & Diagramming (TikZ) ---
+\usepackage{graphicx}                   % Figure & image inclusion
+\usepackage{xcolor}                     % Color model support
+\usepackage{tikz}                       % TikZ vector drawing engine
+\usetikzlibrary{
+  arrows.meta,                          % Modern arrow heads
+  positioning,                          % Relative node placement
+  calc,                                 % Coordinate calculations
+  shapes.geometric,                     % Advanced shapes
+  fit,                                  % Bounding box fitting
+  backgrounds                           % Background layers
+}
+\usepackage{pgfplots}                   % High-quality scientific plotting
+\pgfplotsset{compat=1.18}
+\usepackage{tikz-cd}                    % Commutative & architecture flow diagrams
+
+% --- 4. Academic Tables & Structural Layout ---
+\usepackage{booktabs}                   % Publication-quality horizontal rules
+\usepackage{tabularx}                   % Tables with auto-expanding columns
+\usepackage{multirow}                   % Multi-row table cells
+\usepackage{makecell}                   % Flexible column headers & multi-line cells
+\usepackage{array}                      % Extended array and tabular environments
+\usepackage{enumitem}                   % Granular list spacing control
+
+% --- 5. Code Listings & Callout Containers ---
+\usepackage{listings}                   % Source code syntax highlighting
+\usepackage{tcolorbox}                  % Sleek modern callout frames & boxes
+\tcbuselibrary{skins, breakable}
+
+% --- 6. Citations, Hyperlinks & Cross-Referencing ---
+\usepackage{cite}                       % Standard numeric citation formatting
+\usepackage[normalem]{ulem}             % Sophisticated underlining
+\usepackage{hyperref}                   % Clickable hyper-links & PDF bookmarks
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!70!black,
+  citecolor=green!50!black,
+  urlcolor=blue!80!black
+}
+\usepackage{cleveref}                   % Intelligent contextual references (\cref{fig:model})

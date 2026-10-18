@@ -1,39 +1,63 @@
 // ========================================================
 // FOLIO PRESENTATION TEMPLATE (16:9 Widescreen / 1080p)
-// Minimal, ultra-crisp slide deck design system for Typst
+// Apple Keynote-Inspired Minimalist Design System for Typst
 // ========================================================
 
 #let themes = (
   dark: (
-    bg: rgb("#09090b"),
-    text: rgb("#f4f4f5"),
+    bg: rgb("#000000"),
+    text: rgb("#f5f5f7"),
     heading: rgb("#ffffff"),
-    muted: rgb("#a1a1aa"),
-    accent: rgb("#38bdf8"),
-    card-bg: rgb("#18181b"),
-    border: rgb("#27272a"),
-    code-bg: rgb("#121215"),
-    inserted: rgb("#4ade80"),
-    highlight: rgb("#fde047"),
+    subheading: rgb("#a1a1a6"),
+    muted: rgb("#86868b"),
+    subtle: rgb("#424245"),
+    accent: rgb("#2997ff"),
+    card-bg: rgb("#161618"),
+    border: rgb("#2c2c2e"),
+    code-bg: rgb("#121214"),
+    inserted: rgb("#30d158"),
+    highlight: rgb("#ffd60a"),
   ),
   light: (
-    bg: rgb("#ffffff"),
-    text: rgb("#18181b"),
-    heading: rgb("#09090b"),
-    muted: rgb("#71717a"),
-    accent: rgb("#0284c7"),
-    card-bg: rgb("#f4f4f5"),
-    border: rgb("#e4e4e7"),
-    code-bg: rgb("#f8fafc"),
-    inserted: rgb("#15803d"),
-    highlight: rgb("#fef08a"),
+    bg: rgb("#fbfbfd"),
+    text: rgb("#1d1d1f"),
+    heading: rgb("#000000"),
+    subheading: rgb("#515154"),
+    muted: rgb("#86868b"),
+    subtle: rgb("#d2d2d7"),
+    accent: rgb("#0071e3"),
+    card-bg: rgb("#f5f5f7"),
+    border: rgb("#e5e5ea"),
+    code-bg: rgb("#f0f0f2"),
+    inserted: rgb("#248a3d"),
+    highlight: rgb("#ffdf33"),
   ),
 )
 
 #let fonts = (
-  sans: ("Inter", "Liberation Sans", "FreeSans"),
-  display: ("Inter Display", "Inter"),
-  mono: ("Iosevka NF", "Source Code Pro", "Consolas"),
+  sans: (
+    "SF Pro Display",
+    "SF Pro Text",
+    "Inter Display",
+    "Inter",
+    "Helvetica Neue",
+    "Liberation Sans",
+    "FreeSans",
+  ),
+  display: (
+    "SF Pro Display",
+    "Inter Display",
+    "Inter",
+    "Helvetica Neue",
+    "FreeSans",
+  ),
+  mono: (
+    "SF Mono",
+    "Iosevka NF",
+    "Source Code Pro",
+    "Menlo",
+    "Consolas",
+  ),
 )
 
 // In Markdown presentations, horizontal rules (---) create slide breaks
@@ -85,9 +109,9 @@
     paper: "presentation-16-9",
     fill: t.bg,
     margin: (
-      top: 2.2cm,
-      bottom: 1.6cm,
-      x: 2.4cm,
+      top: 2.4cm,
+      bottom: 1.8cm,
+      x: 2.8cm,
     ),
     footer: context {
       set text(
@@ -102,9 +126,11 @@
           columns: (1fr, 1fr),
           align(left)[
             #if final-author != none [#final-author]
-            #if final-title != none [ • #final-title]
+            #if final-title != none [ #h(6pt)•#h(6pt) #final-title]
           ],
-          align(right)[#cur / #tot],
+          align(right)[
+            #str(cur) #h(4pt)/#h(4pt) #str(tot)
+          ],
         )
       }
     },
@@ -122,8 +148,8 @@
 
   set par(
     justify: false,
-    leading: 0.75em,
-    spacing: 1.3em,
+    leading: 0.85em,
+    spacing: 1.4em,
   )
 
   // ==========================================
@@ -131,53 +157,54 @@
   // ==========================================
   show heading.where(level: 1): it => {
     pagebreak(weak: true)
-    v(0.2em)
+    v(0.4em)
     block(
       width: 100%,
-      below: 1.2em,
-      [
-        #text(
-          size: 26pt,
-          weight: "bold",
-          fill: t.heading,
-          tracking: -0.02em,
-        )[#it.body]
-        #v(0.3em)
-        #line(length: 100%, stroke: 1.5pt + t.accent)
-      ],
+      below: 1.4em,
+      text(
+        font: fonts.display,
+        size: 30pt,
+        weight: "bold",
+        fill: t.heading,
+        tracking: -0.035em,
+        it.body,
+      ),
     )
   }
 
   show heading.where(level: 2): it => block(
-    above: 1.1em,
-    below: 0.7em,
+    above: 1.3em,
+    below: 0.8em,
     text(
-      size: 19pt,
-      weight: "bold",
-      fill: t.accent,
-      tracking: -0.01em,
+      font: fonts.display,
+      size: 20pt,
+      weight: "semibold",
+      fill: t.at("subheading", default: t.text),
+      tracking: -0.02em,
       it.body,
     ),
   )
 
   show heading.where(level: 3): it => block(
-    above: 0.9em,
-    below: 0.5em,
+    above: 1.0em,
+    below: 0.6em,
     text(
+      font: fonts.sans,
       size: 16pt,
-      weight: "semibold",
+      weight: "medium",
       fill: t.muted,
+      tracking: -0.01em,
       it.body,
     ),
   )
 
-  // Lists
+  // Lists with Apple-grade spacing and subtle markers
   set list(
-    spacing: 1.1em,
-    marker: [•],
+    spacing: 1.25em,
+    marker: text(fill: t.muted, size: 12pt)[•],
   )
   set enum(
-    spacing: 1.1em,
+    spacing: 1.25em,
   )
 
   // Links
@@ -186,11 +213,11 @@
     underline(offset: 2pt, it),
   )
 
-  // Code Blocks
+  // Code Blocks (Xcode / macOS Terminal Aesthetic)
   show raw.where(block: true): it => block(
     fill: t.code-bg,
-    inset: 14pt,
-    radius: 6pt,
+    inset: 16pt,
+    radius: 8pt,
     width: 100%,
     stroke: 0.5pt + t.border,
     outset: 0pt,
@@ -198,93 +225,102 @@
       #set text(
         font: fonts.mono,
         size: 13pt,
+        fill: t.text,
       )
       #it
     ],
   )
 
-  // Inline Code
+  // Inline Code (Discreet pill badge)
   show raw.where(block: false): it => box(
     fill: t.card-bg,
-    inset: (x: 5pt, y: 2pt),
+    inset: (x: 6pt, y: 2pt),
     radius: 4pt,
-    stroke: 0.3pt + t.border,
+    stroke: 0.4pt + t.border,
     text(
       font: fonts.mono,
-      size: 14pt,
-      fill: t.accent,
+      size: 13.5pt,
+      fill: t.text,
       it,
     ),
   )
 
-  // Blockquotes & Callouts
+  // Blockquotes & Callouts (Sleek Keynote Card)
   show quote.where(block: true): it => block(
     fill: t.card-bg,
-    inset: (x: 16pt, y: 12pt),
-    radius: 6pt,
+    inset: (x: 18pt, y: 14pt),
+    radius: 8pt,
     stroke: (left: 3pt + t.accent),
     width: 100%,
-    it.body,
+    text(
+      fill: t.text,
+      it.body,
+    ),
   )
 
   // Math equations
   show math.equation.where(block: true): it => block(
     width: 100%,
-    inset: (y: 8pt),
-    align(center, text(size: 20pt, it)),
+    inset: (y: 10pt),
+    align(center, text(size: 21pt, it)),
   )
 
   // ==========================================
-  // TITLE SLIDE HERO (Slide 1)
+  // TITLE SLIDE HERO (Slide 1 - Apple Keynote Style)
   // ==========================================
   align(center + horizon)[
     #text(
+      font: fonts.sans,
       size: 11pt,
-      weight: "bold",
-      tracking: 0.25em,
-      fill: t.accent,
-    )[FOLIO PRESENTATION]
+      weight: "semibold",
+      tracking: 0.16em,
+      fill: t.muted,
+    )[KEYNOTE]
 
-    #v(1.2em)
+    #v(1.4em)
 
     #text(
-      size: 34pt,
+      font: fonts.display,
+      size: 38pt,
       weight: "bold",
       fill: t.heading,
-      tracking: -0.03em,
+      tracking: -0.04em,
     )[#final-title]
 
     #if final-subtitle != none [
       #v(0.8em)
       #text(
-        size: 18pt,
+        font: fonts.display,
+        size: 19pt,
+        weight: "regular",
         fill: t.muted,
+        tracking: -0.015em,
       )[#final-subtitle]
     ]
 
-    #v(2.5em)
+    #v(3.0em)
 
     #if final-author != none [
       #text(
-        size: 16pt,
+        size: 15pt,
         weight: "medium",
         fill: t.text,
       )[#final-author]
     ]
 
     #if final-dep != none [
-      #v(0.3em)
+      #v(0.35em)
       #text(
-        size: 13pt,
+        size: 12.5pt,
         fill: t.muted,
       )[#final-dep]
     ]
 
     #if final-date != none [
-      #v(0.3em)
+      #v(0.35em)
       #text(
         size: 11pt,
-        fill: t.muted,
+        fill: t.subtle,
       )[#final-date]
     ]
   ]

@@ -329,32 +329,22 @@ def build_builtin_role_registry(folder_name: str) -> dict[str, Role]:
             ignores=["dist-newstyle/", ".cabal-sandbox/"],
         ),
         # ------------------------------------------------------------
-        # Document & Typesetting Workspaces
+        # Document & Typesetting Workspaces (Unified under Folio)
         # ------------------------------------------------------------
-        "typst": Role(
+        "folio": Role(
             category="Typesetting",
-            description="Typst + Tinymist LSP + typstyle",
+            description="Polyglot Document Engine (Typst + LaTeX + Markdown)",
             pkgs=[
                 "typst",
+                "pandoc",
                 "tinymist",
                 "typstyle",
+                "tectonic",
+                "texlab",
             ],
             hooks=[
                 'export TYPST_ROOT="$PWD"',
-                fmt_status("📄", "Typst", "Tinymist LSP + typstyle"),
-            ],
-            ignores=[],
-        ),
-        "latex": Role(
-            category="Typesetting",
-            description="Tectonic + texlab + latexindent",
-            pkgs=[
-                "tectonic",
-                "texlab",
-                "texlivePackages.latexindent",
-            ],
-            hooks=[
-                fmt_status("📜", "LaTeX", "Tectonic + texlab"),
+                fmt_status("📝", "Folio", "Polyglot Document Engine (Typst + LaTeX)"),
             ],
             ignores=[
                 "*.aux",
@@ -365,24 +355,9 @@ def build_builtin_role_registry(folder_name: str) -> dict[str, Role]:
                 "*.fdb_latexmk",
                 "*.fls",
             ],
-        ),
-        "folio": Role(
-            category="Typesetting",
-            description="Typst/Pandoc/LaTeX Markdown Document Engine",
-            pkgs=[
-                "typst",
-                "pandoc",
-                "tinymist",
-                "typstyle",
-                "tectonic",
-            ],
-            hooks=[
-                fmt_status("📝", "Folio", "Typst/Pandoc/LaTeX Document Engine"),
-            ],
-            ignores=[],
             targets={
                 "report": {
-                    "project": ["template.typ"],
+                    "project": ["template.typ", "packages.typ"],
                     "starter": ["input.md"],
                     "description": "Standard document / report (template.typ + input.md)",
                     "aliases": ["doc", "document", "default"],
@@ -394,10 +369,22 @@ def build_builtin_role_registry(folder_name: str) -> dict[str, Role]:
                     "aliases": ["presentation", "slodes", "slide", "deck", "ppt"],
                 },
                 "paper": {
-                    "project": ["ieee.typ"],
+                    "project": ["ieee.typ", "library.bib"],
                     "starter": ["paper.md"],
                     "description": "Academic IEEE 2-column paper (ieee.typ + paper.md)",
                     "aliases": ["ieee", "article"],
+                },
+                "typst": {
+                    "project": ["template.typ", "packages.typ", "library.bib"],
+                    "starter": ["main.typ"],
+                    "description": "Native Typst document with modular packages manifest",
+                    "aliases": ["typ"],
+                },
+                "latex": {
+                    "project": ["packages.tex", "library.bib"],
+                    "starter": ["main.tex"],
+                    "description": "Native LaTeX IEEEtran document with modular packages manifest",
+                    "aliases": ["tex"],
                 },
             },
         ),
@@ -429,8 +416,10 @@ BUILTIN_ALIASES = {
     "react": "next",
     "js": "ts",
     "mv": "mathvis",
-    "typ": "typst",
-    "tex": "latex",
+    "typ": "folio:typst",
+    "typst": "folio:typst",
+    "tex": "folio:latex",
+    "latex": "folio:latex",
     "hs": "haskell",
     "cs": "dotnet",
     "csharp": "dotnet",
