@@ -37,6 +37,17 @@ nix run github:SpanishSyntax/Flaker -- init python
 # Initialize a Zig project with zls and build.zig
 nix run github:SpanishSyntax/Flaker -- init zig
 
+# Initialize a Folio workspace specifically for 16:9 slides presentation
+flaker init folio slides
+
+# Initialize a Folio workspace for an academic IEEE paper
+flaker init folio paper
+
+# Drop a starter document directly using role shortcuts
+flaker new slides                      # 16:9 widescreen presentation (slides.md)
+flaker new paper                       # IEEE 2-column paper (paper.md)
+flaker new report                      # Clean report document (input.md)
+
 # Drop a starter experiment file into current folder without touching root configs
 flaker new mv
 
@@ -77,6 +88,8 @@ Commands:
   interactive  Launch interactive Bun-style role and command selector.
 
 Options:
+  -m, --mode MODE      Document operating mode / scaffolding target (report, slides, paper, all).
+  -t, --target TARGET  Alias for --mode.
   -f, --force          Overwrite existing files without confirmation prompts.
   -n, --dry-run        Preview generated files in stdout without writing.
   -c, --channel NAME   Nixpkgs channel (default: nixos-26.05, e.g. unstable, 24.11).
@@ -113,7 +126,7 @@ Options:
 | **Next.js** | `next` | `react` | Bun, `vtsls`, `typescript` | `prettierd` |
 | **Typst** | `typst` | `typ` | `typst`, `tinymist` (LSP) | `typstyle` |
 | **LaTeX** | `latex` | `tex` | `tectonic`, `texlab` (LSP) | `latexindent` |
-| **Folio** | `folio` | - | `typst`, `pandoc`, `tinymist` | `typstyle` |
+| **Folio** | `folio` | `slides`, `paper`, `report`, `presentation`, `slodes` | `typst`, `pandoc`, `tinymist`, `tectonic` | `typstyle` |
 | **DevOps & Cloud** | `ops` | `devops`, `docker` | `docker-compose`, `lazydocker`, `kubectl`, `helm`, `k9s`, `dive` | - |
 
 ---

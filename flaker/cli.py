@@ -4,6 +4,7 @@ import sys
 import tomllib
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any
 
 from flaker import __version__
 from flaker.ui import ui
@@ -16,6 +17,7 @@ class Role:
     category: str = "General"
     description: str = ""
     ignores: list[str] = field(default_factory=list)
+    targets: dict[str, dict[str, Any]] = field(default_factory=dict)
 
 
 def get_project_name(root_path: Path) -> str:
@@ -378,6 +380,26 @@ def build_builtin_role_registry(folder_name: str) -> dict[str, Role]:
                 fmt_status("📝", "Folio", "Typst/Pandoc/LaTeX Document Engine"),
             ],
             ignores=[],
+            targets={
+                "report": {
+                    "project": ["template.typ"],
+                    "starter": ["input.md"],
+                    "description": "Standard document / report (template.typ + input.md)",
+                    "aliases": ["doc", "document", "default"],
+                },
+                "slides": {
+                    "project": ["slides.typ"],
+                    "starter": ["slides.md"],
+                    "description": "16:9 widescreen presentation (slides.typ + slides.md)",
+                    "aliases": ["presentation", "slodes", "slide", "deck", "ppt"],
+                },
+                "paper": {
+                    "project": ["ieee.typ"],
+                    "starter": ["paper.md"],
+                    "description": "Academic IEEE 2-column paper (ieee.typ + paper.md)",
+                    "aliases": ["ieee", "article"],
+                },
+            },
         ),
         # ------------------------------------------------------------
         # Cloud & Infrastructure
@@ -415,6 +437,11 @@ BUILTIN_ALIASES = {
     "devops": "ops",
     "docker": "ops",
     "ex": "elixir",
+    "slides": "folio:slides",
+    "slodes": "folio:slides",
+    "presentation": "folio:slides",
+    "paper": "folio:paper",
+    "report": "folio:report",
 }
 
 
@@ -439,6 +466,7 @@ def load_user_config() -> tuple[dict[str, Role], dict[str, str], list[Path]]:
                     category=role_data.get("category", "Custom"),
                     description=role_data.get("description", "Custom user role"),
                     ignores=role_data.get("ignores", []),
+                    targets=role_data.get("targets", {}),
                 )
             for alias_key, target_role in data.get("aliases", {}).items():
                 extra_aliases[alias_key] = target_role
@@ -479,6 +507,8 @@ def print_help():
   interactive  Launch interactive Bun-style role and command selector.
 
 {ui.blue("Options:")}
+  -m, --mode MODE      Document operating mode / scaffolding target (report, slides, paper, all).
+  -t, --target TARGET  Alias for --mode.
   -f, --force          Overwrite existing files without confirmation prompts.
   -n, --dry-run        Preview generated files in stdout without writing.
   -c, --channel NAME   Nixpkgs channel (default: nixos-26.05, e.g. unstable, 24.11).
@@ -493,6 +523,12 @@ def print_help():
   flaker                                 # Interactive Bun-style stack selector
   flaker init py                         # Setup Python DevShell, root configs, and starter
   flaker init py cpp rust typ            # Polyglot multi-language workspace bootstrap
+  flaker init folio report               # Setup Folio workspace for clean report document
+  flaker init folio slides               # Setup Folio workspace for 16:9 presentation slides
+  flaker init folio paper                # Setup Folio workspace for IEEE 2-column paper
+  flaker new folio slides                # Drop slides.md in current folder (+ slides.typ)
+  flaker new paper                       # Direct shortcut to drop paper.md in current folder
+  flaker init folio -m slides            # Bootstrap slides using explicit --mode flag
   flaker new mv                          # Drop mathvis plot.py in current experiment folder
   flaker new typ                         # Drop typst main.typ in current folder
   flaker shell rust next                 # Setup DevShell without scaffolding files
@@ -505,7 +541,8 @@ def display_roles_list(roles_db: dict[str, Role], aliases: dict[str, str]) -> No
     """Prints a formatted terminal table of all registered roles."""
     reverse_aliases: dict[str, list[str]] = {}
     for alias, target in aliases.items():
-        reverse_aliases.setdefault(target, []).append(alias)
+        base_role = target.split(":", 1)[0]
+        reverse_aliases.setdefault(base_role, []).append(alias)
 
     ui.header("FLAKER ROLES REGISTRY", width=96)
     role_hdr = ui.bold(f"{'ROLE':<12}")
@@ -542,7 +579,9 @@ def display_role_info(
     assets_dirs: list[Path],
 ) -> None:
     """Displays detailed configuration and packages for a given role."""
-    resolved_name = aliases.get(role_name, role_name)
+    clean_input = role_name.strip().lower()
+    aliased_target = aliases.get(clean_input, clean_input)
+    resolved_name = aliased_target.split(":", 1)[0]
     if resolved_name not in roles_db:
         ui.error(
             f"Unknown role '{role_name}'. Run 'flaker list' to see available roles."
@@ -550,7 +589,9 @@ def display_role_info(
         sys.exit(1)
 
     role = roles_db[resolved_name]
-    rev_aliases = [a for a, t in aliases.items() if t == resolved_name]
+    rev_aliases = [
+        a for a, t in aliases.items() if t.split(":", 1)[0] == resolved_name
+    ]
 
     ui.header(f"Role Information: {resolved_name}", width=76)
     print(f"  {ui.bold('Category')}    : {role.category}")
@@ -558,6 +599,21 @@ def display_role_info(
         f"  {ui.bold('Aliases')}     : {', '.join(rev_aliases) if rev_aliases else ui.dim('none')}"
     )
     print(f"  {ui.bold('Summary')}     : {role.description}")
+
+    if role.targets:
+        print(
+            f"\n  {ui.bold('Available Document Targets (--target, -m, or positional):')}"
+        )
+        for t_name, t_meta in role.targets.items():
+            aliases_str = (
+                f" [aliases: {', '.join(t_meta.get('aliases', []))}]"
+                if t_meta.get("aliases")
+                else ""
+            )
+            desc = t_meta.get("description", "")
+            print(f"    • {ui.cyan(t_name):<10} : {desc}{ui.dim(aliases_str)}")
+        print(f"    • {ui.cyan('all'):<10} : Scaffold all templates simultaneously")
+
     print(f"\n  {ui.bold('Packages Included in DevShell:')}")
     for pkg in role.pkgs:
         print(f"    • {ui.cyan(pkg)}")
@@ -565,6 +621,18 @@ def display_role_info(
     print(f"\n  {ui.bold('Shell Activation Hooks:')}")
     for hook in role.hooks:
         print(f"    • {ui.dim(hook)}")
+
+    if role.targets:
+        print(f"\n  {ui.bold('Template Assets by Target:')}")
+        for t_name, t_meta in role.targets.items():
+            p_files = t_meta.get("project", [])
+            s_files = t_meta.get("starter", [])
+            details = []
+            if p_files:
+                details.append(f"foundation: {', '.join(p_files)}")
+            if s_files:
+                details.append(f"starter: {', '.join(s_files)}")
+            print(f"    📦 {ui.cyan(t_name):<10} -> {'; '.join(details)}")
 
     # Inspect template files
     project_files: list[str] = []
@@ -601,18 +669,19 @@ def display_role_info(
                         starter_files.append(str(f.relative_to(rdir)))
             break
 
-    if project_files:
-        print(f"\n  {ui.bold('Project Root Foundation Files (flaker project):')}")
-        for pf in project_files:
-            print(f"    📦 {ui.cyan(pf)}")
+    if not role.targets:
+        if project_files:
+            print(f"\n  {ui.bold('Project Root Foundation Files (flaker project):')}")
+            for pf in project_files:
+                print(f"    📦 {ui.cyan(pf)}")
 
-    if starter_files:
-        print(f"\n  {ui.bold('Starter / Leaf Files (flaker new):')}")
-        for sf in starter_files:
-            print(f"    📄 {ui.green(sf)}")
-    elif not project_files:
-        print(f"\n  {ui.bold('Template Files:')}")
-        print(f"    {ui.dim('(No template files for this role; DevShell only)')}")
+        if starter_files:
+            print(f"\n  {ui.bold('Starter / Leaf Files (flaker new):')}")
+            for sf in starter_files:
+                print(f"    📄 {ui.green(sf)}")
+        elif not project_files:
+            print(f"\n  {ui.bold('Template Files:')}")
+            print(f"    {ui.dim('(No template files for this role; DevShell only)')}")
 
     if role.ignores:
         print(f"\n  {ui.bold('Default .gitignore Rules:')}")
@@ -810,6 +879,42 @@ def prepare_flake_env(
     return True
 
 
+def resolve_role_target(
+    role_key: str, target_input: str, roles_db: dict[str, Role]
+) -> str | None:
+    """Resolves target_input against role's target definitions or returns None."""
+    if role_key not in roles_db:
+        return None
+    role = roles_db[role_key]
+    if not role.targets:
+        return None
+    t_clean = target_input.strip().lower()
+    if t_clean in ("all", "everything", "full"):
+        return "all"
+    for canonical_name, meta in role.targets.items():
+        if t_clean == canonical_name.lower():
+            return canonical_name
+        aliases = [a.lower() for a in meta.get("aliases", [])]
+        if t_clean in aliases:
+            return canonical_name
+    return None
+
+
+def find_role_for_standalone_target(
+    target_input: str, roles_db: dict[str, Role]
+) -> tuple[str, str] | None:
+    """
+    Checks if target_input is a valid target for any role with targets.
+    Returns (role_key, canonical_target_name) or None.
+    """
+    for role_key, role in roles_db.items():
+        if role.targets:
+            canonical = resolve_role_target(role_key, target_input, roles_db)
+            if canonical:
+                return role_key, canonical
+    return None
+
+
 def scaffold_assets(
     target_dir: Path,
     project_name: str,
@@ -819,18 +924,25 @@ def scaffold_assets(
     dry_run: bool = False,
     auto_git: bool = True,
     project_root: Path | None = None,
+    role_targets: dict[str, str] | None = None,
+    roles_db: dict[str, Role] | None = None,
 ) -> bool:
     """
     Copies role templates into the target directory based on scope:
       - 'project': Copies files from role/project/ into target_dir (usually project_root)
       - 'starter': Copies files from role/starter/ into target_dir (usually current_dir)
       - 'all': Copies both project and starter assets
+    Filters files based on role_targets if specified.
     """
     scaffolded_any = False
     created_files: list[str] = []
+    targets_map = role_targets or {}
 
     for role_key in resolved_roles:
         found_in_dir = False
+        target_name = targets_map.get(role_key)
+        role_def = roles_db.get(role_key) if roles_db else None
+
         for adir in assets_dirs:
             role_assets_dir = adir / role_key
             if not role_assets_dir.exists():
@@ -840,17 +952,33 @@ def scaffold_assets(
             has_project_subdir = (role_assets_dir / "project").is_dir()
             has_starter_subdir = (role_assets_dir / "starter").is_dir()
 
-            subdirs_to_copy: list[Path] = []
+            subdirs_to_copy: list[tuple[Path, str]] = []
             if has_project_subdir or has_starter_subdir:
                 if scope in ("project", "all") and has_project_subdir:
-                    subdirs_to_copy.append(role_assets_dir / "project")
+                    subdirs_to_copy.append((role_assets_dir / "project", "project"))
                 if scope in ("starter", "all") and has_starter_subdir:
-                    subdirs_to_copy.append(role_assets_dir / "starter")
+                    subdirs_to_copy.append((role_assets_dir / "starter", "starter"))
             else:
                 # Flat legacy directory
-                subdirs_to_copy.append(role_assets_dir)
+                subdirs_to_copy.append((role_assets_dir, "flat"))
 
-            for src_dir in subdirs_to_copy:
+            for src_dir, dir_type in subdirs_to_copy:
+                allowed_files: list[str] | None = None
+                if (
+                    role_def
+                    and role_def.targets
+                    and target_name
+                    and target_name != "all"
+                    and target_name in role_def.targets
+                ):
+                    target_spec = role_def.targets[target_name]
+                    if dir_type in ("project", "starter"):
+                        allowed_files = target_spec.get(dir_type, [])
+                    else:
+                        allowed_files = target_spec.get("project", []) + target_spec.get(
+                            "starter", []
+                        )
+
                 for template_file in src_dir.glob("**/*"):
                     if template_file.is_file():
                         if (
@@ -860,6 +988,12 @@ def scaffold_assets(
                             continue
 
                         relative_path = template_file.relative_to(src_dir)
+                        if (
+                            allowed_files is not None
+                            and str(relative_path) not in allowed_files
+                        ):
+                            continue
+
                         dest_path = target_dir / relative_path
 
                         if dry_run:
@@ -881,12 +1015,18 @@ def scaffold_assets(
                 break
 
     if scaffolded_any and not dry_run:
+        target_labels = [
+            f"{r}:{targets_map[r]}"
+            for r in resolved_roles
+            if targets_map.get(r) and targets_map.get(r) != "all"
+        ]
+        target_info = f" ({', '.join(target_labels)})" if target_labels else ""
         scope_desc = (
             "project foundation"
             if scope == "project"
             else ("starter" if scope == "starter" else "")
         )
-        ui.success(f"Scaffolded {scope_desc} assets into {target_dir}")
+        ui.success(f"Scaffolded {scope_desc}{target_info} assets into {target_dir}")
         if auto_git:
             stage_git_files(project_root or target_dir, created_files)
 
@@ -898,7 +1038,7 @@ def run_interactive_mode(
     aliases: dict[str, str],
     current_dir: Path,
     project_root: Path,
-) -> tuple[str, list[str]]:
+) -> tuple[str, list[str], dict[str, str]]:
     """Interactive role and command selector using arrow/spacebar menus."""
     is_subfolder = (project_root != current_dir) and (
         project_root / "flake.nix"
@@ -983,13 +1123,35 @@ def run_interactive_mode(
 
     if chosen_cmd == "new":
         chosen_role = ui.select("Select role for starter file:", role_options)
-        return chosen_cmd, [chosen_role]
+        chosen_roles = [chosen_role]
     else:
         chosen_roles = ui.multiselect("Select roles for the stack:", role_options)
         if not chosen_roles:
             ui.warn("No roles selected. Exiting.")
             sys.exit(0)
-        return chosen_cmd, chosen_roles
+
+    role_targets: dict[str, str] = {}
+    if chosen_cmd != "shell":
+        for r in chosen_roles:
+            if r in roles_db and roles_db[r].targets:
+                role_def = roles_db[r]
+                options = [
+                    (
+                        t_key,
+                        f"{t_key.capitalize():<8} - {t_meta.get('description', '')}",
+                        "",
+                    )
+                    for t_key, t_meta in role_def.targets.items()
+                ]
+                options.append(
+                    ("all", "All      - Scaffold all templates simultaneously", "")
+                )
+                chosen_target = ui.select(
+                    f"Select document type to scaffold for {r}:", options
+                )
+                role_targets[r] = chosen_target
+
+    return chosen_cmd, chosen_roles, role_targets
 
 
 def handle_color_args():
@@ -1064,6 +1226,7 @@ def main() -> None:
     auto_git = True
     no_direnv = False
     channel = None
+    target_flag: str | None = None
 
     filtered_args: list[str] = []
     i = 0
@@ -1089,6 +1252,15 @@ def main() -> None:
                 sys.exit(1)
         elif arg.startswith("--channel="):
             channel = arg.split("=", 1)[1]
+        elif arg in ("-m", "--mode", "-t", "--target", "--type"):
+            if i + 1 < len(args):
+                target_flag = args[i + 1]
+                i += 1
+            else:
+                ui.error(f"{arg} requires a target name (e.g. report, slides, paper, all).")
+                sys.exit(1)
+        elif arg.startswith(("--mode=", "--target=", "--type=")):
+            target_flag = arg.split("=", 1)[1]
         elif arg in ("--help", "-h"):
             print_help()
             sys.exit(0)
@@ -1111,27 +1283,28 @@ def main() -> None:
     }
 
     command = ""
-    raw_roles: list[str] = []
+    resolved_roles: list[str] = []
+    role_targets: dict[str, str] = {}
 
     # Interactive trigger if no arguments provided in a TTY
     if not filtered_args:
         if sys.stdin.isatty():
-            command, raw_roles = run_interactive_mode(
+            command, resolved_roles, role_targets = run_interactive_mode(
                 roles_db, aliases, current_dir, project_root
             )
         else:
             print_help()
             sys.exit(1)
     elif filtered_args[0] == "interactive":
-        command, raw_roles = run_interactive_mode(
+        command, resolved_roles, role_targets = run_interactive_mode(
             roles_db, aliases, current_dir, project_root
         )
     else:
         command = COMMAND_ALIASES.get(filtered_args[0], filtered_args[0])
-        raw_roles = filtered_args[1:]
+        unparsed_roles = filtered_args[1:]
 
         # If subcommand given without roles in a TTY (e.g. 'flaker new' or 'flaker init')
-        if command in ("init", "new", "shell", "project") and not raw_roles:
+        if command in ("init", "new", "shell", "project") and not unparsed_roles:
             if sys.stdin.isatty():
                 sorted_roles = sorted(roles_db.keys())
                 role_options = [
@@ -1142,12 +1315,12 @@ def main() -> None:
                     chosen_role = ui.select(
                         "Select role for starter file:", role_options
                     )
-                    raw_roles = [chosen_role]
+                    unparsed_roles = [chosen_role]
                 else:
-                    raw_roles = ui.multiselect(
+                    unparsed_roles = ui.multiselect(
                         f"Select roles for flaker {command}:", role_options
                     )
-                    if not raw_roles:
+                    if not unparsed_roles:
                         ui.warn("No roles selected. Exiting.")
                         sys.exit(0)
             else:
@@ -1155,6 +1328,100 @@ def main() -> None:
                     f"Missing roles for command '{command}'. Example: flaker {command} python"
                 )
                 sys.exit(1)
+
+        for item in unparsed_roles:
+            # 1. Colon notation (e.g. folio:slides, folio:paper)
+            if ":" in item:
+                r_part, _, t_part = item.partition(":")
+                canonical_role = aliases.get(r_part.lower(), r_part.lower()).split(":", 1)[0]
+                if canonical_role in roles_db and roles_db[canonical_role].targets:
+                    resolved_t = resolve_role_target(canonical_role, t_part, roles_db)
+                    if not resolved_t:
+                        valid_tgts = ", ".join(list(roles_db[canonical_role].targets.keys()) + ["all"])
+                        ui.error(
+                            f"Unknown target '{t_part}' for role '{canonical_role}'. Available targets: {valid_tgts}"
+                        )
+                        sys.exit(1)
+                    role_targets[canonical_role] = resolved_t
+                if canonical_role not in resolved_roles:
+                    resolved_roles.append(canonical_role)
+                continue
+
+            # 2. Check if item is a target for the immediately preceding role
+            if resolved_roles:
+                last_role = resolved_roles[-1]
+                if last_role in roles_db and roles_db[last_role].targets and last_role not in role_targets:
+                    resolved_t = resolve_role_target(last_role, item, roles_db)
+                    if resolved_t:
+                        role_targets[last_role] = resolved_t
+                        continue
+                    elif item.lower() not in roles_db and item.lower() not in aliases:
+                        valid_tgts = ", ".join(list(roles_db[last_role].targets.keys()) + ["all"])
+                        ui.error(
+                            f"Unknown target '{item}' for role '{last_role}'. Available targets: {valid_tgts}"
+                        )
+                        sys.exit(1)
+
+            # 3. Check if alias maps to role:target (e.g. from aliases dict: "slides" -> "folio:slides")
+            raw_lower = item.lower()
+            if raw_lower in aliases and ":" in aliases[raw_lower]:
+                r_part, _, t_part = aliases[raw_lower].partition(":")
+                canonical_role = aliases.get(r_part.lower(), r_part.lower()).split(":", 1)[0]
+                resolved_t = resolve_role_target(canonical_role, t_part, roles_db)
+                if resolved_t:
+                    role_targets[canonical_role] = resolved_t
+                if canonical_role not in resolved_roles:
+                    resolved_roles.append(canonical_role)
+                continue
+
+            # 4. Check if item is a standalone target for any role (e.g. `flaker new slides` or `flaker new paper`)
+            match = find_role_for_standalone_target(raw_lower, roles_db)
+            if match and len(unparsed_roles) == 1:
+                matched_role, matched_target = match
+                if matched_role not in resolved_roles:
+                    resolved_roles.append(matched_role)
+                role_targets[matched_role] = matched_target
+                continue
+
+            # 5. Normal role name or alias
+            aliased_val = aliases.get(raw_lower, raw_lower)
+            canonical_role = aliased_val.split(":", 1)[0]
+            if canonical_role not in resolved_roles:
+                resolved_roles.append(canonical_role)
+
+        if target_flag:
+            for r in resolved_roles:
+                if r in roles_db and roles_db[r].targets:
+                    resolved_t = resolve_role_target(r, target_flag, roles_db)
+                    if not resolved_t:
+                        valid_tgts = ", ".join(list(roles_db[r].targets.keys()) + ["all"])
+                        ui.error(
+                            f"Unknown target '{target_flag}' for role '{r}'. Available targets: {valid_tgts}"
+                        )
+                        sys.exit(1)
+                    role_targets[r] = resolved_t
+
+        for r in resolved_roles:
+            if r in roles_db and roles_db[r].targets and r not in role_targets:
+                if command == "shell":
+                    continue
+                if sys.stdin.isatty():
+                    role_def = roles_db[r]
+                    options = [
+                        (
+                            t_key,
+                            f"{t_key.capitalize():<8} - {t_meta.get('description', '')}",
+                            "",
+                        )
+                        for t_key, t_meta in role_def.targets.items()
+                    ]
+                    options.append(
+                        ("all", "All      - Scaffold all templates simultaneously", "")
+                    )
+                    chosen = ui.select(f"Select document type to scaffold for {r}:", options)
+                    role_targets[r] = chosen
+                else:
+                    role_targets[r] = "all"
 
     # Enforce valid commands
     if command not in ("init", "new", "shell", "project"):
@@ -1167,7 +1434,6 @@ def main() -> None:
         sys.exit(1)
 
     nixpkgs_url = resolve_nixpkgs_url(channel)
-    resolved_roles = [aliases.get(r.lower(), r.lower()) for r in raw_roles]
 
     # 1. DevShell generation (init and shell)
     if command in ("init", "shell"):
@@ -1198,6 +1464,8 @@ def main() -> None:
             dry_run=dry_run,
             auto_git=auto_git,
             project_root=project_root,
+            role_targets=role_targets,
+            roles_db=roles_db,
         )
         # Scaffold starter files in current directory
         scaffold_assets(
@@ -1209,6 +1477,8 @@ def main() -> None:
             dry_run=dry_run,
             auto_git=auto_git,
             project_root=project_root,
+            role_targets=role_targets,
+            roles_db=roles_db,
         )
 
     elif command == "project":
@@ -1221,6 +1491,8 @@ def main() -> None:
             dry_run=dry_run,
             auto_git=auto_git,
             project_root=project_root,
+            role_targets=role_targets,
+            roles_db=roles_db,
         )
 
     elif command == "new":
@@ -1234,6 +1506,8 @@ def main() -> None:
             dry_run=dry_run,
             auto_git=auto_git,
             project_root=project_root,
+            role_targets=role_targets,
+            roles_db=roles_db,
         )
         # Ensure project foundation exists at project_root if running in a subdirectory
         if project_root != current_dir:
@@ -1246,6 +1520,8 @@ def main() -> None:
                 dry_run=dry_run,
                 auto_git=auto_git,
                 project_root=project_root,
+                role_targets=role_targets,
+                roles_db=roles_db,
             )
 
 
