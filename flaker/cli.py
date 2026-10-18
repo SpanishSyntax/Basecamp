@@ -366,15 +366,16 @@ def build_builtin_role_registry(folder_name: str) -> dict[str, Role]:
         ),
         "folio": Role(
             category="Typesetting",
-            description="Typst/Pandoc Markdown Document Engine",
+            description="Typst/Pandoc/LaTeX Markdown Document Engine",
             pkgs=[
                 "typst",
                 "pandoc",
                 "tinymist",
                 "typstyle",
+                "tectonic",
             ],
             hooks=[
-                fmt_status("📝", "Folio", "Typst/Pandoc Markdown Engine"),
+                fmt_status("📝", "Folio", "Typst/Pandoc/LaTeX Document Engine"),
             ],
             ignores=[],
         ),
