@@ -3,44 +3,166 @@
 % --- Modular Packages & Preamble Manifest ---
 \input{packages.tex}
 
-% Modern Clean Presentation Theme
+% Modern Keynote Typography: Clean Sans-Serif Default
+\setsansfont{Liberation Sans}
+\setmonofont{Liberation Mono}
+\renewcommand{\familydefault}{\sfdefault}
+
+% Beamer Minimal Chrome Reset
 \usetheme{default}
 \usecolortheme{dove}
+\setbeamertemplate{navigation symbols}{}
+\setbeamersize{text margin left=2.0cm, text margin right=2.0cm}
 
-% Custom Minimalist Color Accents & Theme Selection
+% Custom Minimalist Color Accents & Theme Selection (Keynote OLED Dark & Snow Light)
 \usepackage{etoolbox}
 \newcommand{\presentationtheme}{__THEME__}
 
 \ifdefstring{\presentationtheme}{dark}{
+    \definecolor{canvasbg}{HTML}{000000}
+    \definecolor{cardbg}{HTML}{161618}
+    \definecolor{codebg}{HTML}{121214}
+    \definecolor{bordercolor}{HTML}{2C2C2E}
+    \definecolor{normaltext}{HTML}{F5F5F7}
+    \definecolor{headingcolor}{HTML}{FFFFFF}
+    \definecolor{subheadingcolor}{HTML}{A1A1A6}
+    \definecolor{mutedcolor}{HTML}{86868B}
     \definecolor{accentblue}{HTML}{2997FF}
-    \definecolor{darkbg}{HTML}{161618}
-    \setbeamercolor{background canvas}{bg=black}
-    \setbeamercolor{normal text}{fg=white}
-    \setbeamercolor{title}{fg=white}
-    \setbeamercolor{frametitle}{fg=white}
-    \setbeamercolor{subtitle}{fg=white!70!black}
-    \setbeamercolor{author}{fg=white!70!black}
-    \setbeamercolor{institute}{fg=white!70!black}
-    \setbeamercolor{date}{fg=white!70!black}
-    \setbeamercolor{structure}{fg=accentblue}
-    \setbeamercolor{item}{fg=white}
-    \setbeamercolor{block title}{bg=darkbg, fg=white}
-    \setbeamercolor{block body}{bg=darkbg!80!black, fg=white}
-    \usebeamercolor[fg]{normal text}
-    \tcbset{colback=darkbg, colupper=white, colframe=accentblue}
 }{
+    \definecolor{canvasbg}{HTML}{FBFBFD}
+    \definecolor{cardbg}{HTML}{F5F5F7}
+    \definecolor{codebg}{HTML}{F0F0F2}
+    \definecolor{bordercolor}{HTML}{E5E5EA}
+    \definecolor{normaltext}{HTML}{1D1D1F}
+    \definecolor{headingcolor}{HTML}{000000}
+    \definecolor{subheadingcolor}{HTML}{515154}
+    \definecolor{mutedcolor}{HTML}{86868B}
     \definecolor{accentblue}{HTML}{0071E3}
-    \definecolor{darkbg}{HTML}{161618}
-    \setbeamercolor{background canvas}{bg=white}
-    \setbeamercolor{normal text}{fg=black}
-    \setbeamercolor{title}{fg=black}
-    \setbeamercolor{frametitle}{fg=black}
-    \setbeamercolor{subtitle}{fg=darkbg}
-    \setbeamercolor{author}{fg=darkbg}
-    \setbeamercolor{institute}{fg=darkbg}
-    \setbeamercolor{date}{fg=darkbg}
-    \setbeamercolor{structure}{fg=accentblue}
-    \tcbset{colback=blue!5!white, colupper=black, colframe=accentblue}
+}
+
+% Beamer Color Bindings
+\setbeamercolor{background canvas}{bg=canvasbg}
+\setbeamercolor{normal text}{fg=normaltext}
+\setbeamercolor{structure}{fg=accentblue}
+\setbeamercolor{frametitle}{fg=headingcolor}
+\setbeamercolor{framesubtitle}{fg=subheadingcolor}
+\setbeamercolor{title}{fg=headingcolor}
+\setbeamercolor{subtitle}{fg=subheadingcolor}
+\setbeamercolor{author}{fg=normaltext}
+\setbeamercolor{institute}{fg=mutedcolor}
+\setbeamercolor{date}{fg=mutedcolor}
+\usebeamercolor[fg]{normal text}
+
+% Typography Sizing
+\setbeamerfont{frametitle}{size=\fontsize{20pt}{24pt}\bfseries}
+\setbeamerfont{framesubtitle}{size=\fontsize{12pt}{15pt}\normalfont}
+\setbeamerfont{title}{size=\fontsize{28pt}{34pt}\bfseries}
+\setbeamerfont{subtitle}{size=\fontsize{15pt}{20pt}\normalfont}
+
+% Frame Title Layout
+\setbeamertemplate{frametitle}{%
+  \vspace{0.8em}%
+  \begin{beamercolorbox}[wd=\paperwidth,leftskip=2.0cm,rightskip=2.0cm]{frametitle}%
+    {\usebeamerfont{frametitle}\textbf{\insertframetitle}}\par%
+    \ifx\insertframesubtitle\@empty\else%
+      \vspace{0.25em}%
+      {\usebeamerfont{framesubtitle}\textcolor{subheadingcolor}{\insertframesubtitle}}\par%
+    \fi%
+  \end{beamercolorbox}%
+  \vspace{0.4em}%
+}
+
+% Minimalist Keynote Footline (Author • Title | Page / Total)
+\setbeamertemplate{footline}{%
+  \ifnum\thepage>1%
+    \leavevmode\hbox{%
+      \begin{beamercolorbox}[wd=\paperwidth,ht=0ex,dp=3.5ex,leftskip=2.0cm,rightskip=2.0cm]{footline}%
+        {\fontsize{8.5pt}{11pt}\selectfont\textcolor{mutedcolor}{\insertshortauthor\ifx\insertshortauthor\@empty\else\ \textbullet\ \fi\insertshorttitle}}%
+        \hfill%
+        {\fontsize{8.5pt}{11pt}\selectfont\textcolor{mutedcolor}{\insertframenumber{}~/~\inserttotalframenumber}}%
+      \end{beamercolorbox}%
+    }%
+    \vspace{2ex}%
+  \fi%
+}
+
+% Title Slide Hero (Apple Keynote Style)
+\setbeamertemplate{title page}{%
+  \begin{minipage}[c][\textheight][c]{\textwidth}
+    \centering
+    \vspace{-1.5em}
+    {\usebeamerfont{title}\inserttitle}\par
+    \ifx\insertsubtitle\@empty\else
+      \vspace{0.8em}
+      {\usebeamerfont{subtitle}\textcolor{subheadingcolor}{\insertsubtitle}}\par
+    \fi
+    \vspace{2.2em}
+    {\fontsize{13pt}{16pt}\selectfont\textbf{\insertauthor}}\par
+    \ifx\insertinstitute\@empty\else
+      \vspace{0.4em}
+      {\fontsize{10pt}{14pt}\selectfont\textcolor{mutedcolor}{\insertinstitute}}\par
+    \fi
+    \ifx\insertdate\@empty\else
+      \vspace{0.3em}
+      {\fontsize{9pt}{13pt}\selectfont\textcolor{mutedcolor}{\insertdate}}\par
+    \fi
+  \end{minipage}
+}
+
+% List Styling & Spacing
+\setbeamertemplate{itemize item}{\textcolor{mutedcolor}{\small$\bullet$}}
+\setbeamertemplate{itemize subitem}{\textcolor{mutedcolor}{\scriptsize\textendash}}
+\setbeamertemplate{itemize subsubitem}{\textcolor{mutedcolor}{\tiny$\circ$}}
+
+% Sleek Keynote Card
+\newtcolorbox{keynotecard}[1][]{
+  enhanced,
+  arc=3mm,
+  boxrule=0.5pt,
+  colframe=bordercolor,
+  colback=cardbg,
+  coltext=normaltext,
+  borderline west={3.5pt}{0pt}{accentblue},
+  top=3.5mm, bottom=3.5mm, left=4.5mm, right=4.5mm,
+  #1
+}
+
+% Beamer Block Customization (Card Style)
+\setbeamertemplate{block begin}{
+  \vspace{0.6em}
+  \begin{tcolorbox}[
+    enhanced,
+    arc=3mm,
+    boxrule=0.5pt,
+    colframe=bordercolor,
+    colback=cardbg,
+    coltext=normaltext,
+    coltitle=headingcolor,
+    title={\textbf{\insertblocktitle}},
+    fonttitle=\bfseries\normalsize,
+    attach boxed title to top left={yshift=-2mm, xshift=3mm},
+    boxed title style={colback=cardbg, boxrule=0pt},
+    top=3mm, bottom=3mm, left=4mm, right=4mm
+  ]
+}
+\setbeamertemplate{block end}{\end{tcolorbox}\vspace{0.4em}}
+
+% Code Listings Style
+\lstset{
+  backgroundcolor=\color{codebg},
+  basicstyle=\ttfamily\fontsize{9.5pt}{12pt}\selectfont\color{normaltext},
+  keywordstyle=\bfseries\color{accentblue},
+  commentstyle=\color{mutedcolor},
+  stringstyle=\color{subheadingcolor},
+  breaklines=true,
+  frame=single,
+  rulecolor=\color{bordercolor},
+  frameround=tttt,
+  xleftmargin=1em,
+  framexleftmargin=0.8em,
+  framexrightmargin=0.8em,
+  framextopmargin=0.6em,
+  framexbottommargin=0.6em
 }
 
 \title{\textbf{__TITLE__}}
@@ -59,17 +181,18 @@
 % Section 1
 \section{Overview}
 
-\begin{frame}{Problem Formulation \& Motivation}
+\begin{frame}{Problem Formulation \& Motivation}{Physical constraints \& edge drift}
     \begin{itemize}
+        \setlength{\itemsep}{0.8em}
         \item \textbf{Autonomous Drift}: Dead-reckoning drift in GPS-denied environments
         \item \textbf{Bandwidth Constraints}: Low throughput under severe physical attenuation
         \item \textbf{Decentralized Consensus}: Eliminating single points of failure
     \end{itemize}
     
     \vspace{0.8em}
-    \begin{tcolorbox}[arc=3mm]
+    \begin{keynotecard}
         \textbf{Objective}: Bound global swarm error using local ultra-wideband ranging constraints.
-    \end{tcolorbox}
+    \end{keynotecard}
 \end{frame}
 
 \begin{frame}{Distributed Optimization Model}
@@ -92,6 +215,7 @@ def consensus_step(x_i, neighbors, weights, step_size=0.05):
 \end{lstlisting}
 
     \begin{itemize}
+        \setlength{\itemsep}{0.6em}
         \item Deterministic compute budget ($< 1$ ms per tick)
         \item Zero dynamic memory allocations in inner loop
     \end{itemize}
@@ -99,6 +223,7 @@ def consensus_step(x_i, neighbors, weights, step_size=0.05):
 
 \begin{frame}{Conclusions \& References}
     \begin{enumerate}
+        \setlength{\itemsep}{0.6em}
         \item Successfully validated across high-fidelity simulation and nano-quadrotor flights.
         \item Future work addresses communication jamming resilience \cite{ieee_evans}.
     \end{enumerate}
