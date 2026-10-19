@@ -366,4 +366,4 @@ def compute_consensus_step(x_local, neighbors, weights):
 
 The decentralized framework converges to bounded error envelopes under arbitrary topology switching.
 
-#bibliography("/library.bib", title: "References")
+#bibliography("library.bib", title: "References")

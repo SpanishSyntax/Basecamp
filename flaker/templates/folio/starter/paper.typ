@@ -116,7 +116,7 @@
     "Autonomous Swarms",
     "Ultra-Wideband",
   ),
-  bibliography: bibliography("/library.bib", title: auto),
+  bibliography: bibliography("library.bib", title: auto),
   date: [__DATE__],
 )
 

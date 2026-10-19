@@ -60,5 +60,5 @@ def compute_consensus_step(x_local, neighbors, weights):
 # Conclusion & Next Steps
 
 1. **Hardware-in-the-loop validation** on 16 crazyflie nano-quadrotors
-2. **Resilience under jamming**: Byzantine-tolerant consensus protocols
+2. **Resilience under jamming**: Byzantine-tolerant consensus protocols [@ieee_evans]
 3. **Open-source release**: Package available under MIT license

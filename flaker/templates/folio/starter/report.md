@@ -179,5 +179,10 @@ Here is another sentence referencing a secondary note.[^2]
 [INFO] 2026-08-14 10:39:00 - Pipeline initialized successfully.
 [INFO] 2026-08-14 10:39:01 - Parsing GFM syntax tree...
 [SUCCESS] Render complete with zero compilation warnings.
-
 ```
+
+---
+
+# References & Citations
+
+Scholarly citations are resolved directly from the centralized bibliography [@ieee_evans; @ieee_ramirez].

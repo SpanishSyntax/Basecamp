@@ -470,4 +470,4 @@ def update_state(x, u, dt=0.01):
 
 The architecture satisfies all real-time requirements with zero dynamic memory allocations in the inner loop.
 
-#bibliography("/library.bib", title: "References")
+#bibliography("library.bib", title: "References")

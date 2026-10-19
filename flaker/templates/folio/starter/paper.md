@@ -56,4 +56,4 @@ The convergence rate of consensus iterations remains exponential as long as the 
 
 # Conclusion
 
-We presented a decentralized estimation architecture for autonomous MAV swarms in GPS-denied environments. By combining local VIO with inter-agent UWB ranging within a distributed factor graph, the swarm bounds localization drift without central coordination. Future work will investigate Byzantine-fault-tolerant consensus under active communication jamming.
+We presented a decentralized estimation architecture for autonomous MAV swarms in GPS-denied environments. By combining local VIO with inter-agent UWB ranging within a distributed factor graph, the swarm bounds localization drift without central coordination. Future work will investigate Byzantine-fault-tolerant consensus under active communication jamming [@ieee_evans; @ieee_ramirez].
