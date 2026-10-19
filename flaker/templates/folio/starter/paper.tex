@@ -1,4 +1,4 @@
-\documentclass[10pt, journal, compsoc]{IEEEtran}
+\documentclass[10pt, journal]{IEEEtran}
 
 % --- Modular Packages & Preamble Manifest ---
 \input{packages.tex}
@@ -26,27 +26,21 @@
 
 % --- Document Metadata ---
 \title{__TITLE__}
-\author{
-  __AUTHOR__
-  \IEEEauthorblockA{\\Department of Systems \& Control, Delft University of Technology\\
-  Email: author@tudelft.nl}
-}
+\author{__AUTHOR__,~\IEEEmembership{Member,~IEEE}%
+\thanks{The author is with the Department of Systems \& Control, Delft University of Technology, 2628 CD Delft, The Netherlands (e-mail: author@tudelft.nl).}}
 
 \begin{document}
 
-% --- Abstract & Keywords Queue ---
-\IEEEtitleabstractindextext{
-	\begin{abstract}
-		Autonomous robotic swarms offer transformative potential in subterranean exploration, disaster response, and planetary speleology. In these scenarios, the absence of global navigation satellite systems (GNSS) presents a fundamental challenge. Individual agents equipped solely with visual-inertial odometry (VIO) inevitably experience unbounded dead-reckoning drift over prolonged mission horizons. We formulate a decentralized factor graph framework with inter-agent ultra-wideband ranging constraints to bound global localization drift.
-	\end{abstract}
-	\begin{IEEEkeywords}
-		Decentralized Estimation, Factor Graphs, Autonomous Swarms, Ultra-Wideband, Robotic Networks.
-	\end{IEEEkeywords}
-}
-
 \maketitle
-\IEEEdisplaynontitleabstractindextext
-\IEEEpeerreviewmaketitle
+
+% --- Abstract & Keywords Queue ---
+\begin{abstract}
+Autonomous robotic swarms offer transformative potential in subterranean exploration, disaster response, and planetary speleology. In these scenarios, the absence of global navigation satellite systems (GNSS) presents a fundamental challenge. Individual agents equipped solely with visual-inertial odometry (VIO) inevitably experience unbounded dead-reckoning drift over prolonged mission horizons. We formulate a decentralized factor graph framework with inter-agent ultra-wideband ranging constraints to bound global localization drift.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Decentralized Estimation, Factor Graphs, Autonomous Swarms, Ultra-Wideband, Robotic Networks.
+\end{IEEEkeywords}
 
 % --- Section 1: Introduction ---
 \section{Introduction and Problem Formulation}

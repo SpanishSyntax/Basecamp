@@ -4,7 +4,13 @@
 \input{packages.tex}
 
 % Page Geometry & Margins
-\usepackage[a4paper, top=2.5cm, bottom=2.5cm, left=2.5cm, right=2.5cm]{geometry}
+\usepackage[a4paper, top=2.0cm, bottom=2.0cm, left=2.5cm, right=2.5cm]{geometry}
+
+% Compact Chapter Headings (eliminates classical 50pt top drop)
+\makeatletter
+\patchcmd{\@makechapterhead}{\vspace*{50\p@}}{\vspace*{0pt}}{}{}
+\patchcmd{\@makeschapterhead}{\vspace*{50\p@}}{\vspace*{0pt}}{}{}
+\makeatother
 
 % Document Metadata
 \title{\textbf{__TITLE__}\\ \large Technical Systems Engineering Report}
