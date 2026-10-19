@@ -19,7 +19,7 @@
 
 // --- 3. Flowcharts & Software Architecture Diagrams ---
 // Native Mermaid renderer for software flowcharts, sequences, and classes
-#import "@preview/merman:0.5.0": mermaid
+#import "@preview/merman:0.1.0": mermaid
 
 // --- 4. Advanced Tables & Data Grids ---
 // Publication-grade table styling, custom colspans, rowspans, and cell styling
