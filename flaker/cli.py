@@ -251,7 +251,7 @@ def build_builtin_role_registry(folder_name: str) -> dict[str, Role]:
             description="Svelte 5 + Bun + svelte-ls",
             pkgs=[
                 "bun",
-                "nodePackages.svelte-language-server",
+                "svelte-language-server",
                 "vtsls",
                 "typescript",
                 "prettierd",
