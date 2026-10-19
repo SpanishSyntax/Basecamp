@@ -1525,22 +1525,38 @@ def scaffold_assets(
                         content = content.replace("__PROJECT_NAME__", project_name)
                         if metadata:
                             for mk, mv in metadata.items():
-                                content = content.replace(f"__{mk.upper()}__", mv)
+                                val = mv
+                                if dest_path.suffix == ".tex" and isinstance(val, str) and not mk.startswith("packages_"):
+                                    val = val.replace("&", r"\&")
+                                content = content.replace(f"__{mk.upper()}__", val)
                         # Fallback defaults for unreplaced placeholders
-                        content = content.replace("__TITLE__", project_name.replace("-", " ").replace("_", " ").title())
-                        content = content.replace(
-                            "__SUBTITLE__",
-                            "16:9 Technical Systems Presentation" if "slides" in dest_path.name else "Technical Systems Engineering Report",
+                        title_fb = project_name.replace("-", " ").replace("_", " ").title()
+                        subtitle_fb = (
+                            "16:9 Technical Systems Presentation"
+                            if "slides" in dest_path.name
+                            else "Technical Systems Engineering Report"
                         )
-                        content = content.replace("__AUTHOR__", get_git_author() or "Author")
-                        content = content.replace("__DEPENDENCY__", "Department of Systems & Control")
-                        content = content.replace("__THEME__", "dark")
-                        content = content.replace("__ENGINE__", metadata.get("engine", "typst") if metadata else "typst")
+                        author_fb = get_git_author() or "Author"
+                        dep_fb = "Department of Systems & Control"
                         system_date = time.strftime("%B %Y")
+                        date_fb = (metadata.get("date") if metadata else None) or system_date
+
+                        if dest_path.suffix == ".tex":
+                            title_fb = title_fb.replace("&", r"\&")
+                            subtitle_fb = subtitle_fb.replace("&", r"\&")
+                            author_fb = author_fb.replace("&", r"\&")
+                            dep_fb = dep_fb.replace("&", r"\&")
+                            date_fb = date_fb.replace("&", r"\&")
+
+                        content = content.replace("__TITLE__", title_fb)
+                        content = content.replace("__SUBTITLE__", subtitle_fb)
+                        content = content.replace("__AUTHOR__", author_fb)
+                        content = content.replace("__DEPENDENCY__", dep_fb)
+                        content = content.replace("__THEME__", "dark")
                         content = content.replace(
-                            "__DATE__",
-                            (metadata.get("date") if metadata else None) or system_date,
+                            "__ENGINE__", metadata.get("engine", "typst") if metadata else "typst"
                         )
+                        content = content.replace("__DATE__", date_fb)
                         dest_path.write_text(content, encoding="utf-8")
                         scaffolded_any = True
                         created_files.append(str(dest_path.relative_to(target_dir)))
