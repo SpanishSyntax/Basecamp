@@ -1302,6 +1302,7 @@ def resolve_document_metadata(
     theme_flag: str | None = None,
     engine_flag: str | None = None,
     configure_packages: bool = False,
+    interactive: bool = True,
 ) -> dict[str, str]:
     """Interactively prompts or resolves document metadata when scaffolding Folio documents."""
     meta: dict[str, str] = {}
@@ -1319,7 +1320,7 @@ def resolve_document_metadata(
 
     is_markdown_target = target in ("report", "slides", "paper", "")
 
-    if sys.stdin.isatty():
+    if interactive and sys.stdin.isatty():
         # Title
         if title_flag:
             meta["title"] = title_flag
@@ -2014,8 +2015,9 @@ def main() -> None:
             configure_packages = False
         elif configure_packages_flag:
             configure_packages = True
-        elif sys.stdin.isatty():
-            configure_packages = True
+
+    # Prompt metadata interactively ONLY for the 'new' command (isolated starter document)
+    interactive_meta = (command == "new")
 
     # Resolve metadata for Folio documents (title, author, theme, engine, packages)
     doc_metadata = resolve_document_metadata(
@@ -2027,12 +2029,14 @@ def main() -> None:
         theme_flag=doc_theme,
         engine_flag=doc_engine,
         configure_packages=configure_packages,
+        interactive=interactive_meta,
     )
 
     # 1. DevShell generation (init and shell)
     if command in ("init", "shell"):
+        init_root = current_dir if command == "init" else project_root
         success = prepare_flake_env(
-            project_root=project_root,
+            project_root=init_root,
             resolved_roles=resolved_roles,
             roles_db=roles_db,
             template_path=template_path,
@@ -2048,9 +2052,9 @@ def main() -> None:
 
     # 2. Project foundation scaffolding
     if command == "init":
-        # Scaffold project root assets
+        # Scaffold project root assets in root (current_dir)
         scaffold_assets(
-            target_dir=project_root,
+            target_dir=current_dir,
             project_name=project_name,
             resolved_roles=resolved_roles,
             assets_dirs=all_asset_dirs,
@@ -2058,12 +2062,12 @@ def main() -> None:
             force=force,
             dry_run=dry_run,
             auto_git=auto_git,
-            project_root=project_root,
+            project_root=current_dir,
             role_targets=role_targets,
             roles_db=roles_db,
             metadata=doc_metadata,
         )
-        # Scaffold starter files in current directory
+        # Scaffold starter files in root (current_dir)
         scaffold_assets(
             target_dir=current_dir,
             project_name=project_name,
@@ -2073,10 +2077,9 @@ def main() -> None:
             force=force,
             dry_run=dry_run,
             auto_git=auto_git,
-            project_root=project_root,
+            project_root=current_dir,
             role_targets=role_targets,
             roles_db=roles_db,
-            metadata=doc_metadata,
         )
 
     elif command == "project":
