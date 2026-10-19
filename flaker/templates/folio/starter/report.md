@@ -4,7 +4,8 @@ author: "__AUTHOR__"
 dependency: "__DEPENDENCY__"
 date: "__DATE__"
 mode: "report"
-engine: "__ENGINE__" # Options: typst | latex
+# Engine options: typst | latex
+engine: "__ENGINE__"
 ---
 
 This document uses strictly standard GitHub Flavored Markdown (GFM) and standard LaTeX math.

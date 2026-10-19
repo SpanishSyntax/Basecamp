@@ -5,7 +5,8 @@ author: "__AUTHOR__"
 dependency: "__DEPENDENCY__"
 date: "__DATE__"
 mode: "slides"
-engine: "__ENGINE__" # Options: typst | latex
+# Engine options: typst | latex
+engine: "__ENGINE__"
 theme: "__THEME__"
 aspect-ratio: "16-9"
 ---
