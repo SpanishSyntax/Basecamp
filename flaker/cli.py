@@ -2096,7 +2096,7 @@ def main() -> None:
         )
 
     elif command == "new":
-        # Scaffold starter in current directory
+        # Scaffold starter in current directory only
         scaffold_assets(
             target_dir=current_dir,
             project_name=project_name,
@@ -2111,22 +2111,6 @@ def main() -> None:
             roles_db=roles_db,
             metadata=doc_metadata,
         )
-        # Ensure project foundation exists at project_root if running in a subdirectory
-        if project_root != current_dir:
-            scaffold_assets(
-                target_dir=project_root,
-                project_name=project_name,
-                resolved_roles=resolved_roles,
-                assets_dirs=all_asset_dirs,
-                scope="project",
-                force=force,
-                dry_run=dry_run,
-                auto_git=auto_git,
-                project_root=project_root,
-                role_targets=role_targets,
-                roles_db=roles_db,
-                metadata=doc_metadata,
-            )
 
 
 if __name__ == "__main__":
