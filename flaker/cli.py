@@ -1,4 +1,5 @@
 import os
+import shutil
 import subprocess
 import sys
 import time
@@ -487,7 +488,6 @@ BUILTIN_ALIASES = {
     "docker": "ops",
     "ex": "elixir",
     "slides": "folio:slides",
-    "slodes": "folio:slides",
     "presentation": "folio:slides",
     "paper": "folio:paper",
     "report": "folio:report",
@@ -608,34 +608,34 @@ def print_help():
 
 
 def display_roles_list(roles_db: dict[str, Role], aliases: dict[str, str]) -> None:
-    """Prints a formatted terminal table of all registered roles."""
-    reverse_aliases: dict[str, list[str]] = {}
-    for alias, target in aliases.items():
-        base_role = target.split(":", 1)[0]
-        reverse_aliases.setdefault(base_role, []).append(alias)
-
-    ui.header("FLAKER ROLES REGISTRY", width=96)
-    role_hdr = ui.bold(f"{'ROLE':<12}")
-    alias_hdr = ui.bold(f"{'ALIASES':<10}")
-    cat_hdr = ui.bold(f"{'CATEGORY':<20}")
-    desc_hdr = ui.bold("DESCRIPTION")
-    print(f"{role_hdr} {alias_hdr} {cat_hdr} {desc_hdr}")
-    print(ui.dim("-" * 96))
-
+    """Prints a clean, formatted terminal table of all registered roles inside a ui.panel."""
     # Group roles by category
     categories: dict[str, list[str]] = {}
     for r_key, role in roles_db.items():
         categories.setdefault(role.category, []).append(r_key)
 
+    term_cols = shutil.get_terminal_size(fallback=(88, 24)).columns
+    box_w = min(88, max(36, term_cols - 2))
+    inner_w = box_w - 4
+
+    hdr_role = ui.bold(f"{'ROLE':<10}")
+    hdr_cat = ui.bold(f"{'CATEGORY':<18}")
+    hdr_desc = ui.bold("DESCRIPTION")
+    sep_line = ui.dim("─" * inner_w)
+
+    panel_lines: list[str] = [
+        f"{hdr_role}  {hdr_cat}  {hdr_desc}",
+        sep_line,
+    ]
+
     for cat in sorted(categories.keys()):
         for r_key in sorted(categories[cat]):
             role = roles_db[r_key]
-            alias_str = ", ".join(reverse_aliases.get(r_key, []))
-            r_col = ui.cyan(f"{r_key:<12}")
-            a_col = ui.dim(f"{alias_str:<10}")
-            print(f"{r_col} {a_col} {role.category:<20} {role.description}")
+            r_col = ui.cyan(f"{r_key:<10}")
+            cat_col = f"{role.category:<18}"
+            panel_lines.append(f"{r_col}  {cat_col}  {role.description}")
 
-    print(ui.blue("=" * 96))
+    ui.panel("❄️  Flaker Roles Registry", panel_lines, width=box_w)
     ui.info(
         f"Run '{ui.bold('flaker info <role>')}' for packages, hooks, and starter files.\n",
         symbol="💡",
@@ -659,14 +659,15 @@ def display_role_info(
         sys.exit(1)
 
     role = roles_db[resolved_name]
+    # Only direct role aliases (exclude target shortcuts like folio:slides)
     rev_aliases = [
-        a for a, t in aliases.items() if t.split(":", 1)[0] == resolved_name
+        a for a, t in aliases.items() if t == resolved_name
     ]
 
     ui.header(f"Role Information: {resolved_name}", width=76)
     print(f"  {ui.bold('Category')}    : {role.category}")
     print(
-        f"  {ui.bold('Aliases')}     : {', '.join(rev_aliases) if rev_aliases else ui.dim('none')}"
+        f"  {ui.bold('Aliases')}     : {', '.join(sorted(rev_aliases)) if rev_aliases else ui.dim('none')}"
     )
     print(f"  {ui.bold('Summary')}     : {role.description}")
 
@@ -682,7 +683,6 @@ def display_role_info(
             )
             desc = t_meta.get("description", "")
             print(f"    • {ui.cyan(t_name):<10} : {desc}{ui.dim(aliases_str)}")
-        print(f"    • {ui.cyan('all'):<10} : Scaffold all templates simultaneously")
 
     print(f"\n  {ui.bold('Packages Included in DevShell:')}")
     for pkg in role.pkgs:
