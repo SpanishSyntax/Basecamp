@@ -553,17 +553,17 @@ def print_help():
   flaker <command> [roles...] [options]
 
 {ui.blue("Commands:")}
-  init         Full workspace bootstrap (DevShell + project root files + starter).
-  new          Drop starter files into current directory (e.g. main.py, plot.py).
-  shell        Generate DevShell flake.nix, .envrc, and .gitignore at project root.
-  project      Scaffold only project root foundation files (pyproject.toml, report.typ).
-  packages     Interactively configure and dynamically generate package manifest.
-  list         List all available roles, categories, and aliases.
-  info <role>  Display detailed information, packages, and starter files for a role.
-  interactive  Launch interactive Bun-style role and command selector.
+  init         Create full setup (flake, envrc, project configs, starter).
+  new          Add starter file (main.py, report.md, etc.).
+  shell        Add flake.nix and .envrc.
+  project      Add project configs (pyproject.toml, packages.typ, etc.).
+  packages     Configure package bundles.
+  list         List available roles and stacks.
+  info <role>  Display detailed information for a role.
+  interactive  Launch interactive stack and command selector.
 
 {ui.blue("Options:")}
-  -m, --mode MODE      Document operating mode / scaffolding target (report, slides, paper, all).
+  -m, --mode MODE      Document operating mode / target (report, slides, paper).
   -t, --target TARGET  Alias for --mode.
   -e, --engine ENGINE  Compilation engine for Markdown ('typst' or 'latex').
   -p, --packages       Configure packages dynamically (default in interactive mode).
@@ -1602,68 +1602,28 @@ def run_interactive_mode(
             rel = current_dir.name
         ui.info(f"Existing workspace detected at {ui.bold(str(project_root))}")
         cmd_options = [
-            (
-                "new",
-                f"Create starter file in ./{rel}/",
-                "Drops starter script in current directory",
-            ),
-            (
-                "shell",
-                "Update DevShell environment at root",
-                "flake.nix, .envrc, and .gitignore",
-            ),
-            (
-                "project",
-                "Scaffold project foundation files",
-                "Scaffold root configs to workspace root",
-            ),
-            (
-                "init",
-                "Re-initialize workspace",
-                "Full bootstrap (DevShell + project foundation + starter)",
-            ),
+            ("new", f"Add starter file in ./{rel}/", "Starter file in current directory"),
+            ("shell", "Add flake.nix and .envrc", "DevShell at project root"),
+            ("project", "Add project configs", "Root configs (pyproject.toml, etc.)"),
+            ("init", "Create full setup", "Full workspace setup at project root"),
         ]
     elif has_root_flake:
         ui.info(f"Active workspace detected at {ui.bold(str(project_root))}")
         cmd_options = [
-            (
-                "new",
-                "Create a starter file in current directory",
-                "Drop starter script (main.py, plot.py, etc.)",
-            ),
-            ("init", "Re-initialize workspace", "DevShell + root configs + starter"),
-            (
-                "shell",
-                "DevShell environment only",
-                "flake.nix, .envrc, and .gitignore at root",
-            ),
-            (
-                "project",
-                "Scaffold project foundation files",
-                "Scaffold root configs to project root",
-            ),
+            ("new", "Add starter file", "Starter file in current directory"),
+            ("shell", "Add flake.nix and .envrc", "DevShell at root"),
+            ("project", "Add project configs", "Root configs (pyproject.toml, etc.)"),
+            ("init", "Create full setup", "Full workspace setup (flake, envrc, configs, starter)"),
         ]
     else:
         cmd_options = [
-            (
-                "init",
-                "Initialize full workspace",
-                "DevShell flake.nix + project root configs + starter",
-            ),
-            (
-                "shell",
-                "DevShell environment only",
-                "flake.nix, .envrc, and .gitignore at root",
-            ),
-            ("new", "Drop starter files into current directory", "Starter script only"),
-            (
-                "project",
-                "Scaffold project foundation files",
-                "Root configs only (pyproject.toml, packages.typ)",
-            ),
+            ("init", "Create full setup", "Flake, envrc, project configs, starter"),
+            ("shell", "Add flake.nix and .envrc", "DevShell environment only"),
+            ("project", "Add project configs", "Root configs (pyproject.toml, etc.)"),
+            ("new", "Add starter file", "Starter file in current directory"),
         ]
 
-    chosen_cmd = ui.select("What would you like to do?", cmd_options)
+    chosen_cmd = ui.select("Action:", cmd_options)
 
     sorted_roles = sorted(roles_db.keys())
     role_options = [
@@ -1672,10 +1632,10 @@ def run_interactive_mode(
     ]
 
     if chosen_cmd == "new":
-        chosen_role = ui.select("Select role for starter file:", role_options)
+        chosen_role = ui.select("Select role:", role_options)
         chosen_roles = [chosen_role]
     else:
-        chosen_roles = ui.multiselect("Select roles for the stack:", role_options)
+        chosen_roles = ui.multiselect("Select roles:", role_options)
         if not chosen_roles:
             ui.warn("No roles selected. Exiting.")
             sys.exit(0)
@@ -1694,7 +1654,7 @@ def run_interactive_mode(
                     for t_key, t_meta in role_def.targets.items()
                 ]
                 chosen_target = ui.select(
-                    f"Select document type to scaffold for {r}:", options
+                    f"Select template for {r}:", options
                 )
                 role_targets[r] = chosen_target
 
@@ -1814,7 +1774,7 @@ def main() -> None:
                 target_flag = args[i + 1]
                 i += 1
             else:
-                ui.error(f"{arg} requires a target name (e.g. report, slides, paper, all).")
+                ui.error(f"{arg} requires a target name (e.g. report, slides, paper).")
                 sys.exit(1)
         elif arg.startswith(("--mode=", "--target=", "--type=")):
             target_flag = arg.split("=", 1)[1]
@@ -1909,12 +1869,12 @@ def main() -> None:
                 ]
                 if command == "new":
                     chosen_role = ui.select(
-                        "Select role for starter file:", role_options
+                        "Select role:", role_options
                     )
                     unparsed_roles = [chosen_role]
                 else:
                     unparsed_roles = ui.multiselect(
-                        f"Select roles for flaker {command}:", role_options
+                        f"Select roles for {command}:", role_options
                     )
                     if not unparsed_roles:
                         ui.warn("No roles selected. Exiting.")
@@ -2019,7 +1979,7 @@ def main() -> None:
                         )
                         for t_key, t_meta in role_def.targets.items()
                     ]
-                    chosen = ui.select(f"Select document type to scaffold for {r}:", options)
+                    chosen = ui.select(f"Select template for {r}:", options)
                     role_targets[r] = chosen
                 else:
                     role_targets[r] = "report" if "report" in role_def.targets else list(role_def.targets.keys())[0]
