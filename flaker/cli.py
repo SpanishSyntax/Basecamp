@@ -1027,6 +1027,16 @@ TYPST_PACKAGE_BUNDLES: list[dict[str, Any]] = [
         ),
     },
     {
+        "id": "mitex",
+        "label": "MiTeX (@preview/mitex:0.2.7)",
+        "desc": "Compile native LaTeX math equations directly inside Typst blocks",
+        "default": False,
+        "snippet": (
+            "// MiTeX allows writing native LaTeX equations directly inside Typst blocks\n"
+            '#import "@preview/mitex:0.2.7": mitex\n'
+        ),
+    },
+    {
         "id": "merman",
         "label": "Merman (@preview/merman:0.1.0)",
         "desc": "Native Mermaid renderer for software flowcharts, sequences & ERDs",
