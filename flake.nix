@@ -59,7 +59,18 @@
           find $out/${pkgs.python3.sitePackages}/flaker/templates -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
         '';
 
-        doCheck = false;
+        nativeCheckInputs = [
+          pkgs.python3Packages.pytest
+          pkgs.direnv
+        ];
+
+        checkPhase = ''
+          runHook preCheck
+          pytest
+          runHook postCheck
+        '';
+
+        doCheck = true;
 
         meta = with lib; {
           description = "Fast, modular Nix development environment and project scaffolding tool";
@@ -89,6 +100,7 @@
         packages = with pkgs; [
           python3
           python3Packages.setuptools
+          python3Packages.pytest
           direnv
         ];
       };

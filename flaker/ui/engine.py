@@ -1,81 +1,18 @@
-"""Terminal UI, ANSI styling, and robust interactive menu engine for CLI tools."""
+"""Terminal UI, ANSI styling, and interactive menu engine for Flaker."""
 
 import os
-import re
-import select
 import shutil
 import sys
-import termios
-import threading
-import tty
 from contextlib import contextmanager
 from typing import Any, Iterator, Sequence
 
-ANSI_REGEX = re.compile(r"\x1b\[[0-9;]*[a-zA-Z]")
-
-
-def strip_ansi(text: str) -> str:
-    """Strips ANSI escape codes to measure true visual character length."""
-    return ANSI_REGEX.sub("", text)
-
-
-class Spinner:
-    """Zero-dependency braille terminal spinner for background operations."""
-
-    FRAMES = ("⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏")
-
-    def __init__(self, ui_instance: "UI", message: str):
-        self.ui = ui_instance
-        self.message = message
-        self._stop_event = threading.Event()
-        self._thread: threading.Thread | None = None
-        self._is_tty = sys.stdout.isatty()
-
-    def update(self, message: str):
-        """Updates the active spinner status text."""
-        self.message = message
-
-    def _spin(self):
-        idx = 0
-        while not self._stop_event.is_set():
-            frame = self.ui.bold_cyan(self.FRAMES[idx % len(self.FRAMES)])
-            line = f"\r\033[2K{self.ui.badge()} {frame} {self.message}"
-            sys.stdout.write(line)
-            sys.stdout.flush()
-            idx += 1
-            self._stop_event.wait(0.08)
-
-    def start(self):
-        if not self._is_tty:
-            self.ui.action(self.message, symbol="⏳")
-            return
-        sys.stdout.write("\033[?25l")
-        sys.stdout.flush()
-        self._thread = threading.Thread(target=self._spin, daemon=True)
-        self._thread.start()
-
-    def stop(self, final_message: str | None = None, ok: bool = True):
-        if not self._is_tty:
-            if final_message:
-                if ok:
-                    self.ui.success(final_message)
-                else:
-                    self.ui.error(final_message)
-            return
-
-        self._stop_event.set()
-        if self._thread and self._thread.is_alive():
-            self._thread.join(timeout=0.5)
-        sys.stdout.write("\r\033[2K\033[?25h")
-        sys.stdout.flush()
-        if final_message:
-            if ok:
-                self.ui.success(final_message)
-            else:
-                self.ui.error(final_message)
+from flaker.ui.spinner import Spinner
+from flaker.ui.terminal import fit_line, normalize_options, read_key, strip_ansi
 
 
 class UI:
+    """Terminal styling, panels, banners, and interactive menus."""
+
     def __init__(
         self, app_name: str = "flaker", icon: str = "❄️", badge_color: str = "1;34"
     ):
@@ -84,7 +21,7 @@ class UI:
         self.badge_color = badge_color
         self._color_mode = "auto"
 
-    def set_color_mode(self, mode: str):
+    def set_color_mode(self, mode: str) -> None:
         self._color_mode = mode.lower()
 
     @property
@@ -141,19 +78,19 @@ class UI:
     def status(self, symbol: str, message: str, code: str = "1") -> str:
         return f"{self.badge()} {self.style(f'{symbol} {message}', code)}"
 
-    def success(self, msg: str):
+    def success(self, msg: str) -> None:
         print(self.status("✔", msg, "1;32"))
 
-    def info(self, msg: str, symbol: str = "ℹ️"):
+    def info(self, msg: str, symbol: str = "ℹ️") -> None:
         print(self.status(symbol, msg, "1;34"))
 
-    def warn(self, msg: str):
+    def warn(self, msg: str) -> None:
         print(self.status("⚠️", msg, "1;33"))
 
-    def error(self, msg: str):
+    def error(self, msg: str) -> None:
         print(self.status("✘", msg, "1;31"), file=sys.stderr)
 
-    def action(self, msg: str, symbol: str = "⚡"):
+    def action(self, msg: str, symbol: str = "⚡") -> None:
         print(self.status(symbol, msg, "0;36"))
 
     def prompt(self, message: str, default: str = "") -> str:
@@ -181,11 +118,11 @@ class UI:
             print()
             sys.exit(0)
 
-    def header(self, title: str, width: int = 76):
+    def header(self, title: str, width: int = 76) -> None:
         border = self.blue("=" * width)
         print(f"\n{border}\n {self.bold(title)}\n{border}")
 
-    def subheader(self, title: str, width: int = 76):
+    def subheader(self, title: str, width: int = 76) -> None:
         rule_part = self.dim("-" * max(0, width - len(title) - 5))
         print(f"\n{self.cyan(f'--- {title}')} {rule_part}")
 
@@ -196,7 +133,7 @@ class UI:
         border_color: str = "0;36",
         width: int = 76,
         stream: Any = None,
-    ):
+    ) -> None:
         """Renders a width-aware rounded box panel (╭─╮│╰─╯)."""
         out = stream or sys.stdout
         body_lines = lines.splitlines() if isinstance(lines, str) else list(lines)
@@ -229,7 +166,7 @@ class UI:
                 print(f"{side} {clipped}{pad} {side}", file=out)
         print(bottom_border, file=out)
 
-    def error_panel(self, title: str, lines: Sequence[str] | str):
+    def error_panel(self, title: str, lines: Sequence[str] | str) -> None:
         """Renders a formatted error diagnostic panel to stderr."""
         styled_title = self.red(f"✘ {title}")
         self.panel(styled_title, lines, border_color="1;31", stream=sys.stderr)
@@ -247,120 +184,6 @@ class UI:
         else:
             sp.stop()
 
-    # -------------------------------------------------------------------------
-    # Robust Terminal Engine (Arrow Keys & Non-Wrapping Width Handling)
-    # -------------------------------------------------------------------------
-    def _read_key(self) -> str:
-        """
-        Reads a single raw keypress or ANSI escape sequence directly from stdin.
-        Uses os.read() without TextIOWrapper buffering to ensure escape sequences
-        arrive atomically and reliably in modern terminal emulators (Kitty, Alacritty, etc.).
-        """
-        fd = sys.stdin.fileno()
-        old_settings = termios.tcgetattr(fd)
-        try:
-            tty.setraw(fd)
-            raw = os.read(fd, 32)
-            if not raw:
-                return "ctrl_d"
-
-            # Check if this is an escape sequence
-            if raw == b"\x1b":
-                # Check if more bytes are pending in the kernel pty buffer
-                r, _, _ = select.select([fd], [], [], 0.025)
-                if r:
-                    raw += os.read(fd, 32)
-                else:
-                    return "esc"
-
-            # Arrow keys & cursor navigation:
-            # Handles \x1b[A, \x1bOA (application mode), \x1b[1;2A, \x1b[[A, etc.
-            if raw.startswith(b"\x1b") and raw.endswith(b"A"):
-                return "up"
-            if raw.startswith(b"\x1b") and raw.endswith(b"B"):
-                return "down"
-            if raw.startswith(b"\x1b") and raw.endswith(b"C"):
-                return "right"
-            if raw.startswith(b"\x1b") and raw.endswith(b"D"):
-                return "left"
-
-            # Enter, space, vim navigation, controls
-            if raw in (b"\r", b"\n"):
-                return "enter"
-            if raw == b" ":
-                return "space"
-            if raw == b"\x03":  # Ctrl+C
-                return "ctrl_c"
-            if raw == b"\x04":  # Ctrl+D
-                return "ctrl_d"
-            if raw in (b"k", b"K"):
-                return "up"
-            if raw in (b"j", b"J"):
-                return "down"
-            if raw in (b"a", b"A"):
-                return "a"
-            if raw in (b"q", b"Q"):
-                return "q"
-
-            return raw.decode("utf-8", errors="ignore")
-        finally:
-            termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
-
-    @staticmethod
-    def _fit_line(
-        prefix: str, label_styled: str, label_plain: str, desc: str, max_w: int
-    ) -> str:
-        """
-        Ensures a menu item line never exceeds max_w visual columns.
-        Prevents terminal wrapping so cursor up/down operations remain 100% in sync.
-        """
-        prefix_len = len(strip_ansi(prefix))
-        avail = max_w - prefix_len
-        if avail <= 5:
-            return prefix + label_plain[: max(0, avail)]
-
-        if not desc:
-            if len(label_plain) <= avail:
-                return f"{prefix}{label_styled}"
-            return f"{prefix}{label_plain[: max(0, avail - 3)]}..."
-
-        # Both label and desc present
-        if len(label_plain) + 2 + len(desc) <= avail:
-            return f"{prefix}{label_styled} \033[90m{desc}\033[0m"
-
-        # Fit label and truncated description
-        if len(label_plain) + 6 <= avail:
-            rem = avail - len(label_plain) - 4
-            trunc_desc = desc[: max(0, rem)] + "..."
-            return f"{prefix}{label_styled} \033[90m{trunc_desc}\033[0m"
-
-        # Narrow terminal: label only
-        if len(label_plain) <= avail:
-            return f"{prefix}{label_styled}"
-        return f"{prefix}{label_plain[: max(0, avail - 3)]}..."
-
-    @staticmethod
-    def _normalize_options(options: Sequence[Any]) -> list[tuple[str, str, str]]:
-        """
-        Normalizes option entries into (key, label, description).
-        Accepts:
-          - "name" -> (name, name, "")
-          - ("key", "label") -> (key, label, "")
-          - ("key", "label", "description") -> (key, label, description)
-        """
-        result = []
-        for opt in options:
-            if isinstance(opt, (list, tuple)):
-                if len(opt) == 1:
-                    result.append((str(opt[0]), str(opt[0]), ""))
-                elif len(opt) == 2:
-                    result.append((str(opt[0]), str(opt[1]), ""))
-                else:
-                    result.append((str(opt[0]), str(opt[1]), str(opt[2])))
-            else:
-                result.append((str(opt), str(opt), ""))
-        return result
-
     def select(
         self,
         title: str,
@@ -371,7 +194,7 @@ class UI:
         Single-select interactive menu with arrow key navigation.
         Width & height aware: truncates wide lines and paginates lists to fit any terminal size.
         """
-        items = self._normalize_options(options)
+        items = normalize_options(options)
         if not items:
             return ""
 
@@ -400,10 +223,8 @@ class UI:
                 cols, term_rows = term_size.columns, term_size.lines
                 max_w = max(25, cols - 1)
 
-                # Available vertical rows for items
                 max_visible = max(3, min(len(items), term_rows - 5, 10))
 
-                # Keep active item inside scroll window
                 if current < scroll_offset:
                     scroll_offset = current
                 elif current >= scroll_offset + max_visible:
@@ -413,7 +234,6 @@ class UI:
                 )
 
                 lines = []
-                # Header
                 raw_title = f"{self.badge()} {self.bold(title)}"
                 lines.append(
                     raw_title
@@ -421,7 +241,6 @@ class UI:
                     else raw_title[:max_w]
                 )
 
-                # Subtitle navigation hint
                 raw_help = self.dim(
                     "  (Use ↑/↓ or j/k to navigate, Enter to select, q/Ctrl+C to cancel)"
                 )
@@ -432,11 +251,9 @@ class UI:
                 )
                 lines.append("")
 
-                # Up indicator if scrolled
                 if scroll_offset > 0:
                     lines.append(self.dim(f"  ▲ ({scroll_offset} more above...)"))
 
-                # Visible items
                 visible_items = items[scroll_offset : scroll_offset + max_visible]
                 for idx_offset, (key, label, desc) in enumerate(visible_items):
                     actual_idx = scroll_offset + idx_offset
@@ -448,14 +265,12 @@ class UI:
                         styled_lbl = label
 
                     prefix = f"  {pointer} "
-                    lines.append(self._fit_line(prefix, styled_lbl, label, desc, max_w))
+                    lines.append(fit_line(prefix, styled_lbl, label, desc, max_w))
 
-                # Down indicator if more below
                 if scroll_offset + max_visible < len(items):
                     remaining = len(items) - (scroll_offset + max_visible)
                     lines.append(self.dim(f"  ▼ ({remaining} more below...)"))
 
-                # Clear previous frame rows and redraw in-place
                 if rendered_lines > 0:
                     sys.stdout.write(f"\033[{rendered_lines}A\r")
                 for line in lines:
@@ -463,7 +278,7 @@ class UI:
                 sys.stdout.flush()
                 rendered_lines = len(lines)
 
-                key = self._read_key()
+                key = read_key()
                 if key == "up":
                     current = (current - 1) % len(items)
                 elif key == "down":
@@ -480,7 +295,6 @@ class UI:
                     print("\nAborted.")
                     sys.exit(0)
 
-            # Clear interactive frame cleanly and output final choice
             sys.stdout.write(f"\033[{rendered_lines}A\r")
             for _ in range(rendered_lines):
                 sys.stdout.write("\033[2K\r\n")
@@ -491,7 +305,6 @@ class UI:
             sys.stdout.flush()
             return items[current][0]
         finally:
-            # Restore cursor
             sys.stdout.write("\033[?25h")
             sys.stdout.flush()
 
@@ -505,13 +318,12 @@ class UI:
         Multi-select interactive menu with arrow key navigation and spacebar toggling.
         Width & height aware: truncates wide lines and paginates lists to fit any terminal size.
         """
-        items = self._normalize_options(options)
+        items = normalize_options(options)
         if not items:
             return []
 
         selected_keys: set[str] = set(preselected) if preselected else set()
 
-        # Fallback for non-interactive / non-TTY
         if not sys.stdin.isatty():
             print(f"\n{self.badge()} {self.bold(title)}")
             for idx, (k, lbl, desc) in enumerate(items, 1):
@@ -529,7 +341,6 @@ class UI:
         scroll_offset = 0
         rendered_lines = 0
 
-        # Hide cursor
         sys.stdout.write("\033[?25l")
         sys.stdout.flush()
 
@@ -539,10 +350,8 @@ class UI:
                 cols, term_rows = term_size.columns, term_size.lines
                 max_w = max(25, cols - 1)
 
-                # Available vertical rows for items
                 max_visible = max(3, min(len(items), term_rows - 5, 10))
 
-                # Keep active item inside scroll window
                 if current < scroll_offset:
                     scroll_offset = current
                 elif current >= scroll_offset + max_visible:
@@ -569,11 +378,9 @@ class UI:
                 )
                 lines.append("")
 
-                # Up indicator if scrolled
                 if scroll_offset > 0:
                     lines.append(self.dim(f"  ▲ ({scroll_offset} more above...)"))
 
-                # Visible items
                 visible_items = items[scroll_offset : scroll_offset + max_visible]
                 for idx_offset, (key, label, desc) in enumerate(visible_items):
                     actual_idx = scroll_offset + idx_offset
@@ -590,14 +397,12 @@ class UI:
                         styled_lbl = self.green(label) if is_checked else label
 
                     prefix = f"  {pointer} {check} "
-                    lines.append(self._fit_line(prefix, styled_lbl, label, desc, max_w))
+                    lines.append(fit_line(prefix, styled_lbl, label, desc, max_w))
 
-                # Down indicator if more below
                 if scroll_offset + max_visible < len(items):
                     remaining = len(items) - (scroll_offset + max_visible)
                     lines.append(self.dim(f"  ▼ ({remaining} more below...)"))
 
-                # Clear previous frame rows and redraw in-place
                 if rendered_lines > 0:
                     sys.stdout.write(f"\033[{rendered_lines}A\r")
                 for line in lines:
@@ -605,7 +410,7 @@ class UI:
                 sys.stdout.flush()
                 rendered_lines = len(lines)
 
-                key = self._read_key()
+                key = read_key()
                 if key == "up":
                     current = (current - 1) % len(items)
                 elif key == "down":
@@ -633,7 +438,6 @@ class UI:
                     print("\nAborted.")
                     sys.exit(0)
 
-            # Clear interactive frame cleanly and output final choice
             sys.stdout.write(f"\033[{rendered_lines}A\r")
             for _ in range(rendered_lines):
                 sys.stdout.write("\033[2K\r\n")
@@ -645,9 +449,5 @@ class UI:
             sys.stdout.flush()
             return [k for k, _, _ in items if k in selected_keys]
         finally:
-            # Restore cursor
             sys.stdout.write("\033[?25h")
             sys.stdout.flush()
-
-
-ui = UI()
