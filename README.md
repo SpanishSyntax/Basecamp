@@ -159,7 +159,7 @@ Flaker provides a symmetrical 9-way document scaffolding engine for [Folio](http
 
 ### Foundation Assets (`project/`)
 When initializing a Folio workspace, Flaker automatically scaffolds the corresponding shared foundation assets to the project root:
-- `packages.typ`: Modular Typst preamble hub (`cetz`, `fletcher`, `physica`, `mitex`, `merman`, `tablex`, `algorithmic`, `codly`).
+- `packages.typ`: Modular Typst preamble hub (`cetz`, `fletcher`, `physica`, `merman`, `tablex`, `algorithmic`, `codly`).
 - `packages.tex`: Modular LaTeX preamble hub (`amsmath`, `mathtools`, `tikz`, `pgfplots`, `booktabs`, `tcolorbox`, `cleveref`).
 - `library.bib`: Shared BibTeX bibliography database.
 - `report.typ`, `slides.typ`, `paper.typ`: Re-usable Typst layout functions for Markdown conversion and native Typst authoring.

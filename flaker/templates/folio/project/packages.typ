@@ -14,8 +14,6 @@
 // Mathematica/Physics notation: differential forms, matrices, bra-kets
 #import "@preview/physica:0.9.3": *
 
-// MiTeX allows writing native LaTeX equations directly inside Typst blocks
-#import "@preview/mitex:0.2.5": mitex
 
 // --- 3. Flowcharts & Software Architecture Diagrams ---
 // Native Mermaid renderer for software flowcharts, sequences, and classes
