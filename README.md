@@ -37,16 +37,27 @@ nix run github:SpanishSyntax/Flaker -- init python
 # Initialize a Zig project with zls and build.zig
 nix run github:SpanishSyntax/Flaker -- init zig
 
+# Initialize a Folio workspace for clean Markdown report
+flaker init folio report
+
 # Initialize a Folio workspace specifically for 16:9 slides presentation
 flaker init folio slides
 
 # Initialize a Folio workspace for an academic IEEE paper
 flaker init folio paper
 
-# Drop a starter document directly using role shortcuts
-flaker new slides                      # 16:9 widescreen presentation (slides.md)
-flaker new paper                       # IEEE 2-column paper (paper.md)
-flaker new report                      # Clean report document (report.md)
+# Initialize native Typst or LaTeX workspaces directly
+flaker init typ                        # Native Typst workspace (report.typ + packages.typ)
+flaker init tex                        # Native LaTeX workspace (report.tex + packages.tex)
+flaker init typ:paper                  # Native Typst IEEE 2-column paper (paper.typ)
+flaker init tex:slides                 # Native LaTeX 16:9 Beamer slides (slides.tex)
+
+# Drop starter documents directly using role shortcuts
+flaker new slides                      # 16:9 Markdown presentation (slides.md)
+flaker new paper                       # IEEE 2-column Markdown paper (paper.md)
+flaker new report                      # Clean Markdown report document (report.md)
+flaker new typ:paper                   # Native Typst paper (paper.typ)
+flaker new tex:slides                  # Native LaTeX Beamer slides (slides.tex)
 
 # Drop a starter experiment file into current folder without touching root configs
 flaker new mv
@@ -54,8 +65,8 @@ flaker new mv
 # Generate only DevShell without starter files
 flaker shell rust next
 
-# Scaffold project foundation files (pyproject.toml, template.typ) to project root
-flaker project typst
+# Scaffold project foundation files (packages.typ, report.typ, library.bib) to project root
+flaker project folio
 
 # Combine roles: Rust backend + Next.js frontend + DevOps containers
 nix run github:SpanishSyntax/Flaker -- init rust next ops
@@ -82,7 +93,8 @@ Commands:
   init         Full workspace bootstrap (DevShell + project root files + starter).
   new          Drop starter files into current directory (e.g. main.py, plot.py).
   shell        Generate DevShell flake.nix, .envrc, and .gitignore at project root.
-  project      Scaffold only project root foundation files (pyproject.toml, template.typ).
+  project      Scaffold only project root foundation files (pyproject.toml, report.typ).
+  packages     Interactively configure and dynamically generate package manifest.
   list         List all available roles, categories, and aliases.
   info <role>  Display detailed information, packages, and starter files for a role.
   interactive  Launch interactive Bun-style role and command selector.
@@ -90,6 +102,7 @@ Commands:
 Options:
   -m, --mode MODE      Document operating mode / scaffolding target (report, slides, paper, all).
   -t, --target TARGET  Alias for --mode.
+  -p, --packages       Prompt to interactively configure packages dynamically.
   --title TITLE        Document title for Folio documents.
   --author AUTHOR      Document author for Folio documents.
   --theme THEME        Presentation theme for slides ('dark' or 'light').
@@ -128,9 +141,36 @@ Options:
 | **Vue** | `vue` | - | Bun, `vue-language-server`, `vtsls` | `prettierd` |
 | **Next.js** | `next` | `react` | Bun, `vtsls`, `typescript` | `prettierd` |
 | **Folio (Markdown)** | `folio` / `md` | `md:report`, `md:slides`, `md:paper`, `report`, `slides`, `paper` | `pandoc`, `typst`, `tectonic`, `tinymist`, `texlab` | `typstyle` |
-| **Folio (Typst)** | `typst` | `typst:report`, `typst:slides`, `typst:paper`, `typ` | `typst`, `tinymist` (LSP) | `typstyle` |
-| **Folio (LaTeX)** | `latex` | `latex:report`, `latex:slides`, `latex:paper`, `tex`, `beamer` | `tectonic`, `texlab` (LSP) | - |
+| **Folio (Typst)** | `typst` / `typ` | `typ:report`, `typ:slides`, `typ:paper`, `typst:report`, `typst:slides`, `typst:paper` | `typst`, `tinymist` (LSP) | `typstyle` |
+| **Folio (LaTeX)** | `latex` / `tex` | `tex:report`, `tex:slides`, `tex:paper`, `latex:report`, `latex:slides`, `latex:paper`, `beamer` | `tectonic`, `texlab` (LSP) | - |
 | **DevOps & Cloud** | `ops` | `devops`, `docker` | `docker-compose`, `lazydocker`, `kubectl`, `helm`, `k9s`, `dive` | - |
+
+---
+
+## 📝 Folio Document Engine (Standardized 3×3 Matrix)
+
+Flaker provides a symmetrical 9-way document scaffolding engine for [Folio](https://github.com/SpanishSyntax/Folio). Every document archetype is available across all three supported markup languages:
+
+| Document Archetype | Markdown (`.md`) | Typst (`.typ`) | LaTeX (`.tex`) | Output / Layout Specification |
+| :--- | :--- | :--- | :--- | :--- |
+| **Technical Report** | `report.md` | `report.typ` | `report.tex` | Minimal sans-serif Inter layout (A4/Letter) |
+| **16:9 Presentation** | `slides.md` | `slides.typ` | `slides.tex` | Apple Keynote-inspired widescreen slide deck |
+| **Academic Paper** | `paper.md` | `paper.typ` | `paper.tex` | Dual-column IEEE Computer Society publication |
+
+### Foundation Assets (`project/`)
+When initializing a Folio workspace, Flaker automatically scaffolds the corresponding shared foundation assets to the project root:
+- `packages.typ`: Modular Typst preamble hub (`cetz`, `fletcher`, `physica`, `mitex`, `merman`, `tablex`, `algorithmic`, `codly`).
+- `packages.tex`: Modular LaTeX preamble hub (`amsmath`, `mathtools`, `tikz`, `pgfplots`, `booktabs`, `tcolorbox`, `cleveref`).
+- `library.bib`: Shared BibTeX bibliography database.
+- `report.typ`, `slides.typ`, `paper.typ`: Re-usable Typst layout functions for Markdown conversion and native Typst authoring.
+
+#### Interactive Package Configurator (`flaker packages`)
+You can dynamically assemble your package manifest at any time with sane defaults preselected:
+```bash
+flaker packages typ                  # Interactively configure packages.typ via multi-select
+flaker packages tex                  # Interactively configure packages.tex via multi-select
+flaker init folio slides --packages  # Interactively choose package bundles during init
+```
 
 ---
 
@@ -210,13 +250,11 @@ Flaker/
         ├── haskell/
         ├── java/
         ├── julia/
-        ├── latex/
         ├── mathvis/
         ├── ops/
         ├── python/
         ├── rust/
         ├── ts/
-        ├── typst/
         └── zig/
 ```
 

@@ -1,5 +1,96 @@
-#import "/packages.typ": *
-#import "/ieee.typ": *
+// ========================================================
+// FOLIO IEEE ACADEMIC PAPER TEMPLATE
+// Powered by @preview/charged-ieee:0.1.4 with Markdown Interop
+// ========================================================
+#import "@preview/charged-ieee:0.1.4": ieee
+#import "packages.typ": *
+
+#let horizontalrule = line(length: 100%, stroke: 0.5pt + rgb("#a1a1aa"))
+
+#let paper(
+  title: "Untitled IEEE Paper",
+  author: none,
+  authors: (),
+  dependency: none,
+  email: none,
+  abstract: none,
+  keywords: none,
+  index-terms: (),
+  paper: "us-letter",
+  paper-size: none,
+  bibliography: none,
+  date: none,
+  doc,
+  ..sink,
+) = {
+  let final-title = title
+  let final-author = author
+  let final-dep = dependency
+  let final-email = email
+  let final-abstract = abstract
+  let final-paper-size = if paper-size != none { paper-size } else { paper }
+  let final-bibliography = bibliography
+
+  let final-index-terms = if index-terms.len() > 0 {
+    index-terms
+  } else if keywords != none and keywords != "" {
+    keywords.split(",").map(k => k.trim())
+  } else {
+    ()
+  }
+
+  let final-authors = if authors.len() > 0 {
+    authors
+  } else if final-author != none {
+    (
+      (
+        name: final-author,
+        department: final-dep,
+        organization: final-dep,
+        email: final-email,
+      ),
+    )
+  } else {
+    (
+      (
+        name: "Author",
+        department: "Department",
+        organization: "Organization",
+        email: none,
+      ),
+    )
+  }
+
+  show: ieee.with(
+    title: final-title,
+    authors: final-authors,
+    abstract: if final-abstract != none [ #final-abstract ] else { [] },
+    index-terms: final-index-terms,
+    paper-size: final-paper-size,
+    bibliography: final-bibliography,
+  )
+
+  // Markdown code block formatting
+  show raw.where(block: true): it => block(
+    fill: rgb("#f4f4f5"),
+    inset: 8pt,
+    radius: 3pt,
+    width: 100%,
+    stroke: 0.3pt + rgb("#d4d4d8"),
+    it,
+  )
+
+  show raw.where(block: false): it => box(
+    fill: rgb("#f4f4f5"),
+    inset: (x: 3pt, y: 1pt),
+    radius: 2pt,
+    it,
+  )
+
+  doc
+}
+
+#let conf = paper
 
 #show: paper.with(
   title: text(
@@ -58,21 +149,21 @@ $ min_(bold(x)) sum_(i in cal(V)) f_i (bold(x)_i) + sum_((i,j) in cal(E)) g_(i j
 
 = Experimental Verification
 
-Evaluation across subterranean mine simulation benchmarks confirms exponential consensus convergence whenever $lambda_2(cal(L)) > 0$.
+Hardware experiments across 6 quadrotor aerial platforms demonstrated sub-15cm absolute localization accuracy over a 45-minute continuous mission.
 
 #align(center)[
   #table(
     columns: (auto, 1fr, 1fr, auto),
-    inset: 8pt,
-    align: (col, row) => if row == 0 { center + horizon } else { left + horizon },
-    stroke: (x, y) => if y == 0 { (bottom: 1.5pt + black) } else { (bottom: 0.5pt + gray) },
-    [*Node*], [*Algorithm Tier*], [*Status*], [*ATE (m)*],
-    [*MAV-01*], [Distributed ADMM], [`Converged`], [0.042],
-    [*MAV-02*], [Decoupled Consensus], [`Converged`], [0.038],
-    [*MAV-03*], [Decentralized EKF], [`Legacy`], [0.185],
+    inset: 6pt,
+    align: (col, row) => if row == 0 { center } else { left },
+    stroke: 0.4pt + rgb("#a1a1aa"),
+    [*Trial ID*], [*Swarm Size*], [*RMSE Drift (m)*], [*Consensus Rate*],
+    [`EXP-01`], [3 Agents], [0.082], [100 Hz],
+    [`EXP-02`], [6 Agents], [0.124], [80 Hz],
+    [`EXP-03`], [12 Agents], [0.149], [50 Hz],
   )
 ]
 
-= Conclusion
+= Conclusions
 
-We formulated a decentralized estimation architecture for autonomous MAV swarms. By combining local odometry with inter-agent UWB ranging, the swarm bounds localization drift without centralized coordination.
+We demonstrated fully decentralized cooperative localization with guaranteed drift bounds under intermittent inter-agent ranging constraints.

@@ -4,7 +4,7 @@ import sys
 import tomllib
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, Sequence
 
 from flaker import __version__
 from flaker.ui import ui
@@ -360,19 +360,19 @@ def build_builtin_role_registry(folder_name: str) -> dict[str, Role]:
                 # 1. Polyglot Markdown Workspaces (Frontmatter driven)
                 # --------------------------------------------------------
                 "report": {
-                    "project": ["packages.typ", "report.typ", "packages.tex", "library.bib"],
+                    "project": ["packages.typ", "report.typ", "library.bib"],
                     "starter": ["report.md"],
                     "description": "Polyglot Markdown report (report.md + packages + library.bib)",
                     "aliases": ["md-report", "doc", "document", "default"],
                 },
                 "slides": {
-                    "project": ["packages.typ", "slides.typ", "packages.tex", "library.bib"],
+                    "project": ["packages.typ", "slides.typ", "library.bib"],
                     "starter": ["slides.md"],
                     "description": "Polyglot Markdown 16:9 slides (slides.md + packages + library.bib)",
                     "aliases": ["md-slides", "presentation", "slodes", "slide", "deck", "ppt"],
                 },
                 "paper": {
-                    "project": ["packages.typ", "ieee.typ", "packages.tex", "library.bib"],
+                    "project": ["packages.typ", "paper.typ", "library.bib"],
                     "starter": ["paper.md"],
                     "description": "Polyglot Markdown IEEE paper (paper.md + packages + library.bib)",
                     "aliases": ["md-paper", "ieee", "article"],
@@ -381,21 +381,21 @@ def build_builtin_role_registry(folder_name: str) -> dict[str, Role]:
                 # 2. Native Typst Workspaces
                 # --------------------------------------------------------
                 "typst-report": {
-                    "project": ["packages.typ", "report.typ", "library.bib"],
-                    "starter": ["main.typ"],
-                    "description": "Native Typst technical report (main.typ + report.typ + packages.typ + library.bib)",
+                    "project": ["packages.typ", "library.bib"],
+                    "starter": ["report.typ"],
+                    "description": "Native Typst technical report (report.typ + packages.typ + library.bib)",
                     "aliases": ["typ-report"],
                 },
                 "typst-slides": {
-                    "project": ["packages.typ", "slides.typ", "library.bib"],
-                    "starter": ["presentation.typ"],
-                    "description": "Native Typst 16:9 presentation (presentation.typ + slides.typ + packages.typ + library.bib)",
+                    "project": ["packages.typ", "library.bib"],
+                    "starter": ["slides.typ"],
+                    "description": "Native Typst 16:9 presentation (slides.typ + packages.typ + library.bib)",
                     "aliases": ["typ-slides"],
                 },
                 "typst-paper": {
-                    "project": ["packages.typ", "ieee.typ", "library.bib"],
+                    "project": ["packages.typ", "library.bib"],
                     "starter": ["paper.typ"],
-                    "description": "Native Typst IEEE 2-column paper (paper.typ + ieee.typ + packages.typ + library.bib)",
+                    "description": "Native Typst IEEE 2-column paper (paper.typ + packages.typ + library.bib)",
                     "aliases": ["typ-paper", "typst", "typ"],
                 },
                 # --------------------------------------------------------
@@ -450,16 +450,22 @@ BUILTIN_ALIASES = {
     "js": "ts",
     "mv": "mathvis",
     "md": "folio:report",
-    "typ": "folio:typst-paper",
-    "typst": "folio:typst-paper",
+    "typ": "folio:typst-report",
+    "typst": "folio:typst-report",
     "typst-paper": "folio:typst-paper",
     "typst-report": "folio:typst-report",
     "typst-slides": "folio:typst-slides",
     "typst:paper": "folio:typst-paper",
     "typst:report": "folio:typst-report",
     "typst:slides": "folio:typst-slides",
-    "tex": "folio:latex-paper",
-    "latex": "folio:latex-paper",
+    "typ-paper": "folio:typst-paper",
+    "typ-report": "folio:typst-report",
+    "typ-slides": "folio:typst-slides",
+    "typ:paper": "folio:typst-paper",
+    "typ:report": "folio:typst-report",
+    "typ:slides": "folio:typst-slides",
+    "tex": "folio:latex-report",
+    "latex": "folio:latex-report",
     "latex-paper": "folio:latex-paper",
     "latex-report": "folio:latex-report",
     "latex-slides": "folio:latex-slides",
@@ -468,6 +474,7 @@ BUILTIN_ALIASES = {
     "latex:slides": "folio:latex-slides",
     "tex-report": "folio:latex-report",
     "tex-slides": "folio:latex-slides",
+    "tex-paper": "folio:latex-paper",
     "tex:report": "folio:latex-report",
     "tex:slides": "folio:latex-slides",
     "tex:paper": "folio:latex-paper",
@@ -548,7 +555,8 @@ def print_help():
   init         Full workspace bootstrap (DevShell + project root files + starter).
   new          Drop starter files into current directory (e.g. main.py, plot.py).
   shell        Generate DevShell flake.nix, .envrc, and .gitignore at project root.
-  project      Scaffold only project root foundation files (pyproject.toml, template.typ).
+  project      Scaffold only project root foundation files (pyproject.toml, report.typ).
+  packages     Interactively configure and dynamically generate package manifest.
   list         List all available roles, categories, and aliases.
   info <role>  Display detailed information, packages, and starter files for a role.
   interactive  Launch interactive Bun-style role and command selector.
@@ -556,6 +564,8 @@ def print_help():
 {ui.blue("Options:")}
   -m, --mode MODE      Document operating mode / scaffolding target (report, slides, paper, all).
   -t, --target TARGET  Alias for --mode.
+  -e, --engine ENGINE  Compilation engine for Markdown ('typst' or 'latex').
+  -p, --packages       Prompt to interactively configure packages dynamically.
   --title TITLE        Document title for Folio documents.
   --author AUTHOR      Document author for Folio documents.
   --theme THEME        Presentation theme for slides ('dark' or 'light').
@@ -576,13 +586,20 @@ def print_help():
   flaker init folio report               # Setup Folio workspace for clean report document
   flaker init folio slides               # Setup Folio workspace for 16:9 presentation slides
   flaker init folio paper                # Setup Folio workspace for IEEE 2-column paper
-  flaker new folio slides                # Drop slides.md in current folder (+ slides.typ)
+  flaker init folio slides --packages    # Scaffold slides and interactively pick package bundles
+  flaker packages typ                    # Interactively configure Typst packages (packages.typ)
+  flaker packages tex                    # Interactively configure LaTeX packages (packages.tex)
+  flaker init typ                        # Setup native Typst workspace (report.typ + packages.typ)
+  flaker init tex                        # Setup native LaTeX workspace (report.tex + packages.tex)
+  flaker new md:slides                   # Drop slides.md in current folder
+  flaker new typ:paper                   # Drop native Typst IEEE 2-column paper (paper.typ)
+  flaker new tex:slides                  # Drop native LaTeX Beamer presentation (slides.tex)
   flaker new paper                       # Direct shortcut to drop paper.md in current folder
   flaker init folio -m slides            # Bootstrap slides using explicit --mode flag
   flaker new mv                          # Drop mathvis plot.py in current experiment folder
-  flaker new typ                         # Drop typst main.typ in current folder
+  flaker new typ                         # Drop native Typst report (report.typ) in current folder
   flaker shell rust next                 # Setup DevShell without scaffolding files
-  flaker project typst                   # Scaffold template.typ & library.bib to project root
+  flaker project folio                   # Scaffold layout templates & library.bib to project root
   flaker list                            # View all registered language roles & aliases
 """)
 
@@ -976,6 +993,301 @@ def get_git_author() -> str:
     return ""
 
 
+TYPST_PACKAGE_BUNDLES: list[dict[str, Any]] = [
+    {
+        "id": "cetz",
+        "label": "CeTZ (@preview/cetz:0.3.1)",
+        "desc": "TikZ-like vector drawing canvas & scientific plotting engine",
+        "default": True,
+        "snippet": (
+            "// --- 1. Vector Drawing & Graphing (The \"TikZ\" of Typst) ---\n"
+            "// CeTZ provides a comprehensive TikZ-inspired vector canvas\n"
+            '#import "@preview/cetz:0.3.1"\n'
+        ),
+    },
+    {
+        "id": "fletcher",
+        "label": "Fletcher (@preview/fletcher:0.5.2)",
+        "desc": "Commutative diagrams, finite state machines, and flowcharts",
+        "default": True,
+        "snippet": (
+            "// Fletcher provides elegant commutative diagrams and state machines\n"
+            '#import "@preview/fletcher:0.5.2" as fletcher: diagram, node, edge\n'
+        ),
+    },
+    {
+        "id": "physica",
+        "label": "Physica (@preview/physica:0.9.3)",
+        "desc": "Advanced math, differential forms, matrices, and bra-kets",
+        "default": True,
+        "snippet": (
+            "// --- 2. Advanced Mathematics & Physics Notation ---\n"
+            "// Mathematica/Physics notation: differential forms, matrices, bra-kets\n"
+            '#import "@preview/physica:0.9.3": *\n'
+        ),
+    },
+    {
+        "id": "mitex",
+        "label": "MiTeX (@preview/mitex:0.2.5)",
+        "desc": "Compile native LaTeX math equations directly inside Typst blocks",
+        "default": False,
+        "snippet": (
+            "// MiTeX allows writing native LaTeX equations directly inside Typst blocks\n"
+            '#import "@preview/mitex:0.2.5": mitex\n'
+        ),
+    },
+    {
+        "id": "merman",
+        "label": "Merman (@preview/merman:0.1.0)",
+        "desc": "Native Mermaid renderer for software flowcharts, sequences & ERDs",
+        "default": True,
+        "snippet": (
+            "// --- 3. Flowcharts & Software Architecture Diagrams ---\n"
+            "// Native Mermaid renderer for software flowcharts, sequences, and classes\n"
+            '#import "@preview/merman:0.1.0": mermaid\n'
+        ),
+    },
+    {
+        "id": "tablex",
+        "label": "Tablex (@preview/tablex:0.0.9)",
+        "desc": "Publication-grade tables with custom colspans, rowspans & cell styling",
+        "default": True,
+        "snippet": (
+            "// --- 4. Advanced Tables & Data Grids ---\n"
+            "// Publication-grade table styling, custom colspans, rowspans, and cell styling\n"
+            '#import "@preview/tablex:0.0.9": tablex, cellx, hlinex, vlinex\n'
+        ),
+    },
+    {
+        "id": "algorithmic",
+        "label": "Algorithmic (@preview/algorithmic:0.1.0)",
+        "desc": "Clean pseudocode typesetting with line numbering and indentation",
+        "default": False,
+        "snippet": (
+            "// --- 5. Algorithmic Pseudocode ---\n"
+            "// Clean pseudocode typesetting with line numbering and indentation\n"
+            '#import "@preview/algorithmic:0.1.0": *\n'
+        ),
+    },
+    {
+        "id": "codly",
+        "label": "Codly (@preview/codly:1.0.0)",
+        "desc": "Enhanced source code blocks with line numbering and tab labels",
+        "default": False,
+        "snippet": (
+            "// --- 6. Code Block Formatting (Codly) ---\n"
+            "// Enhanced code blocks with line numbering, icons, and tab labels\n"
+            '#import "@preview/codly:1.0.0": *\n'
+        ),
+    },
+]
+
+LATEX_PACKAGE_BUNDLES: list[dict[str, Any]] = [
+    {
+        "id": "typography",
+        "label": "Typography & Fonts",
+        "desc": "Fontspec, TeX Gyre Pagella, JetBrains Mono, Babel, Microtype",
+        "default": True,
+        "snippet": (
+            "% --- 1. Core Typography, Fonts & Localization ---\n"
+            "\\usepackage{fontspec}\n"
+            "\\setmainfont{TeX Gyre Pagella}\n"
+            "\\setmonofont{JetBrainsMono NFM}\n"
+            "\\usepackage[english]{babel}\n"
+            "\\usepackage{microtype}                  % Improved kerning and micro-typography\n"
+        ),
+    },
+    {
+        "id": "math",
+        "label": "Mathematics & Physics",
+        "desc": "AMS-LaTeX, mathtools, bm, diffcoeff, siunitx",
+        "default": True,
+        "snippet": (
+            "% --- 2. Mathematical Sciences & Physics ---\n"
+            "\\usepackage{amsmath, amssymb, amsfonts} % Core AMS mathematical symbols & environments\n"
+            "\\usepackage{mathtools}                  % Mathematical tools and extensions\n"
+            "\\usepackage{bm}                         % Bold mathematical symbols (\\bm{\\alpha})\n"
+            "\\usepackage{diffcoeff}                  % Clean derivative notation (\\diff{y}{x})\n"
+            "\\usepackage{siunitx}                    % Comprehensive SI units formatting (\\qty{10}{\\meter\\per\\second})\n"
+        ),
+    },
+    {
+        "id": "tikz",
+        "label": "TikZ & PGFPlots (Vector Graphics)",
+        "desc": "TikZ, PGFPlots 1.18, arrows.meta, positioning, calc, tikz-cd",
+        "default": True,
+        "snippet": (
+            "% --- 3. Vector Graphics, Plotting & Diagramming (TikZ) ---\n"
+            "\\usepackage{graphicx}                   % Figure & image inclusion\n"
+            "\\usepackage{xcolor}                     % Color model support\n"
+            "\\usepackage{tikz}                       % TikZ vector drawing engine\n"
+            "\\usetikzlibrary{\n"
+            "  arrows.meta,                          % Modern arrow heads\n"
+            "  positioning,                          % Relative node placement\n"
+            "  calc,                                 % Coordinate calculations\n"
+            "  shapes.geometric,                     % Advanced shapes\n"
+            "  fit,                                  % Bounding box fitting\n"
+            "  backgrounds                           % Background layers\n"
+            "}\n"
+            "\\usepackage{pgfplots}                   % High-quality scientific plotting\n"
+            "\\pgfplotsset{compat=1.18}\n"
+            "\\usepackage{tikz-cd}                    % Commutative & architecture flow diagrams\n"
+        ),
+    },
+    {
+        "id": "tables",
+        "label": "Academic Tables & Structure",
+        "desc": "Booktabs, tabularx, multirow, makecell, array, enumitem",
+        "default": True,
+        "snippet": (
+            "% --- 4. Academic Tables & Structural Layout ---\n"
+            "\\usepackage{booktabs}                   % Publication-quality horizontal rules\n"
+            "\\usepackage{tabularx}                   % Tables with auto-expanding columns\n"
+            "\\usepackage{multirow}                   % Multi-row table cells\n"
+            "\\usepackage{makecell}                   % Flexible column headers & multi-line cells\n"
+            "\\usepackage{array}                      % Extended array and tabular environments\n"
+            "\\usepackage{enumitem}                   % Granular list spacing control\n"
+        ),
+    },
+    {
+        "id": "boxes",
+        "label": "Code Listings & Callouts",
+        "desc": "Listings, tcolorbox with skins & breakable",
+        "default": True,
+        "snippet": (
+            "% --- 5. Code Listings & Callout Containers ---\n"
+            "\\usepackage{listings}                   % Source code syntax highlighting\n"
+            "\\usepackage{tcolorbox}                  % Sleek modern callout frames & boxes\n"
+            "\\tcbuselibrary{skins, breakable}\n"
+        ),
+    },
+    {
+        "id": "refs",
+        "label": "Citations & Cross-Referencing",
+        "desc": "Cite, ulem, hyperref, cleveref",
+        "default": True,
+        "snippet": (
+            "% --- 6. Citations, Hyperlinks & Cross-Referencing ---\n"
+            "\\usepackage{cite}                       % Standard numeric citation formatting\n"
+            "\\usepackage[normalem]{ulem}             % Sophisticated underlining\n"
+            "\\usepackage{hyperref}                   % Clickable hyper-links & PDF bookmarks\n"
+            "\\hypersetup{\n"
+            "  colorlinks=true,\n"
+            "  linkcolor=blue!70!black,\n"
+            "  citecolor=green!50!black,\n"
+            "  urlcolor=blue!80!black\n"
+            "}\n"
+            "\\usepackage{cleveref}                   % Intelligent contextual references (\\cref{fig:model})\n"
+        ),
+    },
+]
+
+
+def generate_packages_manifest(
+    pkg_type: str = "typst",
+    selected_ids: Sequence[str] | None = None,
+) -> str:
+    """Generates a dynamic package manifest text for Typst or LaTeX."""
+    is_typst = pkg_type in ("typst", "typ")
+    bundles = TYPST_PACKAGE_BUNDLES if is_typst else LATEX_PACKAGE_BUNDLES
+
+    if selected_ids is None:
+        selected_set = {b["id"] for b in bundles if b.get("default", False)}
+    else:
+        selected_set = set(selected_ids)
+
+    lines = []
+    if is_typst:
+        lines.append("// ========================================================")
+        lines.append("// MODULAR TYPST PACKAGE MANIFEST (packages.typ)")
+        lines.append("// Dynamically generated by Flaker")
+        lines.append("// ========================================================\n")
+    else:
+        lines.append("% ========================================================")
+        lines.append("% MODULAR LATEX PACKAGE MANIFEST (packages.tex)")
+        lines.append("% Dynamically generated by Flaker")
+        lines.append("% ========================================================\n")
+
+    for bundle in bundles:
+        if bundle["id"] in selected_set:
+            lines.append(bundle["snippet"].strip())
+            lines.append("")
+
+    return "\n".join(lines).strip() + "\n"
+
+
+def configure_packages_interactive(
+    preferred_type: str | None = None,
+    dest_dir: Path | None = None,
+) -> Path | None:
+    """
+    Interactively configures and dynamically generates packages.typ or packages.tex
+    using ui.multiselect with sane defaults preselected.
+    """
+    target_dir = dest_dir or Path.cwd()
+
+    # Infer package type if not explicitly passed
+    pkg_type = preferred_type
+    if not pkg_type:
+        has_typ = (target_dir / "packages.typ").exists() or list(target_dir.glob("*.typ"))
+        has_tex = (target_dir / "packages.tex").exists() or list(target_dir.glob("*.tex"))
+        if has_typ and not has_tex:
+            pkg_type = "typst"
+        elif has_tex and not has_typ:
+            pkg_type = "latex"
+        elif sys.stdin.isatty():
+            pkg_type = ui.select(
+                "Select package manifest to configure:",
+                [
+                    ("typst", "Typst package manifest (packages.typ)"),
+                    ("latex", "LaTeX package manifest (packages.tex)"),
+                ],
+            )
+        else:
+            pkg_type = "typst"
+
+    is_typst = pkg_type in ("typst", "typ")
+    bundles = TYPST_PACKAGE_BUNDLES if is_typst else LATEX_PACKAGE_BUNDLES
+    dest_file = target_dir / ("packages.typ" if is_typst else "packages.tex")
+
+    options = [(b["id"], b["label"], b["desc"]) for b in bundles]
+    preselected = [b["id"] for b in bundles if b.get("default", False)]
+
+    if sys.stdin.isatty():
+        fmt_name = "Typst" if is_typst else "LaTeX"
+        chosen_ids = ui.multiselect(
+            f"Select {fmt_name} packages to include in {dest_file.name}:",
+            options,
+            preselected=preselected,
+        )
+        if not chosen_ids:
+            ui.warn("No packages selected. Using default recommended bundle.")
+            chosen_ids = preselected
+    else:
+        chosen_ids = preselected
+
+    content = generate_packages_manifest(pkg_type, chosen_ids)
+
+    # Overwrite check if file exists
+    if dest_file.exists() and sys.stdin.isatty():
+        ans = (
+            input(
+                f"{ui.badge()} {ui.yellow(f'⚠️  {dest_file.name} already exists. Overwrite? [y/N]: ')}"
+            )
+            .strip()
+            .lower()
+        )
+        if ans not in ("y", "yes"):
+            ui.warn(f"Skipped {dest_file.name} (preserved existing file)")
+            return dest_file
+
+    dest_file.write_text(content, encoding="utf-8")
+    ui.success(
+        f"Generated dynamic package manifest ({len(chosen_ids)} bundles) at {dest_file}"
+    )
+    return dest_file
+
+
 def resolve_document_metadata(
     project_name: str,
     resolved_roles: list[str],
@@ -983,6 +1295,8 @@ def resolve_document_metadata(
     title_flag: str | None = None,
     author_flag: str | None = None,
     theme_flag: str | None = None,
+    engine_flag: str | None = None,
+    configure_packages: bool = False,
 ) -> dict[str, str]:
     """Interactively prompts or resolves document metadata when scaffolding Folio documents."""
     meta: dict[str, str] = {}
@@ -997,6 +1311,8 @@ def resolve_document_metadata(
     default_title = project_name.replace("-", " ").replace("_", " ").title()
     default_author = git_author if git_author else "Author"
 
+    is_markdown_target = target in ("report", "slides", "paper", "all", "")
+
     if sys.stdin.isatty():
         # Title
         if title_flag:
@@ -1009,6 +1325,23 @@ def resolve_document_metadata(
             meta["author"] = author_flag
         else:
             meta["author"] = ui.prompt("Author", default=default_author)
+
+        # Engine (prompted specifically for Markdown workspaces)
+        if is_markdown_target:
+            if engine_flag:
+                meta["engine"] = engine_flag.lower()
+            else:
+                meta["engine"] = ui.select(
+                    "Select compilation engine for Markdown:",
+                    [
+                        ("typst", "Typst (recommended, ultra-fast hermetic layout)"),
+                        ("latex", "LaTeX (Tectonic + Pandoc, academic TeX typesetting)"),
+                    ],
+                )
+        elif target.startswith("latex") or target.startswith("tex"):
+            meta["engine"] = "latex"
+        else:
+            meta["engine"] = "typst"
 
         # Theme (specifically for presentation slides)
         if target in ("slides", "all", ""):
@@ -1026,10 +1359,32 @@ def resolve_document_metadata(
             meta["theme"] = theme_flag.lower()
         else:
             meta["theme"] = "dark"
+
+        if configure_packages:
+            is_tex = (meta.get("engine") == "latex") or target.startswith("latex") or target.startswith("tex")
+            fmt = "latex" if is_tex else "typst"
+            bundles = LATEX_PACKAGE_BUNDLES if is_tex else TYPST_PACKAGE_BUNDLES
+            options = [(b["id"], b["label"], b["desc"]) for b in bundles]
+            preselected = [b["id"] for b in bundles if b.get("default", False)]
+            chosen_ids = ui.multiselect(
+                f"Select {fmt.title()} packages to include:",
+                options,
+                preselected=preselected,
+            )
+            key = f"packages_{'tex' if is_tex else 'typ'}_content"
+            meta[key] = generate_packages_manifest(
+                fmt, chosen_ids if chosen_ids else preselected
+            )
     else:
         meta["title"] = title_flag or default_title
         meta["author"] = author_flag or default_author
         meta["theme"] = theme_flag.lower() if theme_flag else "dark"
+        if is_markdown_target:
+            meta["engine"] = engine_flag.lower() if engine_flag else "typst"
+        elif target.startswith("latex") or target.startswith("tex"):
+            meta["engine"] = "latex"
+        else:
+            meta["engine"] = "typst"
 
     return meta
 
@@ -1094,11 +1449,23 @@ def scaffold_assets(
                 ):
                     target_spec = role_def.targets[target_name]
                     if dir_type in ("project", "starter"):
-                        allowed_files = target_spec.get(dir_type, [])
+                        allowed_files = list(target_spec.get(dir_type, []))
                     else:
-                        allowed_files = target_spec.get("project", []) + target_spec.get(
-                            "starter", []
+                        allowed_files = list(target_spec.get("project", [])) + list(
+                            target_spec.get("starter", [])
                         )
+
+                    # Dynamic engine filtering for Markdown targets
+                    if target_name in ("report", "slides", "paper") and dir_type == "project":
+                        if metadata and metadata.get("engine") == "latex":
+                            allowed_files = ["packages.tex", "library.bib"]
+                        else:
+                            allowed_files = ["packages.typ", f"{target_name}.typ", "library.bib"]
+                elif target_name == "all" and dir_type == "project":
+                    if metadata and metadata.get("engine") == "latex":
+                        allowed_files = ["packages.tex", "library.bib"]
+                    elif metadata and metadata.get("engine") == "typst":
+                        allowed_files = ["packages.typ", "report.typ", "slides.typ", "paper.typ", "library.bib"]
 
                 for template_file in src_dir.glob("**/*"):
                     if template_file.is_file():
@@ -1140,7 +1507,20 @@ def scaffold_assets(
                                 continue
 
                         dest_path.parent.mkdir(parents=True, exist_ok=True)
-                        content = template_file.read_text(encoding="utf-8")
+                        if (
+                            dest_path.name == "packages.typ"
+                            and metadata
+                            and metadata.get("packages_typ_content")
+                        ):
+                            content = metadata["packages_typ_content"]
+                        elif (
+                            dest_path.name == "packages.tex"
+                            and metadata
+                            and metadata.get("packages_tex_content")
+                        ):
+                            content = metadata["packages_tex_content"]
+                        else:
+                            content = template_file.read_text(encoding="utf-8")
                         content = content.replace("__PROJECT_NAME__", project_name)
                         if metadata:
                             for mk, mv in metadata.items():
@@ -1151,6 +1531,7 @@ def scaffold_assets(
                         content = content.replace("__AUTHOR__", "Author")
                         content = content.replace("__DEPENDENCY__", "")
                         content = content.replace("__THEME__", "dark")
+                        content = content.replace("__ENGINE__", metadata.get("engine", "typst") if metadata else "typst")
                         content = content.replace("__DATE__", "")
                         dest_path.write_text(content, encoding="utf-8")
                         scaffolded_any = True
@@ -1254,7 +1635,7 @@ def run_interactive_mode(
             (
                 "project",
                 "Scaffold project foundation files",
-                "Root configs only (pyproject.toml, template.typ)",
+                "Root configs only (pyproject.toml, packages.typ)",
             ),
         ]
 
@@ -1375,6 +1756,8 @@ def main() -> None:
     doc_title: str | None = None
     doc_author: str | None = None
     doc_theme: str | None = None
+    doc_engine: str | None = None
+    configure_packages = False
 
     filtered_args: list[str] = []
     i = 0
@@ -1388,6 +1771,8 @@ def main() -> None:
             auto_git = False
         elif arg == "--no-direnv":
             no_direnv = True
+        elif arg in ("-p", "--packages", "--pkg"):
+            configure_packages = True
         elif arg in ("--color", "--no-color") or arg.startswith("--color="):
             if arg == "--color" and i + 1 < len(args):
                 i += 1
@@ -1409,6 +1794,15 @@ def main() -> None:
                 sys.exit(1)
         elif arg.startswith(("--mode=", "--target=", "--type=")):
             target_flag = arg.split("=", 1)[1]
+        elif arg in ("-e", "--engine"):
+            if i + 1 < len(args):
+                doc_engine = args[i + 1]
+                i += 1
+            else:
+                ui.error(f"{arg} requires 'typst' or 'latex'.")
+                sys.exit(1)
+        elif arg.startswith("--engine="):
+            doc_engine = arg.split("=", 1)[1]
         elif arg == "--title":
             if i + 1 < len(args):
                 doc_title = args[i + 1]
@@ -1455,6 +1849,9 @@ def main() -> None:
         "flake": "shell",
         "base": "project",
         "root": "project",
+        "packages": "packages",
+        "package": "packages",
+        "pkg": "packages",
     }
 
     command = ""
@@ -1606,6 +2003,18 @@ def main() -> None:
                 else:
                     role_targets[r] = "all"
 
+    # Handle 'packages' / 'pkg' command
+    if command in ("packages", "pkg", "package"):
+        preferred = unparsed_roles[0] if unparsed_roles else None
+        configure_packages_interactive(preferred, dest_dir=current_dir)
+        sys.exit(0)
+
+    # Handle 'flaker new packages' / 'flaker new pkg'
+    if command == "new" and unparsed_roles and unparsed_roles[0].lower() in ("packages", "pkg", "package"):
+        preferred = unparsed_roles[1] if len(unparsed_roles) > 1 else None
+        configure_packages_interactive(preferred, dest_dir=current_dir)
+        sys.exit(0)
+
     # Enforce valid commands
     if command not in ("init", "new", "shell", "project"):
         ui.error(f"Unknown command '{command}'.\n")
@@ -1618,7 +2027,7 @@ def main() -> None:
 
     nixpkgs_url = resolve_nixpkgs_url(channel)
 
-    # Resolve metadata for Folio documents (title, author, theme)
+    # Resolve metadata for Folio documents (title, author, theme, engine, packages)
     doc_metadata = resolve_document_metadata(
         project_name=project_name,
         resolved_roles=resolved_roles,
@@ -1626,6 +2035,8 @@ def main() -> None:
         title_flag=doc_title,
         author_flag=doc_author,
         theme_flag=doc_theme,
+        engine_flag=doc_engine,
+        configure_packages=configure_packages,
     )
 
     # 1. DevShell generation (init and shell)
