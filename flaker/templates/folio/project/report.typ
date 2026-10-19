@@ -107,9 +107,9 @@
           #if final-author != none [#final-author]
         ],
         align(right)[
-          Página
+          Page
           #counter(page).display()
-          de
+          of
           #counter(page).final().first()
         ],
       )
@@ -161,7 +161,7 @@
               size: 7.5pt,
               fill: theme.muted,
               tracking: 0.05em,
-            )[AUTOR]
+            )[AUTHOR]
 
             #v(2pt)
 
@@ -176,7 +176,7 @@
               size: 7.5pt,
               fill: theme.muted,
               tracking: 0.05em,
-            )[DEPENDENCIA]
+            )[DEPENDENCY]
 
             #v(2pt)
 

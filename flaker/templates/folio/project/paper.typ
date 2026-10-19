@@ -117,6 +117,7 @@
     "Ultra-Wideband",
   ),
   bibliography: bibliography("/library.bib", title: auto),
+  date: [__DATE__],
 )
 
 #v(1em)

@@ -2,9 +2,10 @@
 title: "__TITLE__"
 author: "__AUTHOR__"
 dependency: "__DEPENDENCY__"
-email: ""
-abstract: ""
-keywords: ""
+date: "__DATE__"
+email: "author@tudelft.nl"
+abstract: "Autonomous robotic swarms offer transformative potential in subterranean exploration, disaster response, and planetary speleology. In these scenarios, the absence of global navigation satellite systems (GNSS) presents a fundamental challenge. Individual agents equipped solely with visual-inertial odometry (VIO) inevitably experience unbounded dead-reckoning drift over prolonged mission horizons. We formulate a decentralized factor graph framework with inter-agent ultra-wideband ranging constraints to bound global localization drift."
+keywords: "Decentralized Estimation, Factor Graph Optimization, Autonomous Swarms, Ultra-Wideband, Robotic Networks"
 mode: "paper"
 preset: "ieee"
 # Engine options: typst | latex

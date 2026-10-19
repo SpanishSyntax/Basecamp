@@ -7,16 +7,46 @@
 \usetheme{default}
 \usecolortheme{dove}
 
-% Custom Minimalist Color Accents
-\definecolor{accentblue}{HTML}{0071E3}
-\definecolor{darkbg}{HTML}{161618}
-\setbeamercolor{title}{fg=black}
-\setbeamercolor{frametitle}{fg=black}
-\setbeamercolor{structure}{fg=accentblue}
+% Custom Minimalist Color Accents & Theme Selection
+\usepackage{etoolbox}
+\newcommand{\presentationtheme}{__THEME__}
+
+\ifdefstring{\presentationtheme}{dark}{
+    \definecolor{accentblue}{HTML}{2997FF}
+    \definecolor{darkbg}{HTML}{161618}
+    \setbeamercolor{background canvas}{bg=black}
+    \setbeamercolor{normal text}{fg=white}
+    \setbeamercolor{title}{fg=white}
+    \setbeamercolor{frametitle}{fg=white}
+    \setbeamercolor{subtitle}{fg=white!70!black}
+    \setbeamercolor{author}{fg=white!70!black}
+    \setbeamercolor{institute}{fg=white!70!black}
+    \setbeamercolor{date}{fg=white!70!black}
+    \setbeamercolor{structure}{fg=accentblue}
+    \setbeamercolor{item}{fg=white}
+    \setbeamercolor{block title}{bg=darkbg, fg=white}
+    \setbeamercolor{block body}{bg=darkbg!80!black, fg=white}
+    \usebeamercolor[fg]{normal text}
+    \tcbset{colback=darkbg, colupper=white, colframe=accentblue}
+}{
+    \definecolor{accentblue}{HTML}{0071E3}
+    \definecolor{darkbg}{HTML}{161618}
+    \setbeamercolor{background canvas}{bg=white}
+    \setbeamercolor{normal text}{fg=black}
+    \setbeamercolor{title}{fg=black}
+    \setbeamercolor{frametitle}{fg=black}
+    \setbeamercolor{subtitle}{fg=darkbg}
+    \setbeamercolor{author}{fg=darkbg}
+    \setbeamercolor{institute}{fg=darkbg}
+    \setbeamercolor{date}{fg=darkbg}
+    \setbeamercolor{structure}{fg=accentblue}
+    \tcbset{colback=blue!5!white, colupper=black, colframe=accentblue}
+}
 
 \title{\textbf{__TITLE__}}
 \subtitle{16:9 Technical Systems Presentation}
 \author{__AUTHOR__}
+\institute{__DEPENDENCY__}
 \date{__DATE__}
 
 \begin{document}
@@ -37,7 +67,7 @@
     \end{itemize}
     
     \vspace{0.8em}
-    \begin{tcolorbox}[colback=blue!5!white, colframe=accentblue, arc=3mm]
+    \begin{tcolorbox}[arc=3mm]
         \textbf{Objective}: Bound global swarm error using local ultra-wideband ranging constraints.
     \end{tcolorbox}
 \end{frame}

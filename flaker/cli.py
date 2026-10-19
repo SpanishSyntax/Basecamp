@@ -1,6 +1,7 @@
 import os
 import subprocess
 import sys
+import time
 import tomllib
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -565,7 +566,9 @@ def print_help():
   -m, --mode MODE      Document operating mode / scaffolding target (report, slides, paper, all).
   -t, --target TARGET  Alias for --mode.
   -e, --engine ENGINE  Compilation engine for Markdown ('typst' or 'latex').
-  -p, --packages       Prompt to interactively configure packages dynamically.
+  -p, --packages       Configure packages dynamically (default in interactive mode).
+  --no-pkg             Skip interactive package bundle selection.
+  --no-packages        Alias for --no-pkg.
   --title TITLE        Document title for Folio documents.
   --author AUTHOR      Document author for Folio documents.
   --theme THEME        Presentation theme for slides ('dark' or 'light').
@@ -956,8 +959,6 @@ def resolve_role_target(
     if not role.targets:
         return None
     t_clean = target_input.strip().lower()
-    if t_clean in ("all", "everything", "full"):
-        return "all"
     for canonical_name, meta in role.targets.items():
         if t_clean == canonical_name.lower():
             return canonical_name
@@ -1309,13 +1310,14 @@ def resolve_document_metadata(
 
     import time
     meta["date"] = time.strftime("%B %Y")
+    meta["dependency"] = "Department of Systems & Control"
 
     target = role_targets.get("folio", "")
     git_author = get_git_author()
     default_title = project_name.replace("-", " ").replace("_", " ").title()
     default_author = git_author if git_author else "Author"
 
-    is_markdown_target = target in ("report", "slides", "paper", "all", "")
+    is_markdown_target = target in ("report", "slides", "paper", "")
 
     if sys.stdin.isatty():
         # Title
@@ -1348,7 +1350,7 @@ def resolve_document_metadata(
             meta["engine"] = "typst"
 
         # Theme (specifically for presentation slides)
-        if target in ("slides", "all", ""):
+        if target in ("slides", "") or "slides" in target:
             if theme_flag:
                 meta["theme"] = theme_flag.lower()
             else:
@@ -1465,11 +1467,6 @@ def scaffold_assets(
                             allowed_files = ["packages.tex", "library.bib"]
                         else:
                             allowed_files = ["packages.typ", f"{target_name}.typ", "library.bib"]
-                elif target_name == "all" and dir_type == "project":
-                    if metadata and metadata.get("engine") == "latex":
-                        allowed_files = ["packages.tex", "library.bib"]
-                    elif metadata and metadata.get("engine") == "typst":
-                        allowed_files = ["packages.typ", "report.typ", "slides.typ", "paper.typ", "library.bib"]
 
                 for template_file in src_dir.glob("**/*"):
                     if template_file.is_file():
@@ -1531,12 +1528,19 @@ def scaffold_assets(
                                 content = content.replace(f"__{mk.upper()}__", mv)
                         # Fallback defaults for unreplaced placeholders
                         content = content.replace("__TITLE__", project_name.replace("-", " ").replace("_", " ").title())
-                        content = content.replace("__SUBTITLE__", "")
-                        content = content.replace("__AUTHOR__", "Author")
-                        content = content.replace("__DEPENDENCY__", "")
+                        content = content.replace(
+                            "__SUBTITLE__",
+                            "16:9 Technical Systems Presentation" if "slides" in dest_path.name else "Technical Systems Engineering Report",
+                        )
+                        content = content.replace("__AUTHOR__", get_git_author() or "Author")
+                        content = content.replace("__DEPENDENCY__", "Department of Systems & Control")
                         content = content.replace("__THEME__", "dark")
                         content = content.replace("__ENGINE__", metadata.get("engine", "typst") if metadata else "typst")
-                        content = content.replace("__DATE__", "")
+                        system_date = time.strftime("%B %Y")
+                        content = content.replace(
+                            "__DATE__",
+                            (metadata.get("date") if metadata else None) or system_date,
+                        )
                         dest_path.write_text(content, encoding="utf-8")
                         scaffolded_any = True
                         created_files.append(str(dest_path.relative_to(target_dir)))
@@ -1548,7 +1552,7 @@ def scaffold_assets(
         target_labels = [
             f"{r}:{targets_map[r]}"
             for r in resolved_roles
-            if targets_map.get(r) and targets_map.get(r) != "all"
+            if targets_map.get(r)
         ]
         target_info = f" ({', '.join(target_labels)})" if target_labels else ""
         scope_desc = (
@@ -1673,9 +1677,6 @@ def run_interactive_mode(
                     )
                     for t_key, t_meta in role_def.targets.items()
                 ]
-                options.append(
-                    ("all", "All      - Scaffold all templates simultaneously", "")
-                )
                 chosen_target = ui.select(
                     f"Select document type to scaffold for {r}:", options
                 )
@@ -1761,7 +1762,8 @@ def main() -> None:
     doc_author: str | None = None
     doc_theme: str | None = None
     doc_engine: str | None = None
-    configure_packages = False
+    configure_packages_flag = False
+    no_packages_flag = False
 
     filtered_args: list[str] = []
     i = 0
@@ -1776,7 +1778,9 @@ def main() -> None:
         elif arg == "--no-direnv":
             no_direnv = True
         elif arg in ("-p", "--packages", "--pkg"):
-            configure_packages = True
+            configure_packages_flag = True
+        elif arg in ("--no-packages", "--no-pkg"):
+            no_packages_flag = True
         elif arg in ("--color", "--no-color") or arg.startswith("--color="):
             if arg == "--color" and i + 1 < len(args):
                 i += 1
@@ -1930,7 +1934,7 @@ def main() -> None:
                         or resolve_role_target(canonical_role, t_part, roles_db)
                     )
                     if not resolved_t:
-                        valid_tgts = ", ".join(list(roles_db[canonical_role].targets.keys()) + ["all"])
+                        valid_tgts = ", ".join(list(roles_db[canonical_role].targets.keys()))
                         ui.error(
                             f"Unknown target '{t_part}' for role '{canonical_role}'. Available targets: {valid_tgts}"
                         )
@@ -1952,7 +1956,7 @@ def main() -> None:
                         role_targets[last_role] = resolved_t
                         continue
                     elif item.lower() not in roles_db and item.lower() not in aliases:
-                        valid_tgts = ", ".join(list(roles_db[last_role].targets.keys()) + ["all"])
+                        valid_tgts = ", ".join(list(roles_db[last_role].targets.keys()))
                         ui.error(
                             f"Unknown target '{item}' for role '{last_role}'. Available targets: {valid_tgts}"
                         )
@@ -1978,7 +1982,7 @@ def main() -> None:
                 if r in roles_db and roles_db[r].targets:
                     resolved_t = resolve_role_target(r, target_flag, roles_db)
                     if not resolved_t:
-                        valid_tgts = ", ".join(list(roles_db[r].targets.keys()) + ["all"])
+                        valid_tgts = ", ".join(list(roles_db[r].targets.keys()))
                         ui.error(
                             f"Unknown target '{target_flag}' for role '{r}'. Available targets: {valid_tgts}"
                         )
@@ -1999,13 +2003,10 @@ def main() -> None:
                         )
                         for t_key, t_meta in role_def.targets.items()
                     ]
-                    options.append(
-                        ("all", "All      - Scaffold all templates simultaneously", "")
-                    )
                     chosen = ui.select(f"Select document type to scaffold for {r}:", options)
                     role_targets[r] = chosen
                 else:
-                    role_targets[r] = "all"
+                    role_targets[r] = "report" if "report" in role_def.targets else list(role_def.targets.keys())[0]
 
     # Handle 'packages' / 'pkg' command
     if command in ("packages", "pkg", "package"):
@@ -2030,6 +2031,15 @@ def main() -> None:
         sys.exit(1)
 
     nixpkgs_url = resolve_nixpkgs_url(channel)
+
+    configure_packages = False
+    if "folio" in resolved_roles:
+        if no_packages_flag:
+            configure_packages = False
+        elif configure_packages_flag:
+            configure_packages = True
+        elif sys.stdin.isatty():
+            configure_packages = True
 
     # Resolve metadata for Folio documents (title, author, theme, engine, packages)
     doc_metadata = resolve_document_metadata(
