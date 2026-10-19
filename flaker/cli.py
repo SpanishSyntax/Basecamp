@@ -1469,98 +1469,106 @@ def scaffold_assets(
                         else:
                             allowed_files = ["packages.typ", f"{target_name}.typ", "library.bib"]
 
-                for template_file in src_dir.glob("**/*"):
-                    if template_file.is_file():
-                        if (
-                            "__pycache__" in template_file.parts
-                            or template_file.suffix in (".pyc", ".pyo")
-                        ):
-                            continue
-
-                        relative_path = template_file.relative_to(src_dir)
-                        if (
-                            allowed_files is not None
-                            and str(relative_path) not in allowed_files
-                        ):
-                            continue
-
-                        dest_path = target_dir / relative_path
-
-                        if dry_run:
-                            ui.info(
-                                f"[DRY RUN] Would scaffold {relative_path} into {dest_path}"
-                            )
-                            scaffolded_any = True
-                            continue
-
-                        if dest_path.exists() and not force:
-                            if sys.stdin.isatty():
-                                prompt_msg = f"{ui.badge()} {ui.yellow(f'⚠️  {dest_path.name} already exists. Overwrite? [y/N]: ')}"
-                                try:
-                                    ans = input(prompt_msg).strip().lower()
-                                    if ans not in ("y", "yes"):
-                                        ui.warn(f"Skipped {dest_path.name} (preserved existing file)")
-                                        continue
-                                except (KeyboardInterrupt, EOFError):
-                                    print("\nAborted.")
-                                    return scaffolded_any
-                            else:
-                                ui.warn(f"Skipped {dest_path.name} (file already exists; use -f/--force to overwrite)")
+                files_to_process: list[tuple[Path, Path]] = []
+                if allowed_files is not None:
+                    for rel_str in allowed_files:
+                        rel_p = Path(rel_str)
+                        primary = src_dir / rel_p
+                        fallback = (role_assets_dir / "starter" / rel_p) if dir_type == "project" else None
+                        if primary.is_file():
+                            files_to_process.append((primary, rel_p))
+                        elif fallback and fallback.is_file():
+                            files_to_process.append((fallback, rel_p))
+                else:
+                    for template_file in src_dir.glob("**/*"):
+                        if template_file.is_file():
+                            if (
+                                "__pycache__" in template_file.parts
+                                or template_file.suffix in (".pyc", ".pyo")
+                            ):
                                 continue
+                            relative_path = template_file.relative_to(src_dir)
+                            files_to_process.append((template_file, relative_path))
 
-                        dest_path.parent.mkdir(parents=True, exist_ok=True)
-                        if (
-                            dest_path.name == "packages.typ"
-                            and metadata
-                            and metadata.get("packages_typ_content")
-                        ):
-                            content = metadata["packages_typ_content"]
-                        elif (
-                            dest_path.name == "packages.tex"
-                            and metadata
-                            and metadata.get("packages_tex_content")
-                        ):
-                            content = metadata["packages_tex_content"]
-                        else:
-                            content = template_file.read_text(encoding="utf-8")
-                        content = content.replace("__PROJECT_NAME__", project_name)
-                        if metadata:
-                            for mk, mv in metadata.items():
-                                val = mv
-                                if dest_path.suffix == ".tex" and isinstance(val, str) and not mk.startswith("packages_"):
-                                    val = val.replace("&", r"\&")
-                                content = content.replace(f"__{mk.upper()}__", val)
-                        # Fallback defaults for unreplaced placeholders
-                        title_fb = project_name.replace("-", " ").replace("_", " ").title()
-                        subtitle_fb = (
-                            "16:9 Technical Systems Presentation"
-                            if "slides" in dest_path.name
-                            else "Technical Systems Engineering Report"
+                for template_file, relative_path in files_to_process:
+
+                    dest_path = target_dir / relative_path
+
+                    if dry_run:
+                        ui.info(
+                            f"[DRY RUN] Would scaffold {relative_path} into {dest_path}"
                         )
-                        author_fb = get_git_author() or "Author"
-                        dep_fb = "Department of Systems & Control"
-                        system_date = time.strftime("%B %Y")
-                        date_fb = (metadata.get("date") if metadata else None) or system_date
-
-                        if dest_path.suffix == ".tex":
-                            title_fb = title_fb.replace("&", r"\&")
-                            subtitle_fb = subtitle_fb.replace("&", r"\&")
-                            author_fb = author_fb.replace("&", r"\&")
-                            dep_fb = dep_fb.replace("&", r"\&")
-                            date_fb = date_fb.replace("&", r"\&")
-
-                        content = content.replace("__TITLE__", title_fb)
-                        content = content.replace("__SUBTITLE__", subtitle_fb)
-                        content = content.replace("__AUTHOR__", author_fb)
-                        content = content.replace("__DEPENDENCY__", dep_fb)
-                        content = content.replace("__THEME__", "dark")
-                        content = content.replace(
-                            "__ENGINE__", metadata.get("engine", "typst") if metadata else "typst"
-                        )
-                        content = content.replace("__DATE__", date_fb)
-                        dest_path.write_text(content, encoding="utf-8")
                         scaffolded_any = True
-                        created_files.append(str(dest_path.relative_to(target_dir)))
+                        continue
+
+                    if dest_path.exists() and not force:
+                        if sys.stdin.isatty():
+                            prompt_msg = f"{ui.badge()} {ui.yellow(f'⚠️  {dest_path.name} already exists. Overwrite? [y/N]: ')}"
+                            try:
+                                ans = input(prompt_msg).strip().lower()
+                                if ans not in ("y", "yes"):
+                                    ui.warn(f"Skipped {dest_path.name} (preserved existing file)")
+                                    continue
+                            except (KeyboardInterrupt, EOFError):
+                                print("\nAborted.")
+                                return scaffolded_any
+                        else:
+                            ui.warn(f"Skipped {dest_path.name} (file already exists; use -f/--force to overwrite)")
+                            continue
+
+                    dest_path.parent.mkdir(parents=True, exist_ok=True)
+                    if (
+                        dest_path.name == "packages.typ"
+                        and metadata
+                        and metadata.get("packages_typ_content")
+                    ):
+                        content = metadata["packages_typ_content"]
+                    elif (
+                        dest_path.name == "packages.tex"
+                        and metadata
+                        and metadata.get("packages_tex_content")
+                    ):
+                        content = metadata["packages_tex_content"]
+                    else:
+                        content = template_file.read_text(encoding="utf-8")
+                    content = content.replace("__PROJECT_NAME__", project_name)
+                    if metadata:
+                        for mk, mv in metadata.items():
+                            val = mv
+                            if dest_path.suffix == ".tex" and isinstance(val, str) and not mk.startswith("packages_"):
+                                val = val.replace("&", r"\&")
+                            content = content.replace(f"__{mk.upper()}__", val)
+                    # Fallback defaults for unreplaced placeholders
+                    title_fb = project_name.replace("-", " ").replace("_", " ").title()
+                    subtitle_fb = (
+                        "16:9 Technical Systems Presentation"
+                        if "slides" in dest_path.name
+                        else "Technical Systems Engineering Report"
+                    )
+                    author_fb = get_git_author() or "Author"
+                    dep_fb = "Department of Systems & Control"
+                    system_date = time.strftime("%B %Y")
+                    date_fb = (metadata.get("date") if metadata else None) or system_date
+
+                    if dest_path.suffix == ".tex":
+                        title_fb = title_fb.replace("&", r"\&")
+                        subtitle_fb = subtitle_fb.replace("&", r"\&")
+                        author_fb = author_fb.replace("&", r"\&")
+                        dep_fb = dep_fb.replace("&", r"\&")
+                        date_fb = date_fb.replace("&", r"\&")
+
+                    content = content.replace("__TITLE__", title_fb)
+                    content = content.replace("__SUBTITLE__", subtitle_fb)
+                    content = content.replace("__AUTHOR__", author_fb)
+                    content = content.replace("__DEPENDENCY__", dep_fb)
+                    content = content.replace("__THEME__", "dark")
+                    content = content.replace(
+                        "__ENGINE__", metadata.get("engine", "typst") if metadata else "typst"
+                    )
+                    content = content.replace("__DATE__", date_fb)
+                    dest_path.write_text(content, encoding="utf-8")
+                    scaffolded_any = True
+                    created_files.append(str(dest_path.relative_to(target_dir)))
 
             if found_in_dir:
                 break
