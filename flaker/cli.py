@@ -365,7 +365,7 @@ def build_builtin_role_registry(folder_name: str) -> dict[str, Role]:
                     "project": ["packages.typ", "report.typ", "library.bib"],
                     "starter": ["report.md"],
                     "description": "Polyglot Markdown report (report.md + packages + library.bib)",
-                    "aliases": ["md-report", "doc", "document", "default"],
+                    "aliases": ["md-report", "doc", "document"],
                 },
                 "slides": {
                     "project": ["packages.typ", "slides.typ", "library.bib"],
@@ -377,7 +377,7 @@ def build_builtin_role_registry(folder_name: str) -> dict[str, Role]:
                     "project": ["packages.typ", "paper.typ", "library.bib"],
                     "starter": ["paper.md"],
                     "description": "Polyglot Markdown IEEE paper (paper.md + packages + library.bib)",
-                    "aliases": ["md-paper", "ieee", "article"],
+                    "aliases": ["md-paper", "ieee", "article", "default"],
                 },
                 # --------------------------------------------------------
                 # 2. Native Typst Workspaces
@@ -451,7 +451,7 @@ BUILTIN_ALIASES = {
     "react": "next",
     "js": "ts",
     "mv": "mathvis",
-    "md": "folio:report",
+    "md": "folio:paper",
     "typ": "folio:typst-report",
     "typst": "folio:typst-report",
     "typst-paper": "folio:typst-paper",
@@ -1970,8 +1970,8 @@ def main() -> None:
             if r in roles_db and roles_db[r].targets and r not in role_targets:
                 if command == "shell":
                     continue
+                role_def = roles_db[r]
                 if sys.stdin.isatty():
-                    role_def = roles_db[r]
                     options = [
                         (
                             t_key,
@@ -1983,7 +1983,7 @@ def main() -> None:
                     chosen = ui.select(f"Select template for {r}:", options)
                     role_targets[r] = chosen
                 else:
-                    role_targets[r] = "report" if "report" in role_def.targets else list(role_def.targets.keys())[0]
+                    role_targets[r] = "paper" if "paper" in role_def.targets else ("report" if "report" in role_def.targets else list(role_def.targets.keys())[0])
 
     # Handle 'packages' / 'pkg' command
     if command in ("packages", "pkg", "package"):
