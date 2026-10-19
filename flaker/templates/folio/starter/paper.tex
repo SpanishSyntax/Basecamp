@@ -1,0 +1,79 @@
+\documentclass[10pt, journal, compsoc]{IEEEtran}
+
+% --- Modular Packages & Preamble Manifest ---
+\input{packages.tex}
+
+% --- Custom Colors & Callout Blocks ---
+\definecolor{ieeeblue}{HTML}{006699}
+\definecolor{lumabg}{HTML}{F4F4F4}
+\definecolor{blockquoteleft}{HTML}{777777}
+\definecolor{blockquotebg}{HTML}{EAEAEA}
+
+% Code Listing Preferences
+\lstset{
+  backgroundcolor=\color{lumabg},
+  basicstyle=\ttfamily\scriptsize, 
+  breaklines=true,
+  breakatwhitespace=true,
+  frame=leftline,
+  framerule=2pt,
+  rulecolor=\color{gray},
+  framesep=6pt,
+  xleftmargin=6pt,
+  showstringspaces=false,
+  language=Python
+}
+
+% --- Document Metadata ---
+\title{__TITLE__}
+\author{
+  __AUTHOR__
+  \IEEEauthorblockA{\\Department of Systems \& Control, Delft University of Technology\\
+  Email: author@tudelft.nl}
+}
+
+\begin{document}
+
+% --- Abstract & Keywords Queue ---
+\IEEEtitleabstractindextext{
+	\begin{abstract}
+		Autonomous robotic swarms offer transformative potential in subterranean exploration, disaster response, and planetary speleology. In these scenarios, the absence of global navigation satellite systems (GNSS) presents a fundamental challenge. Individual agents equipped solely with visual-inertial odometry (VIO) inevitably experience unbounded dead-reckoning drift over prolonged mission horizons. We formulate a decentralized factor graph framework with inter-agent ultra-wideband ranging constraints to bound global localization drift.
+	\end{abstract}
+	\begin{IEEEkeywords}
+		Decentralized Estimation, Factor Graphs, Autonomous Swarms, Ultra-Wideband, Robotic Networks.
+	\end{IEEEkeywords}
+}
+
+\maketitle
+\IEEEdisplaynontitleabstractindextext
+\IEEEpeerreviewmaketitle
+
+% --- Section 1: Introduction ---
+\section{Introduction and Problem Formulation}
+\IEEEPARstart{T}{he} primary objective of an IEEE journal paper is to convey technical engineering concepts within a highly uniform, space-efficient, two-column layout grid. To maintain this uniformity, authors must strictly adhere to a standardized hierarchy of structural boundaries.
+
+\subsection{Kinematic State Propagation}
+Consider a swarm comprising $N$ autonomous agents. Each agent $i$ tracks its state vector $\mathbf{x}_i$:
+\begin{equation}
+	\mathbf{x}_i = \begin{bmatrix} \mathbf{p}_i \\ \mathbf{R}_i \\ \mathbf{v}_i \end{bmatrix}
+\end{equation}
+
+\section{Distributed Consensus Optimization}
+Equations inside IEEE papers run inside centered blocks and are numbered sequentially along the right-hand margin:
+\begin{align}
+	\dot{\mathbf{x}}(t) &= \mathbf{A}\mathbf{x}(t) + \mathbf{B}\mathbf{u}(t) \label{eq:statespace} \\
+	\mathbf{y}(t)       &= \mathbf{C}\mathbf{x}(t) + \mathbf{D}\mathbf{u}(t) \label{eq:output}
+\end{align}
+
+\begin{lstlisting}[language=Python, caption={Consensus gradient descent loop.}]
+def compute_step(x, neighbors, weights):
+    grad = sum(w * (x - x_n) for x_n, w in zip(neighbors, weights))
+    return x - 0.05 * grad
+\end{lstlisting}
+
+\section{Citations & Scholarly References}
+Citations map directly to the bibliography file \cite{ieee_evans, ieee_ramirez}.
+
+\bibliographystyle{IEEEtran}
+\bibliography{library}
+\end{document}

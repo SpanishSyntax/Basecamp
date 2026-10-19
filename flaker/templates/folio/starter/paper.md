@@ -7,6 +7,7 @@ abstract: ""
 keywords: ""
 mode: "paper"
 preset: "ieee"
+engine: "typst" # Options: typst | latex
 ---
 
 # Introduction

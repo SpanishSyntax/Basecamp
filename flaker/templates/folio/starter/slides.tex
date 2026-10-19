@@ -1,0 +1,81 @@
+\documentclass[aspectratio=169, 11pt]{beamer}
+
+% --- Modular Packages & Preamble Manifest ---
+\input{packages.tex}
+
+% Modern Clean Presentation Theme
+\usetheme{default}
+\usecolortheme{dove}
+
+% Custom Minimalist Color Accents
+\definecolor{accentblue}{HTML}{0071E3}
+\definecolor{darkbg}{HTML}{161618}
+\setbeamercolor{title}{fg=black}
+\setbeamercolor{frametitle}{fg=black}
+\setbeamercolor{structure}{fg=accentblue}
+
+\title{\textbf{__TITLE__}}
+\subtitle{16:9 Technical Systems Presentation}
+\author{__AUTHOR__}
+\date{__DATE__}
+
+\begin{document}
+
+% Title Slide
+\begin{frame}[plain]
+    \titlepage
+\end{frame}
+
+% Section 1
+\section{Overview}
+
+\begin{frame}{Problem Formulation & Motivation}
+    \begin{itemize}
+        \item \textbf{Autonomous Drift}: Dead-reckoning drift in GPS-denied environments
+        \item \textbf{Bandwidth Constraints}: Low throughput under severe physical attenuation
+        \item \textbf{Decentralized Consensus}: Eliminating single points of failure
+    \end{itemize}
+    
+    \vspace{0.8em}
+    \begin{tcolorbox}[colback=blue!5!white, colframe=accentblue, arc=3mm]
+        \textbf{Objective}: Bound global swarm error using local ultra-wideband ranging constraints.
+    \end{tcolorbox}
+\end{frame}
+
+\begin{frame}{Distributed Optimization Model}
+    Each agent $i \in \mathcal{V}$ minimizes its local cost function:
+    \begin{equation}
+        \min_{\mathbf{x}_i} \sum_{j \in \mathcal{N}_i} \|\mathbf{x}_i - \mathbf{x}_j - \mathbf{d}_{ij}\|_{\mathbf{\Sigma}_{ij}}^2
+    \end{equation}
+
+    \begin{block}{Exponential Convergence Guarantee}
+        Provided graph connectivity $\lambda_2(\mathcal{L}) > 0$, consensus iterations converge exponentially with spectral rate $\rho < 1$.
+    \end{block}
+\end{frame}
+
+\begin{frame}[fragile]{Edge Algorithm Implementation}
+\begin{lstlisting}[language=Python]
+def consensus_step(x_i, neighbors, weights, step_size=0.05):
+    """Computes distributed consensus gradient descent step."""
+    grad = sum(w * (x_i - x_n) for x_n, w in zip(neighbors, weights))
+    return x_i - step_size * grad
+\end{lstlisting}
+
+    \begin{itemize}
+        \item Deterministic compute budget ($< 1$ ms per tick)
+        \item Zero dynamic memory allocations in inner loop
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Conclusions & References}
+    \begin{enumerate}
+        \item Successfully validated across high-fidelity simulation and nano-quadrotor flights.
+        \item Future work addresses communication jamming resilience \cite{ieee_evans}.
+    \end{enumerate}
+
+    \vspace{1em}
+    \bibliographystyle{plain}
+    \bibliography{library}
+\end{frame}
+
+\end{document}

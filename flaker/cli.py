@@ -356,35 +356,68 @@ def build_builtin_role_registry(folder_name: str) -> dict[str, Role]:
                 "*.fls",
             ],
             targets={
+                # --------------------------------------------------------
+                # 1. Polyglot Markdown Workspaces (Frontmatter driven)
+                # --------------------------------------------------------
                 "report": {
-                    "project": ["template.typ", "packages.typ"],
-                    "starter": ["input.md"],
-                    "description": "Standard document / report (template.typ + input.md)",
-                    "aliases": ["doc", "document", "default"],
+                    "project": ["packages.typ", "report.typ", "packages.tex", "library.bib"],
+                    "starter": ["report.md"],
+                    "description": "Polyglot Markdown report (report.md + packages + library.bib)",
+                    "aliases": ["md-report", "doc", "document", "default"],
                 },
                 "slides": {
-                    "project": ["slides.typ"],
+                    "project": ["packages.typ", "slides.typ", "packages.tex", "library.bib"],
                     "starter": ["slides.md"],
-                    "description": "16:9 widescreen presentation (slides.typ + slides.md)",
-                    "aliases": ["presentation", "slodes", "slide", "deck", "ppt"],
+                    "description": "Polyglot Markdown 16:9 slides (slides.md + packages + library.bib)",
+                    "aliases": ["md-slides", "presentation", "slodes", "slide", "deck", "ppt"],
                 },
                 "paper": {
-                    "project": ["ieee.typ", "library.bib"],
+                    "project": ["packages.typ", "ieee.typ", "packages.tex", "library.bib"],
                     "starter": ["paper.md"],
-                    "description": "Academic IEEE 2-column paper (ieee.typ + paper.md)",
-                    "aliases": ["ieee", "article"],
+                    "description": "Polyglot Markdown IEEE paper (paper.md + packages + library.bib)",
+                    "aliases": ["md-paper", "ieee", "article"],
                 },
-                "typst": {
-                    "project": ["template.typ", "packages.typ", "library.bib"],
+                # --------------------------------------------------------
+                # 2. Native Typst Workspaces
+                # --------------------------------------------------------
+                "typst-report": {
+                    "project": ["packages.typ", "report.typ", "library.bib"],
                     "starter": ["main.typ"],
-                    "description": "Native Typst document with modular packages manifest",
-                    "aliases": ["typ"],
+                    "description": "Native Typst technical report (main.typ + report.typ + packages.typ + library.bib)",
+                    "aliases": ["typ-report"],
                 },
-                "latex": {
+                "typst-slides": {
+                    "project": ["packages.typ", "slides.typ", "library.bib"],
+                    "starter": ["presentation.typ"],
+                    "description": "Native Typst 16:9 presentation (presentation.typ + slides.typ + packages.typ + library.bib)",
+                    "aliases": ["typ-slides"],
+                },
+                "typst-paper": {
+                    "project": ["packages.typ", "ieee.typ", "library.bib"],
+                    "starter": ["paper.typ"],
+                    "description": "Native Typst IEEE 2-column paper (paper.typ + ieee.typ + packages.typ + library.bib)",
+                    "aliases": ["typ-paper", "typst", "typ"],
+                },
+                # --------------------------------------------------------
+                # 3. Native LaTeX Workspaces
+                # --------------------------------------------------------
+                "latex-report": {
                     "project": ["packages.tex", "library.bib"],
-                    "starter": ["main.tex"],
-                    "description": "Native LaTeX IEEEtran document with modular packages manifest",
-                    "aliases": ["tex"],
+                    "starter": ["report.tex"],
+                    "description": "Native LaTeX technical report (report.tex + packages.tex + library.bib)",
+                    "aliases": ["tex-report"],
+                },
+                "latex-slides": {
+                    "project": ["packages.tex", "library.bib"],
+                    "starter": ["slides.tex"],
+                    "description": "Native LaTeX 16:9 Beamer slides (slides.tex + packages.tex + library.bib)",
+                    "aliases": ["tex-slides", "beamer"],
+                },
+                "latex-paper": {
+                    "project": ["packages.tex", "library.bib"],
+                    "starter": ["paper.tex"],
+                    "description": "Native LaTeX IEEEtran paper (paper.tex + packages.tex + library.bib)",
+                    "aliases": ["tex-paper", "latex", "tex"],
                 },
             },
         ),
@@ -416,10 +449,29 @@ BUILTIN_ALIASES = {
     "react": "next",
     "js": "ts",
     "mv": "mathvis",
-    "typ": "folio:typst",
-    "typst": "folio:typst",
-    "tex": "folio:latex",
-    "latex": "folio:latex",
+    "md": "folio:report",
+    "typ": "folio:typst-paper",
+    "typst": "folio:typst-paper",
+    "typst-paper": "folio:typst-paper",
+    "typst-report": "folio:typst-report",
+    "typst-slides": "folio:typst-slides",
+    "typst:paper": "folio:typst-paper",
+    "typst:report": "folio:typst-report",
+    "typst:slides": "folio:typst-slides",
+    "tex": "folio:latex-paper",
+    "latex": "folio:latex-paper",
+    "latex-paper": "folio:latex-paper",
+    "latex-report": "folio:latex-report",
+    "latex-slides": "folio:latex-slides",
+    "latex:paper": "folio:latex-paper",
+    "latex:report": "folio:latex-report",
+    "latex:slides": "folio:latex-slides",
+    "tex-report": "folio:latex-report",
+    "tex-slides": "folio:latex-slides",
+    "tex:report": "folio:latex-report",
+    "tex:slides": "folio:latex-slides",
+    "tex:paper": "folio:latex-paper",
+    "beamer": "folio:latex-slides",
     "hs": "haskell",
     "cs": "dotnet",
     "csharp": "dotnet",
@@ -431,6 +483,12 @@ BUILTIN_ALIASES = {
     "presentation": "folio:slides",
     "paper": "folio:paper",
     "report": "folio:report",
+    "md-report": "folio:report",
+    "md-slides": "folio:slides",
+    "md-paper": "folio:paper",
+    "md:report": "folio:report",
+    "md:slides": "folio:slides",
+    "md:paper": "folio:paper",
 }
 
 
@@ -982,6 +1040,7 @@ def scaffold_assets(
     resolved_roles: list[str],
     assets_dirs: list[Path],
     scope: str = "starter",
+    force: bool = False,
     dry_run: bool = False,
     auto_git: bool = True,
     project_root: Path | None = None,
@@ -1065,23 +1124,37 @@ def scaffold_assets(
                             scaffolded_any = True
                             continue
 
-                        if not dest_path.exists():
-                            dest_path.parent.mkdir(parents=True, exist_ok=True)
-                            content = template_file.read_text(encoding="utf-8")
-                            content = content.replace("__PROJECT_NAME__", project_name)
-                            if metadata:
-                                for mk, mv in metadata.items():
-                                    content = content.replace(f"__{mk.upper()}__", mv)
-                            # Fallback defaults for unreplaced placeholders
-                            content = content.replace("__TITLE__", project_name.replace("-", " ").replace("_", " ").title())
-                            content = content.replace("__SUBTITLE__", "")
-                            content = content.replace("__AUTHOR__", "Author")
-                            content = content.replace("__DEPENDENCY__", "")
-                            content = content.replace("__THEME__", "dark")
-                            content = content.replace("__DATE__", "")
-                            dest_path.write_text(content, encoding="utf-8")
-                            scaffolded_any = True
-                            created_files.append(str(dest_path.relative_to(target_dir)))
+                        if dest_path.exists() and not force:
+                            if sys.stdin.isatty():
+                                prompt_msg = f"{ui.badge()} {ui.yellow(f'⚠️  {dest_path.name} already exists. Overwrite? [y/N]: ')}"
+                                try:
+                                    ans = input(prompt_msg).strip().lower()
+                                    if ans not in ("y", "yes"):
+                                        ui.warn(f"Skipped {dest_path.name} (preserved existing file)")
+                                        continue
+                                except (KeyboardInterrupt, EOFError):
+                                    print("\nAborted.")
+                                    return scaffolded_any
+                            else:
+                                ui.warn(f"Skipped {dest_path.name} (file already exists; use -f/--force to overwrite)")
+                                continue
+
+                        dest_path.parent.mkdir(parents=True, exist_ok=True)
+                        content = template_file.read_text(encoding="utf-8")
+                        content = content.replace("__PROJECT_NAME__", project_name)
+                        if metadata:
+                            for mk, mv in metadata.items():
+                                content = content.replace(f"__{mk.upper()}__", mv)
+                        # Fallback defaults for unreplaced placeholders
+                        content = content.replace("__TITLE__", project_name.replace("-", " ").replace("_", " ").title())
+                        content = content.replace("__SUBTITLE__", "")
+                        content = content.replace("__AUTHOR__", "Author")
+                        content = content.replace("__DEPENDENCY__", "")
+                        content = content.replace("__THEME__", "dark")
+                        content = content.replace("__DATE__", "")
+                        dest_path.write_text(content, encoding="utf-8")
+                        scaffolded_any = True
+                        created_files.append(str(dest_path.relative_to(target_dir)))
 
             if found_in_dir:
                 break
@@ -1432,12 +1505,29 @@ def main() -> None:
                 sys.exit(1)
 
         for item in unparsed_roles:
-            # 1. Colon notation (e.g. folio:slides, folio:paper)
+            raw_lower = item.lower()
+
+            # 1. Check if alias directly maps to role:target (e.g. "slides" -> "folio:slides", "md:report" -> "folio:report", "beamer" -> "folio:latex-slides")
+            if raw_lower in aliases and ":" in aliases[raw_lower]:
+                r_part, _, t_part = aliases[raw_lower].partition(":")
+                canonical_role = aliases.get(r_part.lower(), r_part.lower()).split(":", 1)[0]
+                resolved_t = resolve_role_target(canonical_role, t_part, roles_db) or t_part
+                if canonical_role in roles_db:
+                    role_targets[canonical_role] = resolved_t
+                    if canonical_role not in resolved_roles:
+                        resolved_roles.append(canonical_role)
+                    continue
+
+            # 2. Colon notation (e.g. folio:slides, folio:paper, md:report, typst:report)
             if ":" in item:
                 r_part, _, t_part = item.partition(":")
                 canonical_role = aliases.get(r_part.lower(), r_part.lower()).split(":", 1)[0]
                 if canonical_role in roles_db and roles_db[canonical_role].targets:
-                    resolved_t = resolve_role_target(canonical_role, t_part, roles_db)
+                    composite = f"{r_part.lower()}-{t_part.lower()}"
+                    resolved_t = (
+                        resolve_role_target(canonical_role, composite, roles_db)
+                        or resolve_role_target(canonical_role, t_part, roles_db)
+                    )
                     if not resolved_t:
                         valid_tgts = ", ".join(list(roles_db[canonical_role].targets.keys()) + ["all"])
                         ui.error(
@@ -1445,11 +1535,14 @@ def main() -> None:
                         )
                         sys.exit(1)
                     role_targets[canonical_role] = resolved_t
+                elif canonical_role not in roles_db:
+                    ui.error(f"Unknown role '{r_part}'.")
+                    sys.exit(1)
                 if canonical_role not in resolved_roles:
                     resolved_roles.append(canonical_role)
                 continue
 
-            # 2. Check if item is a target for the immediately preceding role
+            # 3. Check if item is a target for the immediately preceding role
             if resolved_roles:
                 last_role = resolved_roles[-1]
                 if last_role in roles_db and roles_db[last_role].targets and last_role not in role_targets:
@@ -1463,18 +1556,6 @@ def main() -> None:
                             f"Unknown target '{item}' for role '{last_role}'. Available targets: {valid_tgts}"
                         )
                         sys.exit(1)
-
-            # 3. Check if alias maps to role:target (e.g. from aliases dict: "slides" -> "folio:slides")
-            raw_lower = item.lower()
-            if raw_lower in aliases and ":" in aliases[raw_lower]:
-                r_part, _, t_part = aliases[raw_lower].partition(":")
-                canonical_role = aliases.get(r_part.lower(), r_part.lower()).split(":", 1)[0]
-                resolved_t = resolve_role_target(canonical_role, t_part, roles_db)
-                if resolved_t:
-                    role_targets[canonical_role] = resolved_t
-                if canonical_role not in resolved_roles:
-                    resolved_roles.append(canonical_role)
-                continue
 
             # 4. Check if item is a standalone target for any role (e.g. `flaker new slides` or `flaker new paper`)
             match = find_role_for_standalone_target(raw_lower, roles_db)
@@ -1573,6 +1654,7 @@ def main() -> None:
             resolved_roles=resolved_roles,
             assets_dirs=all_asset_dirs,
             scope="project",
+            force=force,
             dry_run=dry_run,
             auto_git=auto_git,
             project_root=project_root,
@@ -1587,6 +1669,7 @@ def main() -> None:
             resolved_roles=resolved_roles,
             assets_dirs=all_asset_dirs,
             scope="starter",
+            force=force,
             dry_run=dry_run,
             auto_git=auto_git,
             project_root=project_root,
@@ -1602,6 +1685,7 @@ def main() -> None:
             resolved_roles=resolved_roles,
             assets_dirs=all_asset_dirs,
             scope="project",
+            force=force,
             dry_run=dry_run,
             auto_git=auto_git,
             project_root=project_root,
@@ -1618,6 +1702,7 @@ def main() -> None:
             resolved_roles=resolved_roles,
             assets_dirs=all_asset_dirs,
             scope="starter",
+            force=force,
             dry_run=dry_run,
             auto_git=auto_git,
             project_root=project_root,
@@ -1633,6 +1718,7 @@ def main() -> None:
                 resolved_roles=resolved_roles,
                 assets_dirs=all_asset_dirs,
                 scope="project",
+                force=force,
                 dry_run=dry_run,
                 auto_git=auto_git,
                 project_root=project_root,

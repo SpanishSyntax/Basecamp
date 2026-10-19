@@ -3,17 +3,22 @@
 // Powered by @preview/charged-ieee:0.1.4 with Markdown Interop
 // ========================================================
 #import "@preview/charged-ieee:0.1.4": ieee
+#import "packages.typ": *
 
 #let horizontalrule = line(length: 100%, stroke: 0.5pt + rgb("#a1a1aa"))
 
 #let paper(
   title: "Untitled IEEE Paper",
-  author: "First Author, Member, IEEE, and Second Author",
-  dependency: "Department of Systems & Control, Delft University of Technology",
+  author: none,
+  authors: (),
+  dependency: none,
   email: none,
   abstract: none,
   keywords: none,
+  index-terms: (),
   paper: "us-letter",
+  paper-size: none,
+  bibliography: none,
   date: none,
   doc,
   ..sink,
@@ -23,27 +28,46 @@
   let final-dep = dependency
   let final-email = email
   let final-abstract = abstract
-  let final-keywords = keywords
-  let paper-size = paper
+  let final-paper-size = if paper-size != none { paper-size } else { paper }
+  let final-bibliography = bibliography
 
-  let index-terms = ()
-  if final-keywords != none {
-    index-terms = final-keywords.split(",").map(k => k.trim())
+  let final-index-terms = if index-terms.len() > 0 {
+    index-terms
+  } else if keywords != none and keywords != "" {
+    keywords.split(",").map(k => k.trim())
+  } else {
+    ()
   }
 
-  show: ieee.with(
-    title: final-title,
-    authors: (
+  let final-authors = if authors.len() > 0 {
+    authors
+  } else if final-author != none {
+    (
       (
         name: final-author,
         department: final-dep,
         organization: final-dep,
         email: final-email,
       ),
-    ),
+    )
+  } else {
+    (
+      (
+        name: "Author",
+        department: "Department",
+        organization: "Organization",
+        email: none,
+      ),
+    )
+  }
+
+  show: ieee.with(
+    title: final-title,
+    authors: final-authors,
     abstract: if final-abstract != none [ #final-abstract ] else { [] },
-    index-terms: index-terms,
-    paper-size: paper-size,
+    index-terms: final-index-terms,
+    paper-size: final-paper-size,
+    bibliography: final-bibliography,
   )
 
   // Markdown code block formatting
@@ -65,3 +89,5 @@
 
   doc
 }
+
+#let conf = paper

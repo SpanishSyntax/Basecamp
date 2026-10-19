@@ -2,6 +2,7 @@
 // FOLIO PRESENTATION TEMPLATE (16:9 Widescreen / 1080p)
 // Apple Keynote-Inspired Minimalist Design System for Typst
 // ========================================================
+#import "packages.typ": *
 
 #let themes = (
   dark: (

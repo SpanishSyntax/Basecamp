@@ -46,7 +46,7 @@ flaker init folio paper
 # Drop a starter document directly using role shortcuts
 flaker new slides                      # 16:9 widescreen presentation (slides.md)
 flaker new paper                       # IEEE 2-column paper (paper.md)
-flaker new report                      # Clean report document (input.md)
+flaker new report                      # Clean report document (report.md)
 
 # Drop a starter experiment file into current folder without touching root configs
 flaker new mv
@@ -127,9 +127,9 @@ Options:
 | **Svelte** | `svelte` | - | Bun, `svelte-language-server`, `vtsls` | `prettierd` |
 | **Vue** | `vue` | - | Bun, `vue-language-server`, `vtsls` | `prettierd` |
 | **Next.js** | `next` | `react` | Bun, `vtsls`, `typescript` | `prettierd` |
-| **Typst** | `typst` | `typ` | `typst`, `tinymist` (LSP) | `typstyle` |
-| **LaTeX** | `latex` | `tex` | `tectonic`, `texlab` (LSP) | `latexindent` |
-| **Folio** | `folio` | `slides`, `paper`, `report`, `presentation`, `slodes` | `typst`, `pandoc`, `tinymist`, `tectonic` | `typstyle` |
+| **Folio (Markdown)** | `folio` / `md` | `md:report`, `md:slides`, `md:paper`, `report`, `slides`, `paper` | `pandoc`, `typst`, `tectonic`, `tinymist`, `texlab` | `typstyle` |
+| **Folio (Typst)** | `typst` | `typst:report`, `typst:slides`, `typst:paper`, `typ` | `typst`, `tinymist` (LSP) | `typstyle` |
+| **Folio (LaTeX)** | `latex` | `latex:report`, `latex:slides`, `latex:paper`, `tex`, `beamer` | `tectonic`, `texlab` (LSP) | - |
 | **DevOps & Cloud** | `ops` | `devops`, `docker` | `docker-compose`, `lazydocker`, `kubectl`, `helm`, `k9s`, `dive` | - |
 
 ---
