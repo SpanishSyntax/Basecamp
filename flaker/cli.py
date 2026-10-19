@@ -996,34 +996,34 @@ def get_git_author() -> str:
 TYPST_PACKAGE_BUNDLES: list[dict[str, Any]] = [
     {
         "id": "cetz",
-        "label": "CeTZ (@preview/cetz:0.3.1)",
+        "label": "CeTZ (@preview/cetz:0.5.2)",
         "desc": "TikZ-like vector drawing canvas & scientific plotting engine",
         "default": True,
         "snippet": (
             "// --- 1. Vector Drawing & Graphing (The \"TikZ\" of Typst) ---\n"
             "// CeTZ provides a comprehensive TikZ-inspired vector canvas\n"
-            '#import "@preview/cetz:0.3.1"\n'
+            '#import "@preview/cetz:0.5.2"\n'
         ),
     },
     {
         "id": "fletcher",
-        "label": "Fletcher (@preview/fletcher:0.5.2)",
+        "label": "Fletcher (@preview/fletcher:0.5.8)",
         "desc": "Commutative diagrams, finite state machines, and flowcharts",
         "default": True,
         "snippet": (
             "// Fletcher provides elegant commutative diagrams and state machines\n"
-            '#import "@preview/fletcher:0.5.2" as fletcher: diagram, node, edge\n'
+            '#import "@preview/fletcher:0.5.8" as fletcher: diagram, node, edge\n'
         ),
     },
     {
         "id": "physica",
-        "label": "Physica (@preview/physica:0.9.3)",
+        "label": "Physica (@preview/physica:0.9.8)",
         "desc": "Advanced math, differential forms, matrices, and bra-kets",
         "default": True,
         "snippet": (
             "// --- 2. Advanced Mathematics & Physics Notation ---\n"
             "// Mathematica/Physics notation: differential forms, matrices, bra-kets\n"
-            '#import "@preview/physica:0.9.3": *\n'
+            '#import "@preview/physica:0.9.8": *\n'
         ),
     },
     {
@@ -1038,13 +1038,13 @@ TYPST_PACKAGE_BUNDLES: list[dict[str, Any]] = [
     },
     {
         "id": "merman",
-        "label": "Merman (@preview/merman:0.1.0)",
+        "label": "Merman (@preview/merman:0.5.0)",
         "desc": "Native Mermaid renderer for software flowcharts, sequences & ERDs",
         "default": True,
         "snippet": (
             "// --- 3. Flowcharts & Software Architecture Diagrams ---\n"
             "// Native Mermaid renderer for software flowcharts, sequences, and classes\n"
-            '#import "@preview/merman:0.1.0": mermaid\n'
+            '#import "@preview/merman:0.5.0": mermaid\n'
         ),
     },
     {
@@ -1060,24 +1060,24 @@ TYPST_PACKAGE_BUNDLES: list[dict[str, Any]] = [
     },
     {
         "id": "algorithmic",
-        "label": "Algorithmic (@preview/algorithmic:0.1.0)",
+        "label": "Algorithmic (@preview/algorithmic:1.0.7)",
         "desc": "Clean pseudocode typesetting with line numbering and indentation",
         "default": False,
         "snippet": (
             "// --- 5. Algorithmic Pseudocode ---\n"
             "// Clean pseudocode typesetting with line numbering and indentation\n"
-            '#import "@preview/algorithmic:0.1.0": *\n'
+            '#import "@preview/algorithmic:1.0.7": *\n'
         ),
     },
     {
         "id": "codly",
-        "label": "Codly (@preview/codly:1.0.0)",
+        "label": "Codly (@preview/codly:2.0.0)",
         "desc": "Enhanced source code blocks with line numbering and tab labels",
         "default": False,
         "snippet": (
             "// --- 6. Code Block Formatting (Codly) ---\n"
             "// Enhanced code blocks with line numbering, icons, and tab labels\n"
-            '#import "@preview/codly:1.0.0": *\n'
+            '#import "@preview/codly:2.0.0": *\n'
         ),
     },
 ]
