@@ -1,8 +1,9 @@
 ---
-title: "Document Title"
-author: "Juan José Martínez Guerrero"
-dependency: "TUDelft ME DS&C"
-date: "01/01/2001"
+title: "__TITLE__"
+author: "__AUTHOR__"
+dependency: "__DEPENDENCY__"
+date: "__DATE__"
+mode: "report"
 ---
 
 This document uses strictly standard GitHub Flavored Markdown (GFM) and standard LaTeX math.

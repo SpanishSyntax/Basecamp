@@ -1,11 +1,11 @@
 ---
-title: "Distributed Swarm Intelligence"
-subtitle: "Real-time Consensus in GPS-Denied Environments"
-author: "Juan José Martínez Guerrero"
-dependency: "TUDelft Systems & Control"
-date: "October 2026"
+title: "__TITLE__"
+subtitle: "__SUBTITLE__"
+author: "__AUTHOR__"
+dependency: "__DEPENDENCY__"
+date: "__DATE__"
 mode: "slides"
-theme: "dark"
+theme: "__THEME__"
 aspect-ratio: "16-9"
 ---
 

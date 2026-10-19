@@ -90,6 +90,9 @@ Commands:
 Options:
   -m, --mode MODE      Document operating mode / scaffolding target (report, slides, paper, all).
   -t, --target TARGET  Alias for --mode.
+  --title TITLE        Document title for Folio documents.
+  --author AUTHOR      Document author for Folio documents.
+  --theme THEME        Presentation theme for slides ('dark' or 'light').
   -f, --force          Overwrite existing files without confirmation prompts.
   -n, --dry-run        Preview generated files in stdout without writing.
   -c, --channel NAME   Nixpkgs channel (default: nixos-26.05, e.g. unstable, 24.11).

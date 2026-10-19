@@ -64,43 +64,21 @@
 #let horizontalrule = pagebreak(weak: true)
 
 #let slides(
-  md-path: none,
   title: "Folio Presentation",
   subtitle: none,
-  author: "Juan José Martínez Guerrero",
-  dependency: "TUDelft Systems & Control",
+  author: "Author",
+  dependency: none,
   date: none,
   theme: "dark",
   doc,
+  ..sink,
 ) = {
-  // ==========================================
-  // READ FRONTMATTER
-  // ==========================================
-  let fm = (:)
-  if md-path != none {
-    let text = read(md-path)
-    let m = text.match(regex("^---\\s*\\n([\\s\\S]*?)\\n---\\s*\\n"))
-    if m != none {
-      let yaml-text = m.captures.at(0)
-      for line in yaml-text.split("\n") {
-        let trimmed = line.trim()
-        if trimmed != "" and trimmed.contains(":") {
-          let parts = trimmed.split(":")
-          let key = parts.first().trim()
-          let val = parts.slice(1).join(":").trim().trim("\"").trim("\x27")
-          fm.insert(key, val)
-        }
-      }
-    }
-  }
-
-  let final-title = fm.at("title", default: title)
-  let final-subtitle = fm.at("subtitle", default: subtitle)
-  let final-author = fm.at("author", default: author)
-  let final-dep = fm.at("dependency", default: dependency)
-  let final-date = fm.at("date", default: date)
-  let chosen-theme-name = fm.at("theme", default: theme)
-  let t = themes.at(chosen-theme-name, default: themes.dark)
+  let final-title = title
+  let final-subtitle = subtitle
+  let final-author = author
+  let final-dep = dependency
+  let final-date = date
+  let t = themes.at(theme, default: themes.dark)
 
   // ==========================================
   // PAGE SETUP (16:9 Aspect Ratio)

@@ -41,38 +41,17 @@
 )
 
 #let report(
-  md-path: none,
-  author: "Juan José Martínez Guerrero",
-  dependency: "TUDelft",
+  title: none,
+  author: "Author",
+  dependency: none,
   date: datetime.today().display("[Day]/[Month repr:numerical]/[Year]"),
   doc,
+  ..sink,
 ) = {
-  // ==========================================
-  // READ MARKDOWN FRONTMATTER
-  // ==========================================
-  let fm = (:)
-  if md-path != none {
-    let text = read(md-path)
-    let m = text.match(regex("^---\\s*\\n([\\s\\S]*?)\\n---\\s*\\n"))
-    if m != none {
-      let yaml-text = m.captures.at(0)
-      for line in yaml-text.split("\n") {
-        let trimmed = line.trim()
-        if trimmed != "" and trimmed.contains(":") {
-          let parts = trimmed.split(":")
-          let key = parts.first().trim()
-          // Join the rest in case the value itself contains a colon
-          let val = parts.slice(1).join(":").trim().trim("\"").trim("'")
-          fm.insert(key, val)
-        }
-      }
-    }
-  }
-
-  let front-title = fm.at("title", default: none)
-  let final-author = fm.at("author", default: author)
-  let final-dep = fm.at("dependency", default: dependency)
-  let final-date = fm.at("date", default: date)
+  let front-title = title
+  let final-author = author
+  let final-dep = dependency
+  let final-date = date
 
   // ==========================================
   // PAGE CONFIGURATION

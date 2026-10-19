@@ -498,6 +498,9 @@ def print_help():
 {ui.blue("Options:")}
   -m, --mode MODE      Document operating mode / scaffolding target (report, slides, paper, all).
   -t, --target TARGET  Alias for --mode.
+  --title TITLE        Document title for Folio documents.
+  --author AUTHOR      Document author for Folio documents.
+  --theme THEME        Presentation theme for slides ('dark' or 'light').
   -f, --force          Overwrite existing files without confirmation prompts.
   -n, --dry-run        Preview generated files in stdout without writing.
   -c, --channel NAME   Nixpkgs channel (default: nixos-26.05, e.g. unstable, 24.11).
@@ -904,6 +907,75 @@ def find_role_for_standalone_target(
     return None
 
 
+def get_git_author() -> str:
+    """Retrieves git user.name if configured."""
+    try:
+        res = subprocess.run(["git", "config", "user.name"], capture_output=True, text=True)
+        if res.returncode == 0 and res.stdout.strip():
+            return res.stdout.strip()
+    except Exception:
+        pass
+    return ""
+
+
+def resolve_document_metadata(
+    project_name: str,
+    resolved_roles: list[str],
+    role_targets: dict[str, str],
+    title_flag: str | None = None,
+    author_flag: str | None = None,
+    theme_flag: str | None = None,
+) -> dict[str, str]:
+    """Interactively prompts or resolves document metadata when scaffolding Folio documents."""
+    meta: dict[str, str] = {}
+    if "folio" not in resolved_roles:
+        return meta
+
+    import time
+    meta["date"] = time.strftime("%B %Y")
+
+    target = role_targets.get("folio", "")
+    git_author = get_git_author()
+    default_title = project_name.replace("-", " ").replace("_", " ").title()
+    default_author = git_author if git_author else "Author"
+
+    if sys.stdin.isatty():
+        # Title
+        if title_flag:
+            meta["title"] = title_flag
+        else:
+            meta["title"] = ui.prompt("Document title", default=default_title)
+
+        # Author
+        if author_flag:
+            meta["author"] = author_flag
+        else:
+            meta["author"] = ui.prompt("Author", default=default_author)
+
+        # Theme (specifically for presentation slides)
+        if target in ("slides", "all", ""):
+            if theme_flag:
+                meta["theme"] = theme_flag.lower()
+            else:
+                meta["theme"] = ui.select(
+                    "Select presentation theme:",
+                    [
+                        ("dark", "Dark theme (recommended, 16:9 OLED Keynote style)"),
+                        ("light", "Light theme (clean paper / lecture style)"),
+                    ],
+                )
+        elif theme_flag:
+            meta["theme"] = theme_flag.lower()
+        else:
+            meta["theme"] = "dark"
+    else:
+        meta["title"] = title_flag or default_title
+        meta["author"] = author_flag or default_author
+        meta["theme"] = theme_flag.lower() if theme_flag else "dark"
+
+    return meta
+
+
 def scaffold_assets(
     target_dir: Path,
     project_name: str,
@@ -915,6 +987,7 @@ def scaffold_assets(
     project_root: Path | None = None,
     role_targets: dict[str, str] | None = None,
     roles_db: dict[str, Role] | None = None,
+    metadata: dict[str, str] | None = None,
 ) -> bool:
     """
     Copies role templates into the target directory based on scope:
@@ -996,6 +1069,16 @@ def scaffold_assets(
                             dest_path.parent.mkdir(parents=True, exist_ok=True)
                             content = template_file.read_text(encoding="utf-8")
                             content = content.replace("__PROJECT_NAME__", project_name)
+                            if metadata:
+                                for mk, mv in metadata.items():
+                                    content = content.replace(f"__{mk.upper()}__", mv)
+                            # Fallback defaults for unreplaced placeholders
+                            content = content.replace("__TITLE__", project_name.replace("-", " ").replace("_", " ").title())
+                            content = content.replace("__SUBTITLE__", "")
+                            content = content.replace("__AUTHOR__", "Author")
+                            content = content.replace("__DEPENDENCY__", "")
+                            content = content.replace("__THEME__", "dark")
+                            content = content.replace("__DATE__", "")
                             dest_path.write_text(content, encoding="utf-8")
                             scaffolded_any = True
                             created_files.append(str(dest_path.relative_to(target_dir)))
@@ -1216,6 +1299,9 @@ def main() -> None:
     no_direnv = False
     channel = None
     target_flag: str | None = None
+    doc_title: str | None = None
+    doc_author: str | None = None
+    doc_theme: str | None = None
 
     filtered_args: list[str] = []
     i = 0
@@ -1250,6 +1336,33 @@ def main() -> None:
                 sys.exit(1)
         elif arg.startswith(("--mode=", "--target=", "--type=")):
             target_flag = arg.split("=", 1)[1]
+        elif arg == "--title":
+            if i + 1 < len(args):
+                doc_title = args[i + 1]
+                i += 1
+            else:
+                ui.error("--title requires a title string.")
+                sys.exit(1)
+        elif arg.startswith("--title="):
+            doc_title = arg.split("=", 1)[1]
+        elif arg == "--author":
+            if i + 1 < len(args):
+                doc_author = args[i + 1]
+                i += 1
+            else:
+                ui.error("--author requires an author string.")
+                sys.exit(1)
+        elif arg.startswith("--author="):
+            doc_author = arg.split("=", 1)[1]
+        elif arg == "--theme":
+            if i + 1 < len(args):
+                doc_theme = args[i + 1]
+                i += 1
+            else:
+                ui.error("--theme requires 'dark' or 'light'.")
+                sys.exit(1)
+        elif arg.startswith("--theme="):
+            doc_theme = arg.split("=", 1)[1]
         elif arg in ("--help", "-h"):
             print_help()
             sys.exit(0)
@@ -1424,6 +1537,16 @@ def main() -> None:
 
     nixpkgs_url = resolve_nixpkgs_url(channel)
 
+    # Resolve metadata for Folio documents (title, author, theme)
+    doc_metadata = resolve_document_metadata(
+        project_name=project_name,
+        resolved_roles=resolved_roles,
+        role_targets=role_targets,
+        title_flag=doc_title,
+        author_flag=doc_author,
+        theme_flag=doc_theme,
+    )
+
     # 1. DevShell generation (init and shell)
     if command in ("init", "shell"):
         success = prepare_flake_env(
@@ -1455,6 +1578,7 @@ def main() -> None:
             project_root=project_root,
             role_targets=role_targets,
             roles_db=roles_db,
+            metadata=doc_metadata,
         )
         # Scaffold starter files in current directory
         scaffold_assets(
@@ -1468,6 +1592,7 @@ def main() -> None:
             project_root=project_root,
             role_targets=role_targets,
             roles_db=roles_db,
+            metadata=doc_metadata,
         )
 
     elif command == "project":
@@ -1482,6 +1607,7 @@ def main() -> None:
             project_root=project_root,
             role_targets=role_targets,
             roles_db=roles_db,
+            metadata=doc_metadata,
         )
 
     elif command == "new":
@@ -1497,6 +1623,7 @@ def main() -> None:
             project_root=project_root,
             role_targets=role_targets,
             roles_db=roles_db,
+            metadata=doc_metadata,
         )
         # Ensure project foundation exists at project_root if running in a subdirectory
         if project_root != current_dir:
@@ -1511,6 +1638,7 @@ def main() -> None:
                 project_root=project_root,
                 role_targets=role_targets,
                 roles_db=roles_db,
+                metadata=doc_metadata,
             )
 
 

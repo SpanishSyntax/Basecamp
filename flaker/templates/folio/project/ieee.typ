@@ -7,44 +7,24 @@
 #let horizontalrule = line(length: 100%, stroke: 0.5pt + rgb("#a1a1aa"))
 
 #let paper(
-  md-path: none,
   title: "Untitled IEEE Paper",
   author: "First Author, Member, IEEE, and Second Author",
   dependency: "Department of Systems & Control, Delft University of Technology",
   email: none,
   abstract: none,
   keywords: none,
+  paper: "us-letter",
   date: none,
   doc,
+  ..sink,
 ) = {
-  // ==========================================
-  // READ FRONTMATTER
-  // ==========================================
-  let fm = (:)
-  if md-path != none {
-    let text = read(md-path)
-    let m = text.match(regex("^---\\s*\\n([\\s\\S]*?)\\n---\\s*\\n"))
-    if m != none {
-      let yaml-text = m.captures.at(0)
-      for line in yaml-text.split("\n") {
-        let trimmed = line.trim()
-        if trimmed != "" and trimmed.contains(":") {
-          let parts = trimmed.split(":")
-          let key = parts.first().trim()
-          let val = parts.slice(1).join(":").trim().trim("\"").trim("\x27")
-          fm.insert(key, val)
-        }
-      }
-    }
-  }
-
-  let final-title = fm.at("title", default: title)
-  let final-author = fm.at("author", default: author)
-  let final-dep = fm.at("dependency", default: dependency)
-  let final-email = fm.at("email", default: email)
-  let final-abstract = fm.at("abstract", default: abstract)
-  let final-keywords = fm.at("keywords", default: keywords)
-  let paper-size = fm.at("paper", default: "us-letter")
+  let final-title = title
+  let final-author = author
+  let final-dep = dependency
+  let final-email = email
+  let final-abstract = abstract
+  let final-keywords = keywords
+  let paper-size = paper
 
   let index-terms = ()
   if final-keywords != none {

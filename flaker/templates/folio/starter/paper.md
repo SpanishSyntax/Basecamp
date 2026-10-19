@@ -1,10 +1,10 @@
 ---
-title: "Resilient Distributed State Estimation for Autonomous Swarms in GPS-Denied Tunnels"
-author: "Juan José Martínez Guerrero, Member, IEEE, and Alex Rivera"
-dependency: "Department of Systems and Control, Delft University of Technology, 2628 CD Delft, Netherlands"
-email: "j.j.martinezguerrero@tudelft.nl"
-abstract: "Autonomous micro-aerial vehicle (MAV) swarms navigating GPS-denied subterranean tunnels face rapid sensor drift, intermittent communication links, and severe computational constraints. In this paper, we propose a resilient decentralized estimation framework that fuses on-board visual-inertial odometry with asynchronous ultra-wideband inter-agent ranging. We formulate relative state estimation as a distributed factor graph and solve it via consensus ADMM. Experimental evaluations demonstrate bounded estimation error and sub-10 ms per-agent computation times across swarms of up to 32 agents."
-keywords: "Swarm robotics, distributed state estimation, factor graphs, GPS-denied navigation, ADMM."
+title: "__TITLE__"
+author: "__AUTHOR__"
+dependency: "__DEPENDENCY__"
+email: ""
+abstract: ""
+keywords: ""
 mode: "paper"
 preset: "ieee"
 ---
