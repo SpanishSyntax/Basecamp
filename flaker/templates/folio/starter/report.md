@@ -1,5 +1,6 @@
 ---
 title: "__TITLE__"
+subtitle: "__SUBTITLE__"
 author: "__AUTHOR__"
 dependency: "__DEPENDENCY__"
 date: "__DATE__"

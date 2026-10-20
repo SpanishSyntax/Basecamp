@@ -43,6 +43,7 @@
 
 #let report(
   title: none,
+  subtitle: none,
   author: "Author",
   dependency: none,
   date: datetime.today().display("[Day]/[Month repr:numerical]/[Year]"),
@@ -50,6 +51,7 @@
   ..sink,
 ) = {
   let front-title = title
+  let final-subtitle = subtitle
   let final-author = author
   let final-dep = dependency
   let final-date = date
@@ -149,6 +151,17 @@
         tracking: -0.025em,
       )[
         #front-title
+      ]
+
+      #if final-subtitle != none [
+        #v(3pt)
+        #text(
+          size: 11.5pt,
+          weight: "regular",
+          fill: theme.muted,
+        )[
+          #final-subtitle
+        ]
       ]
 
       #if final-author != none or final-dep != none [
@@ -419,6 +432,7 @@
 
 #show: report.with(
   title: [__TITLE__],
+  subtitle: [__SUBTITLE__],
   author: "__AUTHOR__",
   dependency: "__DEPENDENCY__",
   date: "__DATE__",
