@@ -3,6 +3,7 @@
 import sys
 from pathlib import Path
 
+from flaker import __version__
 from flaker.core.models import Role
 from flaker.ui import ui
 
@@ -19,12 +20,29 @@ def run_interactive_mode(
     ).exists()
     has_root_flake = (project_root / "flake.nix").exists()
 
+    ws_status = (
+        ui.green("active (flake.nix)")
+        if has_root_flake
+        else ui.yellow("uninitialized")
+    )
+    categories = sorted(set(r.category for r in roles_db.values()))
+    cat_summary = ", ".join(categories[:4])
+    if len(categories) > 4:
+        cat_summary += f", +{len(categories) - 4} more"
+
+    panel_lines = [
+        f"{ui.bold('Flaker Version:')}     {ui.bold_cyan(f'v{__version__}')} (Scaffolding & DevShell Engine)",
+        f"{ui.bold('Active Project:')}    {project_root} ({ws_status})",
+        f"{ui.bold('Working Directory:')} {current_dir}",
+        f"{ui.bold('Registered Roles:')}  {len(roles_db)} roles ({cat_summary})",
+    ]
+    ui.panel("FLAKER REPRODUCIBLE NIX WORKSPACE ENGINE", panel_lines)
+
     if is_subfolder:
         try:
             rel = current_dir.relative_to(project_root)
         except ValueError:
             rel = current_dir.name
-        ui.info(f"Existing workspace detected at {ui.bold(str(project_root))}")
         cmd_options = [
             ("new", f"Add starter file in ./{rel}/", "Starter file in current directory"),
             ("shell", "Add flake.nix and .envrc", "DevShell at project root"),
