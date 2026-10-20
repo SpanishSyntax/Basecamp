@@ -3,7 +3,7 @@
 import sys
 from dataclasses import dataclass, field
 
-from flaker.ui import ui
+from flaker.ui import handle_color_args, ui
 
 
 def print_help() -> None:
@@ -67,17 +67,6 @@ def print_help() -> None:
   flaker project folio                   # Scaffold layout templates & library.bib to project root
   flaker list                            # View all registered language roles & aliases
 """)
-
-
-def handle_color_args(argv: list[str]) -> None:
-    """Configures UI color mode based on --color and --no-color flags."""
-    for i, arg in enumerate(argv):
-        if arg == "--no-color":
-            ui.set_color_mode("never")
-        elif arg.startswith("--color="):
-            ui.set_color_mode(arg.split("=", 1)[1])
-        elif arg == "--color" and i + 1 < len(argv):
-            ui.set_color_mode(argv[i + 1])
 
 
 @dataclass
