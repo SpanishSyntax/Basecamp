@@ -1,9 +1,38 @@
-"""Terminal UI, ANSI styling, and interactive menu engine for Flaker."""
+"""Terminal UI interface for Flaker, powered by Rime."""
 
-from flaker.ui.engine import UI
-from flaker.ui.spinner import Spinner
-from flaker.ui.terminal import strip_ansi
+from __future__ import annotations
 
-ui = UI()
+from rime import (
+    UI,
+    Spinner,
+    confirm_input,
+    detect_color_support,
+    get_terminal_columns,
+    multiselect_menu,
+    prompt_input,
+    render_error_panel,
+    render_panel,
+    select_menu,
+    spinner_context,
+    strip_ansi,
+    visual_len,
+)
 
-__all__ = ["UI", "ui", "Spinner", "strip_ansi"]
+ui = UI(app_name="flaker", icon="❄️", badge_color="1;34")
+
+__all__ = [
+    "ui",
+    "UI",
+    "Spinner",
+    "spinner_context",
+    "detect_color_support",
+    "render_panel",
+    "render_error_panel",
+    "prompt_input",
+    "confirm_input",
+    "select_menu",
+    "multiselect_menu",
+    "strip_ansi",
+    "visual_len",
+    "get_terminal_columns",
+]

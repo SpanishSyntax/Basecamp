@@ -31,7 +31,8 @@ def run_flaker(*args: str, cwd: Path | None = None) -> subprocess.CompletedProce
     import os
 
     env = dict(os.environ)
-    env["PYTHONPATH"] = str(REPO_ROOT)
+    existing_pp = os.environ.get("PYTHONPATH", "")
+    env["PYTHONPATH"] = f"{REPO_ROOT}:{existing_pp}" if existing_pp else str(REPO_ROOT)
     cmd = [sys.executable, "-m", "flaker", *args]
     return subprocess.run(
         cmd,
