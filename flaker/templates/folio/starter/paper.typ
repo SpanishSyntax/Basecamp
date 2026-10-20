@@ -3,7 +3,7 @@
 // Powered by @preview/charged-ieee:0.1.4 with Markdown Interop
 // ========================================================
 #import "@preview/charged-ieee:0.1.4": ieee
-#import "packages.typ": *
+#import "/packages.typ": *
 
 #let horizontalrule = line(length: 100%, stroke: 0.5pt + rgb("#a1a1aa"))
 
@@ -116,7 +116,7 @@
     "Autonomous Swarms",
     "Ultra-Wideband",
   ),
-  bibliography: bibliography("library.bib", title: auto),
+  bibliography: bibliography("/library.bib", title: auto),
   date: [__DATE__],
 )
 

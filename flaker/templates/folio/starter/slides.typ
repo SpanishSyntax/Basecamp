@@ -2,7 +2,7 @@
 // FOLIO PRESENTATION TEMPLATE (16:9 Widescreen / 1080p)
 // Apple Keynote-Inspired Minimalist Design System for Typst
 // ========================================================
-#import "packages.typ": *
+#import "/packages.typ": *
 
 #let themes = (
   dark: (
@@ -366,4 +366,4 @@ def compute_consensus_step(x_local, neighbors, weights):
 
 The decentralized framework converges to bounded error envelopes under arbitrary topology switching.
 
-#bibliography("library.bib", title: "References")
+#bibliography("/library.bib", title: "References")

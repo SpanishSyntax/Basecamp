@@ -2,7 +2,7 @@
 // FOLIO MINIMAL SANS-SERIF REPORT TEMPLATE (Typst 0.13+)
 // ========================================================
 #import "@preview/mmdr:0.2.2": mermaid
-#import "packages.typ": *
+#import "/packages.typ": *
 
 // ==========================================
 // COLOR PALETTE
@@ -484,4 +484,4 @@ def update_state(x, u, dt=0.01):
 
 The architecture satisfies all real-time requirements with zero dynamic memory allocations in the inner loop.
 
-#bibliography("library.bib", title: "References")
+#bibliography("/library.bib", title: "References")
