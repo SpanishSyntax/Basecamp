@@ -32,7 +32,7 @@ def build_shell_hooks(
     resolved_roles: list[str],
     roles_db: dict[str, Role],
 ) -> list[str]:
-    """Constructs the unified Option C shell hook with error trapping and status badges."""
+    """Constructs the unified Rime-style shell hook with error trapping and status badges."""
     lines: list[str] = ["_flk_err=0"]
 
     # 1. Per-role error flags and setup commands
@@ -47,10 +47,29 @@ def build_shell_hooks(
                     continue
                 lines.append(hook)
 
-    # 2. Consolidated status badge block
+    # 2. Path detection
+    lines.extend([
+        '_flk_root="\'\'${DIRENV_DIR#-}"',
+        '[ -z "$_flk_root" ] && _flk_root="$PWD"',
+        '_flk_dir="~\'\'${PWD#\'\'$HOME}"',
+        '_flk_flake="~\'\'${_flk_root#\'\'$HOME}/flake.nix"',
+    ])
+
+    # 3. Card Header
     lines.append(
-        "printf '\\033[1;34m❄️  [flaker]\\033[0m \\033[1mWorkspace Initialized:\\033[0m\\n'"
+        "printf '\\033[0;36m╭─ \\033[1m❄️  Workspace Roles\\033[0m \\033[0;36m──────────────────────────────────────────\\033[0m\\n'"
     )
+    lines.append(
+        "printf '\\033[0;36m│\\033[0m  \\033[1mDirectory:\\033[0m  %s\\n' \"$_flk_dir\""
+    )
+    lines.append(
+        "printf '\\033[0;36m│\\033[0m  \\033[1mFlake:\\033[0m      %s\\n' \"$_flk_flake\""
+    )
+    lines.append(
+        "printf '\\033[0;36m├──────────────────────────────────────────────────────────────\\033[0m\\n'"
+    )
+
+    # 4. Status badges for each role
     for r_key in resolved_roles:
         safe_key = re.sub(r"[^a-zA-Z0-9_]", "_", r_key)
         if r_key in roles_db:
@@ -66,13 +85,16 @@ def build_shell_hooks(
         extra_ok = f" \\033[2m({detail})\\033[0m" if detail else ""
         lines.append(
             f'if [ "$_flk_err_{safe_key}" -eq 0 ]; then\n'
-            f"            printf ' \\033[2m│\\033[0m  \\033[1;32m✓\\033[0m {icon} \\033[1m{name}\\033[0m{extra_ok}\\n'\n"
+            f"            printf '\\033[0;36m│\\033[0m   \\033[1;32m✓\\033[0m {icon} \\033[1m{name}\\033[0m{extra_ok}\\n'\n"
             f"          else\n"
-            f"            printf ' \\033[2m│\\033[0m  \\033[1;31m✗\\033[0m {icon} \\033[1m{name}\\033[0m \\033[1;31m(setup failed)\\033[0m\\n'\n"
+            f"            printf '\\033[0;36m│\\033[0m   \\033[1;31m✗\\033[0m {icon} \\033[1m{name}\\033[0m \\033[1;31m(setup failed)\\033[0m\\n'\n"
             f"          fi"
         )
 
-    # 3. Notification on failure
+    # 5. Footer and Notification on failure
+    lines.append(
+        "printf '\\033[0;36m╰──────────────────────────────────────────────────────────────\\033[0m\\n'"
+    )
     lines.append(
         'if [ "$_flk_err" -ne 0 ]; then\n'
         '            type notify-send >/dev/null 2>&1 && notify-send -u critical "❄️ Flaker" "Workspace role setup failed in $(basename "$PWD")"\n'
