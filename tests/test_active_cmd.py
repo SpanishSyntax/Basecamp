@@ -88,6 +88,30 @@ def test_detect_active_roles_from_shell_hooks():
     assert "rust" in detected_keys
 
 
+def test_detect_active_roles_from_option_c_badges():
+    roles_db = build_builtin_role_registry("test_proj")
+    # Option C formatted badges without header comment
+    flake_content = r"""
+{
+  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
+  outputs = { ... }: {
+    devShells.x86_64-linux.default = pkgs.mkShell {
+      packages = with pkgs; [];
+      shellHook = ''
+        printf '\033[1;34m❄️  [flaker]\033[0m \033[1mWorkspace Initialized:\033[0m\n'
+        printf ' \033[2m│\033[0m  \033[1;32m✓\033[0m 📝 \033[1mFolio\033[0m \033[2m(Polyglot)\033[0m\n'
+        printf ' \033[2m│\033[0m  \033[1;32m✓\033[0m 📐 \033[1mMathvis\033[0m \033[2m(Scientific Stack)\033[0m\n'
+      '';
+    };
+  };
+}
+"""
+    diags, extra, channel = detect_active_roles(flake_content, roles_db, {})
+    detected_keys = [d.role_key for d in diags]
+    assert "folio" in detected_keys
+    assert "mathvis" in detected_keys
+
+
 def test_detect_active_roles_from_package_signatures():
     roles_db = build_builtin_role_registry("test_proj")
     # Flake without flaker comment or banners, but with distinctive packages

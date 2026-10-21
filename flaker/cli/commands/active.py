@@ -132,11 +132,15 @@ def detect_active_roles(
                 )
 
     # 2. Check shell hooks for status banners and hook matches
-    # Match: \033[1m<name>\033[0m ... active
+    # Match legacy: \033[1m<name>\033[0m ... active
+    # Match Option C: \033[1m<name>\033[0m \033[2m
     banner_matches = re.findall(
         r"\[flaker\]\\033\[0m.*?\\033\[1m([^\\]+)\\033\[0m.*?active", flake_content
     )
-    for b_name in banner_matches:
+    badge_matches = re.findall(
+        r"\\033\[1m([^\\]+)\\033\[0m\s*\\033\[2m", flake_content
+    )
+    for b_name in banner_matches + badge_matches:
         clean_b = b_name.strip().lower()
         role_key = BANNER_NAME_TO_ROLE.get(clean_b, clean_b)
         aliased = aliases.get(role_key, role_key).split(":", 1)[0]

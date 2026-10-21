@@ -1,5 +1,6 @@
 """Flake environment preparation and project detection for Flaker."""
 
+import re
 import shutil
 import subprocess
 import sys
@@ -25,6 +26,60 @@ def find_project_root(current_dir: Path) -> Path:
         if (p / "flake.nix").exists() or (p / ".git").exists():
             return p
     return current_dir
+
+
+def build_shell_hooks(
+    resolved_roles: list[str],
+    roles_db: dict[str, Role],
+) -> list[str]:
+    """Constructs the unified Option C shell hook with error trapping and status badges."""
+    lines: list[str] = ["_flk_err=0"]
+
+    # 1. Per-role error flags and setup commands
+    for r_key in resolved_roles:
+        safe_key = re.sub(r"[^a-zA-Z0-9_]", "_", r_key)
+        lines.append(f"_flk_err_{safe_key}=0")
+        if r_key in roles_db:
+            role = roles_db[r_key]
+            for hook in role.hooks:
+                # Exclude any legacy fmt_status printf lines
+                if "❄️  [flaker]" in hook and "\\033[1m" in hook:
+                    continue
+                lines.append(hook)
+
+    # 2. Consolidated status badge block
+    lines.append(
+        "printf '\\033[1;34m❄️  [flaker]\\033[0m \\033[1mWorkspace Initialized:\\033[0m\\n'"
+    )
+    for r_key in resolved_roles:
+        safe_key = re.sub(r"[^a-zA-Z0-9_]", "_", r_key)
+        if r_key in roles_db:
+            role = roles_db[r_key]
+            icon = getattr(role, "icon", None) or "❄️"
+            name = getattr(role, "display_name", None) or r_key.title()
+            detail = getattr(role, "status_detail", None) or role.description
+        else:
+            icon = "📦"
+            name = r_key
+            detail = "Package"
+
+        extra_ok = f" \\033[2m({detail})\\033[0m" if detail else ""
+        lines.append(
+            f'if [ "$_flk_err_{safe_key}" -eq 0 ]; then\n'
+            f"            printf ' \\033[2m│\\033[0m  \\033[1;32m✓\\033[0m {icon} \\033[1m{name}\\033[0m{extra_ok}\\n'\n"
+            f"          else\n"
+            f"            printf ' \\033[2m│\\033[0m  \\033[1;31m✗\\033[0m {icon} \\033[1m{name}\\033[0m \\033[1;31m(setup failed)\\033[0m\\n'\n"
+            f"          fi"
+        )
+
+    # 3. Notification on failure
+    lines.append(
+        'if [ "$_flk_err" -ne 0 ]; then\n'
+        '            type notify-send >/dev/null 2>&1 && notify-send -u critical "❄️ Flaker" "Workspace role setup failed in $(basename "$PWD")"\n'
+        '          fi'
+    )
+
+    return lines
 
 
 def prepare_flake_env(
@@ -59,15 +114,15 @@ def prepare_flake_env(
             sys.exit(1)
 
     selected_pkgs: list[str] = []
-    selected_hooks: list[str] = []
 
     for role_key in resolved_roles:
         if role_key in roles_db:
             role = roles_db[role_key]
             selected_pkgs.extend(role.pkgs)
-            selected_hooks.extend(role.hooks)
         else:
             selected_pkgs.append(role_key)
+
+    selected_hooks = build_shell_hooks(resolved_roles, roles_db)
 
     has_rust = "rust" in resolved_roles
 

@@ -24,6 +24,9 @@ class Role:
     description: str = ""
     ignores: list[str] = field(default_factory=list)
     targets: dict[str, dict[str, Any]] = field(default_factory=dict)
+    icon: str = "❄️"
+    display_name: str = ""
+    status_detail: str = ""
 
 
 @dataclass
