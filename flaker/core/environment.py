@@ -32,8 +32,12 @@ def build_shell_hooks(
     resolved_roles: list[str],
     roles_db: dict[str, Role],
 ) -> list[str]:
-    """Constructs the unified Rime-style shell hook with error trapping and status badges."""
-    lines: list[str] = ["_flk_err=0"]
+    """Constructs the unified Rime-style closed box panel with error trapping and status badges."""
+    lines: list[str] = [
+        "_flk_err=0",
+        "_flk_w=76",
+        "_flk_inner=$((_flk_w - 5))",
+    ]
 
     # 1. Per-role error flags and setup commands
     for r_key in resolved_roles:
@@ -47,27 +51,29 @@ def build_shell_hooks(
                     continue
                 lines.append(hook)
 
-    # 2. Path detection
+    # 2. Path detection & formatting
     lines.extend([
         '_flk_root="\'\'${DIRENV_DIR#-}"',
         '[ -z "$_flk_root" ] && _flk_root="$PWD"',
         '_flk_dir="~\'\'${PWD#\'\'$HOME}"',
         '_flk_flake="~\'\'${_flk_root#\'\'$HOME}/flake.nix"',
+        'if [ "$((12 + \'\'${#_flk_dir}))" -gt "$_flk_inner" ]; then _flk_dir="...\'\'${_flk_dir: -$((_flk_inner - 15))}"; fi',
+        'if [ "$((12 + \'\'${#_flk_flake}))" -gt "$_flk_inner" ]; then _flk_flake="...\'\'${_flk_flake: -$((_flk_inner - 15))}"; fi',
+        '_flk_pad_dir=$((_flk_inner - 12 - \'\'${#_flk_dir}))',
+        '_flk_pad_flake=$((_flk_inner - 12 - \'\'${#_flk_flake}))',
     ])
 
-    # 3. Card Header
-    lines.append(
-        "printf '\\033[0;36m╭─ \\033[1m❄️  Workspace Roles\\033[0m \\033[0;36m──────────────────────────────────────────\\033[0m\\n'"
-    )
-    lines.append(
-        "printf '\\033[0;36m│\\033[0m  \\033[1mDirectory:\\033[0m  %s\\n' \"$_flk_dir\""
-    )
-    lines.append(
-        "printf '\\033[0;36m│\\033[0m  \\033[1mFlake:\\033[0m      %s\\n' \"$_flk_flake\""
-    )
-    lines.append(
-        "printf '\\033[0;36m├──────────────────────────────────────────────────────────────\\033[0m\\n'"
-    )
+    # 3. Card Header & Separator
+    lines.extend([
+        '_flk_top_fill=$(printf "%*s" $((_flk_w - 23)) "")',
+        '_flk_top_fill=\'\'${_flk_top_fill// /─}',
+        '_flk_sep=$(printf "%*s" $((_flk_w - 2)) "")',
+        '_flk_sep=\'\'${_flk_sep// /─}',
+        "printf '\\033[0;36m╭─ \\033[1m❄️  Workspace Roles\\033[0m \\033[0;36m%s╮\\033[0m\\n' \"$_flk_top_fill\"",
+        "printf '\\033[0;36m│\\033[0m  \\033[1mDirectory:\\033[0m  %s%*s \\033[0;36m│\\033[0m\\n' \"$_flk_dir\" \"$_flk_pad_dir\" \"\"",
+        "printf '\\033[0;36m│\\033[0m  \\033[1mFlake:\\033[0m      %s%*s \\033[0;36m│\\033[0m\\n' \"$_flk_flake\" \"$_flk_pad_flake\" \"\"",
+        "printf '\\033[0;36m├%s┤\\033[0m\\n' \"$_flk_sep\"",
+    ])
 
     # 4. Status badges for each role
     for r_key in resolved_roles:
@@ -82,18 +88,21 @@ def build_shell_hooks(
             name = r_key
             detail = "Package"
 
-        extra_ok = f" \\033[2m({detail})\\033[0m" if detail else ""
         lines.append(
-            f'if [ "$_flk_err_{safe_key}" -eq 0 ]; then\n'
-            f"            printf '\\033[0;36m│\\033[0m   \\033[1;32m✓\\033[0m {icon} \\033[1m{name}\\033[0m{extra_ok}\\n'\n"
+            f'_flk_pad_{safe_key}=$((_flk_inner - 10 - {len(name)} - {len(detail)}))\n'
+            f"          [ \"$_flk_pad_{safe_key}\" -lt 0 ] && _flk_pad_{safe_key}=0\n"
+            f'          if [ "$_flk_err_{safe_key}" -eq 0 ]; then\n'
+            f"            printf '\\033[0;36m│\\033[0m  \\033[1;32m✓\\033[0m {icon} \\033[1m{name}\\033[0m   \\033[2m({detail})\\033[0m%*s \\033[0;36m│\\033[0m\\n' \"$_flk_pad_{safe_key}\" \"\"\n"
             f"          else\n"
-            f"            printf '\\033[0;36m│\\033[0m   \\033[1;31m✗\\033[0m {icon} \\033[1m{name}\\033[0m \\033[1;31m(setup failed)\\033[0m\\n'\n"
+            f"            _flk_pad_err=$((_flk_inner - 10 - {len(name)} - 14))\n"
+            f"            [ \"$_flk_pad_err\" -lt 0 ] && _flk_pad_err=0\n"
+            f"            printf '\\033[0;36m│\\033[0m  \\033[1;31m✗\\033[0m {icon} \\033[1m{name}\\033[0m   \\033[1;31m(setup failed)\\033[0m%*s \\033[0;36m│\\033[0m\\n' \"$_flk_pad_err\" \"\"\n"
             f"          fi"
         )
 
     # 5. Footer and Notification on failure
     lines.append(
-        "printf '\\033[0;36m╰──────────────────────────────────────────────────────────────\\033[0m\\n'"
+        "printf '\\033[0;36m╰%s╯\\033[0m\\n' \"$_flk_sep\""
     )
     lines.append(
         'if [ "$_flk_err" -ne 0 ]; then\n'
