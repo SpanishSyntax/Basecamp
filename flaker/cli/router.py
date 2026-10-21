@@ -6,6 +6,7 @@ from pathlib import Path
 
 from flaker import __version__
 from flaker.cli.args import handle_color_args, parse_cli_args, print_help
+from flaker.cli.commands.active import display_active_roles
 from flaker.cli.commands.info import display_role_info
 from flaker.cli.commands.interactive import run_interactive_mode
 from flaker.cli.commands.list_cmd import display_roles_list
@@ -71,22 +72,33 @@ def main() -> None:
     aliases.update(user_aliases)
 
     raw_args = sys.argv[1:]
+    parsed = parse_cli_args(raw_args)
+    filtered_args = parsed.filtered_args
 
-    # Handle 'flaker list'
-    if raw_args and raw_args[0] in ("list", "ls"):
+    # Handle 'flaker active' / 'flaker status' / 'flaker -a'
+    if parsed.active and not filtered_args:
+        display_active_roles(project_root, roles_db, aliases)
+        sys.exit(0)
+
+    if filtered_args and filtered_args[0] in ("active", "status"):
+        display_active_roles(project_root, roles_db, aliases)
+        sys.exit(0)
+
+    # Handle 'flaker list' / 'flaker list -a' / 'flaker list --active'
+    if filtered_args and filtered_args[0] in ("list", "ls"):
+        if parsed.active or any(a in ("-a", "--active") for a in raw_args):
+            display_active_roles(project_root, roles_db, aliases)
+            sys.exit(0)
         display_roles_list(roles_db, aliases)
         sys.exit(0)
 
     # Handle 'flaker info <role>'
-    if raw_args and raw_args[0] in ("info", "show"):
-        if len(raw_args) < 2:
+    if filtered_args and filtered_args[0] in ("info", "show"):
+        if len(filtered_args) < 2:
             ui.error("Missing role name for 'flaker info'. Example: flaker info python")
             sys.exit(1)
-        display_role_info(raw_args[1], roles_db, aliases, all_asset_dirs)
+        display_role_info(filtered_args[1], roles_db, aliases, all_asset_dirs)
         sys.exit(0)
-
-    parsed = parse_cli_args(raw_args)
-    filtered_args = parsed.filtered_args
 
     COMMAND_ALIASES = {
         "starter": "new",
@@ -100,6 +112,8 @@ def main() -> None:
         "packages": "packages",
         "package": "packages",
         "pkg": "packages",
+        "status": "active",
+        "active": "active",
     }
 
     command = ""
@@ -254,6 +268,11 @@ def main() -> None:
                             else list(role_def.targets.keys())[0]
                         )
                     )
+
+    # Handle 'active' command (e.g. from interactive selector)
+    if command == "active":
+        display_active_roles(project_root, roles_db, aliases)
+        sys.exit(0)
 
     # Handle 'packages' / 'pkg' command
     if command in ("packages", "pkg", "package"):

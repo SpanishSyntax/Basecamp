@@ -84,7 +84,8 @@ def prepare_flake_env(
     template_content = template_path.read_text(encoding="utf-8")
 
     rendered = (
-        template_content.replace("__NIXPKGS_URL__", nixpkgs_url)
+        template_content.replace("__ROLES_LIST__", " ".join(resolved_roles))
+        .replace("__NIXPKGS_URL__", nixpkgs_url)
         .replace("/* __RUST_INPUT__ */", rust_input)
         .replace("/* __RUST_OVERLAY__ */", rust_overlay)
         .replace("__LIBS_LIST__", libs_list)

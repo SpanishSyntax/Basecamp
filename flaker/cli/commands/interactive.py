@@ -4,6 +4,7 @@ import sys
 from pathlib import Path
 
 from flaker import __version__
+from flaker.cli.commands.active import detect_active_roles
 from flaker.core.models import Role
 from flaker.ui import ui
 
@@ -15,13 +16,22 @@ def run_interactive_mode(
     project_root: Path,
 ) -> tuple[str, list[str], dict[str, str]]:
     """Interactive role and command selector using arrow/spacebar menus."""
-    is_subfolder = (project_root != current_dir) and (
-        project_root / "flake.nix"
-    ).exists()
-    has_root_flake = (project_root / "flake.nix").exists()
+    flake_path = project_root / "flake.nix"
+    has_root_flake = flake_path.exists()
+    is_subfolder = (project_root != current_dir) and has_root_flake
+
+    active_roles_summary = ""
+    if has_root_flake:
+        try:
+            content = flake_path.read_text(encoding="utf-8")
+            diags, _, _ = detect_active_roles(content, roles_db, aliases)
+            if diags:
+                active_roles_summary = ", ".join(d.role_key for d in diags)
+        except OSError:
+            pass
 
     ws_status = (
-        ui.green("active (flake.nix)")
+        ui.green(f"active ({active_roles_summary})" if active_roles_summary else "active (flake.nix)")
         if has_root_flake
         else ui.yellow("uninitialized")
     )
@@ -52,6 +62,7 @@ def run_interactive_mode(
     elif has_root_flake:
         ui.info(f"Active workspace detected at {ui.bold(str(project_root))}")
         cmd_options = [
+            ("active", "Diagnose active roles", "List active roles, channel & packages in flake.nix"),
             ("new", "Add starter file", "Starter file in current directory"),
             ("shell", "Add flake.nix and .envrc", "DevShell at root"),
             ("project", "Add project configs", "Root configs (pyproject.toml, etc.)"),
@@ -70,6 +81,9 @@ def run_interactive_mode(
         ]
 
     chosen_cmd = ui.select("Action:", cmd_options)
+
+    if chosen_cmd == "active":
+        return "active", [], {}
 
     sorted_roles = sorted(roles_db.keys())
     role_options = [

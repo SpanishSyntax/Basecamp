@@ -1,3 +1,4 @@
+# [flaker] roles: __ROLES_LIST__
 {
   inputs = {
     nixpkgs.url = "__NIXPKGS_URL__";

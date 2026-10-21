@@ -60,3 +60,9 @@ def test_flaker_info_invalid():
     res = run_flaker("info", "nonexistent_role_xyz")
     assert res.returncode != 0
     assert "Unknown role" in res.stderr
+
+
+def test_flaker_active_smoke():
+    res = run_flaker("active")
+    assert res.returncode == 0
+    assert "Active Roles Diagnostic" in res.stdout

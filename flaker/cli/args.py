@@ -5,6 +5,13 @@ from dataclasses import dataclass, field
 
 from flaker.ui import handle_color_args, ui
 
+__all__ = [
+    "ParsedArgs",
+    "handle_color_args",
+    "parse_cli_args",
+    "print_help",
+]
+
 
 def print_help() -> None:
     """Prints the CLI usage instructions."""
@@ -21,10 +28,12 @@ def print_help() -> None:
   project      Add project configs (pyproject.toml, packages.typ, etc.).
   packages     Configure package bundles.
   list         List available roles and stacks.
+  active       Diagnose and display active roles on current flake.
   info <role>  Display detailed information for a role.
   interactive  Launch interactive stack and command selector.
 
 {ui.blue("Options:")}
+  -a, --active         Show only active roles on current flake.
   -m, --mode MODE      Document operating mode / target (report, slides, paper).
   -t, --target TARGET  Alias for --mode.
   -e, --engine ENGINE  Compilation engine for Markdown ('typst' or 'latex').
@@ -66,6 +75,8 @@ def print_help() -> None:
   flaker shell rust next                 # Setup DevShell without scaffolding files
   flaker project folio                   # Scaffold layout templates & library.bib to project root
   flaker list                            # View all registered language roles & aliases
+  flaker active                          # Diagnose active roles on current workspace flake
+  flaker list --active                   # Show active roles on current flake
 """)
 
 
@@ -86,6 +97,7 @@ class ParsedArgs:
     doc_engine: str | None = None
     configure_packages_flag: bool = False
     no_packages_flag: bool = False
+    active: bool = False
 
 
 def parse_cli_args(args: list[str]) -> ParsedArgs:
@@ -98,6 +110,8 @@ def parse_cli_args(args: list[str]) -> ParsedArgs:
             parsed.force = True
         elif arg in ("-n", "--dry-run"):
             parsed.dry_run = True
+        elif arg in ("-a", "--active"):
+            parsed.active = True
         elif arg == "--no-git":
             parsed.auto_git = False
         elif arg == "--no-direnv":
