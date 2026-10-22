@@ -2,10 +2,6 @@ import numpy as np
 import plotly.graph_objects as go
 from rich import print as rprint
 
-from plotter import PlotConfigurator
-
-OUTPUT_FILE = "index.html"
-
 
 def generate_l_membrane():
     """Generates the data for the classic MATLAB logo (L-shaped membrane)."""
@@ -32,52 +28,41 @@ def generate_l_membrane():
     return x, y, Z
 
 
-def main():
-    rprint(
-        "[bold cyan]🥚 TU Delft / Systems & Control Easter Egg Initialized[/bold cyan]"
-    )
-    rprint("[bold]Rendering:[/bold] First Eigenfunction of the L-Shaped Membrane...")
+rprint("[bold cyan]📐 Systems & Control Simulation Engine Initialized[/bold cyan]")
+rprint("[bold]Rendering:[/bold] First Eigenfunction of the L-Shaped Membrane...")
 
-    config = PlotConfigurator()
-    fig = config.fig
+x, y, z = generate_l_membrane()
 
-    x, y, z = generate_l_membrane()
-
-    # Add the 3D surface plot
-    fig.add_trace(
+# Build root Plotly Figure (automatically detected and served by Prism)
+fig = go.Figure(
+    data=[
         go.Surface(
             x=x,
             y=y,
             z=z,
             colorscale="Jet",  # The classic retro MATLAB colorscale
-            showscale=False,  # Hide the colorbar for a clean logo look
+            showscale=False,   # Clean logo presentation
             contours=dict(
                 z=dict(
-                    show=True, usecolormap=True, highlightcolor="white", project_z=True
+                    show=True,
+                    usecolormap=True,
+                    highlightcolor="white",
+                    project_z=True,
                 )
             ),
         )
-    )
+    ]
+)
 
-    # Theme it as a floating logo without gridlines or axes
-    config.apply_theme(
-        title="<b>Why MATLAB?</b><br><sup>First Eigenfunction of the L-shaped Membrane</sup>",
-        paper_bgcolor="#f4f4f9",  # Matches your HTML template background
-        scene=dict(
-            xaxis=dict(visible=False),
-            yaxis=dict(visible=False),
-            zaxis=dict(visible=False),
-            camera=dict(
-                eye=dict(x=-1.5, y=-1.5, z=1.2)  # Classic MATLAB viewing angle
-            ),
+fig.update_layout(
+    title="<b>First Eigenfunction of the L-shaped Membrane</b><br><sup>Visualized via Prism</sup>",
+    margin=dict(l=40, r=40, t=60, b=40),
+    scene=dict(
+        xaxis=dict(visible=False),
+        yaxis=dict(visible=False),
+        zaxis=dict(visible=False),
+        camera=dict(
+            eye=dict(x=-1.5, y=-1.5, z=1.2)
         ),
-    )
-
-    config.export(OUTPUT_FILE)
-    rprint(
-        f"✅ [bold green]Membrane rendered and injected into {OUTPUT_FILE}[/bold green]"
-    )
-
-
-if __name__ == "__main__":
-    main()
+    ),
+)
