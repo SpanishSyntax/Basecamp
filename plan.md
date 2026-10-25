@@ -1,14 +1,14 @@
-# Flaker Codebase Audit & Modernization Plan
+# Basecamp Codebase Modernization Plan
 
 > **Audit Date:** October 19, 2026  
-> **Target:** Flaker 0.3.0 (`/home/usurper/Documents/Flaker`)  
-> **Status:** Proposal & Architectural Blueprint  
+> **Target:** Basecamp 0.3.0 (`/home/usurper/Documents/Basecamp`)  
+> **Status:** Implemented & Modernized  
 
 ---
 
 ## 1. Executive Summary & Diagnostic
 
-Flaker has evolved rapidly into a feature-rich scaffolding engine and Nix DevShell generator, supporting 20+ language stacks, polyglot document engines (Typst, LaTeX, Markdown under Folio), dynamic package bundle generation, interactive menus, and out-of-store/Frost integration.
+Basecamp has evolved rapidly into a feature-rich scaffolding engine and Nix DevShell generator, supporting 20+ language stacks, polyglot document engines (Typst, LaTeX, Markdown under Folio), dynamic package bundle generation, interactive menus, and out-of-store/Frost integration.
 
 However, rapid iteration has created significant architectural debt:
 - **Monolithic "God Object" File:** `flaker/cli.py` contains **2,129 lines** (84 KB) combining CLI parsing, built-in database definitions (roles, aliases, package bundles), configuration file parsing, template rendering, git mechanics, interactive prompt loops, and command dispatch.
@@ -38,13 +38,13 @@ The tool itself is architecturally sound in concept (pure standard library, zero
 ## 3. Target Modular Architecture
 
 ```
-flaker/
+basecamp/
 ├── __init__.py                  # Version and package export
 ├── __main__.py                  # Direct module execution hook
 ├── core/
 │   ├── __init__.py
 │   ├── models.py                # Dataclasses: Role, TargetSpec, PackageBundle, WorkspaceContext
-│   ├── config.py                # User config parsing (~/.config/flaker/roles.toml)
+│   ├── config.py                # User config parsing (~/.config/basecamp/roles.toml)
 │   ├── registry.py              # Built-in role definitions, aliases, and channel resolvers
 │   └── environment.py           # Flake template rendering, Nix channel URLs, Direnv hooks
 ├── scaffold/
@@ -64,14 +64,14 @@ flaker/
 │   ├── resolver.py              # Deterministic role/target/alias resolution cascade
 │   ├── commands/
 │   │   ├── __init__.py
-│   │   ├── init.py              # 'flaker init' command handler
-│   │   ├── new.py               # 'flaker new' command handler
-│   │   ├── shell.py             # 'flaker shell' command handler
-│   │   ├── project.py           # 'flaker project' command handler
-│   │   ├── packages.py          # 'flaker packages' command handler
-│   │   ├── list_cmd.py          # 'flaker list' command handler
-│   │   ├── info.py              # 'flaker info' command handler
-│   │   └── interactive.py       # 'flaker interactive' menu flow
+│   │   ├── init.py              # 'basecamp init' command handler
+│   │   ├── new.py               # 'basecamp new' command handler
+│   │   ├── shell.py             # 'basecamp shell' command handler
+│   │   ├── project.py           # 'basecamp project' command handler
+│   │   ├── packages.py          # 'basecamp packages' command handler
+│   │   ├── list_cmd.py          # 'basecamp list' command handler
+│   │   ├── info.py              # 'basecamp info' command handler
+│   │   └── interactive.py       # 'basecamp interactive' menu flow
 │   └── router.py                # Entrypoint router & error boundary
 ├── templates/                   # Static starter & project templates (existing structure)
 └── flake.template               # Root flake.nix skeleton
@@ -79,14 +79,14 @@ flaker/
 
 ### Module Responsibilities
 
-1. **`flaker.core.models`**: Typed dataclasses (`Role`, `TargetSpec`, `PackageBundle`, `ScaffoldResult`) with strict typing.
-2. **`flaker.core.registry`**: Pure data definitions for built-in roles (`rust`, `python`, `folio`, etc.), channel URLs, and default aliases.
-3. **`flaker.core.config`**: Robust parsing and schema validation of user-defined overrides in `~/.config/flaker/roles.toml`.
-4. **`flaker.scaffold.engine`**: Pure scaffolding function taking source templates, target directory, variable mapping, and returning planned or written files.
-5. **`flaker.scaffold.git`**: Dedicated handler for Frost global ignores, Nix/direnv base rules, role-specific ignores, and safe `git add` staging.
-6. **`flaker.scaffold.manifests`**: Isolated Typst and LaTeX package bundle registries and generator functions.
-7. **`flaker.cli.resolver`**: Clean, unit-tested resolution logic for colon syntax (`folio:slides`), target flags (`-m slides`), role aliases, and positional fallbacks.
-8. **`flaker.cli.commands.*`**: Discrete command execution functions with unified return codes and error handling.
+1. **`basecamp.core.models`**: Typed dataclasses (`Role`, `TargetSpec`, `PackageBundle`, `ScaffoldResult`) with strict typing.
+2. **`basecamp.core.registry`**: Pure data definitions for built-in roles (`rust`, `python`, `folio`, etc.), channel URLs, and default aliases.
+3. **`basecamp.core.config`**: Robust parsing and schema validation of user-defined overrides in `~/.config/basecamp/roles.toml`.
+4. **`basecamp.scaffold.engine`**: Pure scaffolding function taking source templates, target directory, variable mapping, and returning planned or written files.
+5. **`basecamp.scaffold.git`**: Dedicated handler for Frost global ignores, Nix/direnv base rules, role-specific ignores, and safe `git add` staging.
+6. **`basecamp.scaffold.manifests`**: Isolated Typst and LaTeX package bundle registries and generator functions.
+7. **`basecamp.cli.resolver`**: Clean, unit-tested resolution logic for colon syntax (`folio:slides`), target flags (`-m slides`), role aliases, and positional fallbacks.
+8. **`basecamp.cli.commands.*`**: Discrete command execution functions with unified return codes and error handling.
 
 ---
 

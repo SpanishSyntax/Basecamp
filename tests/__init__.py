@@ -1,1 +1,1 @@
-"""Test suite for Flaker."""
+"""Test suite for Basecamp."""

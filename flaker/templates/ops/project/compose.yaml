@@ -1,6 +1,0 @@
-services:
-  app:
-    image: alpine:latest
-    container_name: __PROJECT_NAME__-app
-    command: ["sh", "-c", "echo '❄️ [flaker] Container environment active for __PROJECT_NAME__' && sleep infinity"]
-    restart: unless-stopped

@@ -1,8 +1,8 @@
-# Flaker ❄️⚡
+# Basecamp ⛺⚡
 
 > **Fast, Modular Nix Development Environments & Instant Project Scaffolding**
 
-Flaker is an opinionated, lightning-fast CLI utility that automates single-file Nix shell creation (`flake.nix`), sets up seamless `.envrc` direnv hooks, generates language-aware `.gitignore` files, and scaffolds modern starter templates for over 20 languages, frameworks, and cloud ecosystems.
+Basecamp is an opinionated, lightning-fast CLI utility that automates single-file Nix shell creation (`flake.nix`), sets up seamless `.envrc` direnv hooks, generates language-aware `.gitignore` files, and scaffolds modern starter templates for over 20 languages, frameworks, and cloud ecosystems.
 
 ---
 
@@ -15,8 +15,8 @@ Flaker is an opinionated, lightning-fast CLI utility that automates single-file 
 - 🚫 **Smart `.gitignore` Generation**: Appends standard Nix/direnv ignores (`.direnv/`, `result`) and role-specific cache/build directories (`.venv/`, `target/`, `node_modules/`, `zig-cache/`, `_build/`, etc.).
 - 🌐 **Configurable Nixpkgs Channels (`-c / --channel`)**: Easily switch between `nixos-26.05`, `unstable`, `24.11`, or custom flake URIs on the fly.
 - 🔍 **Discovery & Inspection (`list` & `info`)**: Browse all available roles, categories, and aliases, or inspect exact packages, LSPs, and shell hooks before scaffolding.
-- 🧭 **Interactive Stack Selector (`interactive`)**: Run `flaker` with no arguments in any terminal for a clean interactive menu to choose stacks and commands.
-- 🧩 **Extensible User Roles (`~/.config/flaker/roles.toml`)**: Define custom organization or project roles without modifying Flaker's code.
+- 🧭 **Interactive Stack Selector (`interactive`)**: Run `basecamp` with no arguments in any terminal for a clean interactive menu to choose stacks and commands.
+- 🧩 **Extensible User Roles (`~/.config/basecamp/roles.toml`)**: Define custom organization or project roles without modifying Basecamp's code.
 - 🔗 **Native Runtime Library Injection**: Automatically injects standard C runtime libraries (`stdenv.cc.cc.lib`, `zlib`, `glib`, `libxml2`, `openssl`, `libffi`) into `LD_LIBRARY_PATH`.
 - 🦀 **Rust-Overlay Integration**: Seamlessly pulls and activates the `oxalica/rust-overlay` toolchain with `rust-analyzer` when Rust roles are selected.
 - 🪶 **Pure & Ultra-Lightweight**: Zero external Python dependencies; 100% standard library core with sub-30ms startup.
@@ -25,60 +25,60 @@ Flaker is an opinionated, lightning-fast CLI utility that automates single-file 
 
 ## 🚀 Quick Start
 
-Run Flaker directly via Nix without installing:
+Run Basecamp directly via Nix without installing:
 
 ```bash
 # Interactive mode (launches terminal stack selector)
-nix run github:SpanishSyntax/Flaker
+nix run github:SpanishSyntax/Basecamp
 
 # Initialize a Python environment with uv, ruff, and ty LSP + project template
-nix run github:SpanishSyntax/Flaker -- init python
+nix run github:SpanishSyntax/Basecamp -- init python
 
 # Initialize a Zig project with zls and build.zig
-nix run github:SpanishSyntax/Flaker -- init zig
+nix run github:SpanishSyntax/Basecamp -- init zig
 
 # Initialize a Folio workspace for clean Markdown report
-flaker init folio report
+basecamp init folio report
 
 # Initialize a Folio workspace specifically for 16:9 slides presentation
-flaker init folio slides
+basecamp init folio slides
 
 # Initialize a Folio workspace for an academic IEEE paper
-flaker init folio paper
+basecamp init folio paper
 
 # Initialize native Typst or LaTeX workspaces directly
-flaker init typ                        # Native Typst workspace (report.typ + packages.typ)
-flaker init tex                        # Native LaTeX workspace (report.tex + packages.tex)
-flaker init typ:paper                  # Native Typst IEEE 2-column paper (paper.typ)
-flaker init tex:slides                 # Native LaTeX 16:9 Beamer slides (slides.tex)
+basecamp init typ                        # Native Typst workspace (report.typ + packages.typ)
+basecamp init tex                        # Native LaTeX workspace (report.tex + packages.tex)
+basecamp init typ:paper                  # Native Typst IEEE 2-column paper (paper.typ)
+basecamp init tex:slides                 # Native LaTeX 16:9 Beamer slides (slides.tex)
 
 # Drop starter documents directly using role shortcuts
-flaker new slides                      # 16:9 Markdown presentation (slides.md)
-flaker new paper                       # IEEE 2-column Markdown paper (paper.md)
-flaker new report                      # Clean Markdown report document (report.md)
-flaker new typ:paper                   # Native Typst paper (paper.typ)
-flaker new tex:slides                  # Native LaTeX Beamer slides (slides.tex)
+basecamp new slides                      # 16:9 Markdown presentation (slides.md)
+basecamp new paper                       # IEEE 2-column Markdown paper (paper.md)
+basecamp new report                      # Clean Markdown report document (report.md)
+basecamp new typ:paper                   # Native Typst paper (paper.typ)
+basecamp new tex:slides                  # Native LaTeX Beamer slides (slides.tex)
 
 # Drop a starter experiment file into current folder without touching root configs
-flaker new mv
+basecamp new mv
 
 # Generate only DevShell without starter files
-flaker shell rust next
+basecamp shell rust next
 
 # Scaffold project foundation files (packages.typ, report.typ, library.bib) to project root
-flaker project folio
+basecamp project folio
 
 # Combine roles: Rust backend + Next.js frontend + DevOps containers
-nix run github:SpanishSyntax/Flaker -- init rust next ops
+nix run github:SpanishSyntax/Basecamp -- init rust next ops
 
 # Target nixpkgs-unstable channel
-nix run github:SpanishSyntax/Flaker -- init go -c unstable
+nix run github:SpanishSyntax/Basecamp -- init go -c unstable
 
 # Dry-run preview without writing files
-nix run github:SpanishSyntax/Flaker -- init rust --dry-run
+nix run github:SpanishSyntax/Basecamp -- init rust --dry-run
 
 # View all available roles and categories
-nix run github:SpanishSyntax/Flaker -- list
+nix run github:SpanishSyntax/Basecamp -- list
 ```
 
 ---
@@ -86,8 +86,8 @@ nix run github:SpanishSyntax/Flaker -- list
 ## 💻 CLI Commands & Options
 
 ```text
-Usage: flaker [options]
-       flaker <command> [roles...] [options]
+Usage: basecamp [options]
+       basecamp <command> [roles...] [options]
 
 Commands:
   init         Full workspace bootstrap (DevShell + project root files + starter).
@@ -96,12 +96,15 @@ Commands:
   project      Scaffold only project root foundation files (pyproject.toml, report.typ).
   packages     Interactively configure and dynamically generate package manifest.
   list         List all available roles, categories, and aliases.
+  active       Diagnose and display active roles on current flake.
   info <role>  Display detailed information, packages, and starter files for a role.
   interactive  Launch interactive Bun-style role and command selector.
 
 Options:
+  -a, --active         Show only active roles on current flake.
   -m, --mode MODE      Document operating mode / scaffolding target (report, slides, paper, all).
   -t, --target TARGET  Alias for --mode.
+  -e, --engine ENGINE  Compilation engine for Markdown ('typst' or 'latex').
   -p, --packages       Prompt to interactively configure packages dynamically.
   --title TITLE        Document title for Folio documents.
   --author AUTHOR      Document author for Folio documents.
@@ -149,7 +152,7 @@ Options:
 
 ## 📝 Folio Document Engine (Standardized 3×3 Matrix)
 
-Flaker provides a symmetrical 9-way document scaffolding engine for [Folio](https://github.com/SpanishSyntax/Folio). Every document archetype is available across all three supported markup languages:
+Basecamp provides a symmetrical 9-way document scaffolding engine for [Folio](https://github.com/SpanishSyntax/Folio). Every document archetype is available across all three supported markup languages:
 
 | Document Archetype | Markdown (`.md`) | Typst (`.typ`) | LaTeX (`.tex`) | Output / Layout Specification |
 | :--- | :--- | :--- | :--- | :--- |
@@ -158,25 +161,25 @@ Flaker provides a symmetrical 9-way document scaffolding engine for [Folio](http
 | **Academic Paper** | `paper.md` | `paper.typ` | `paper.tex` | Dual-column IEEE Computer Society publication |
 
 ### Foundation Assets (`project/`)
-When initializing a Folio workspace, Flaker automatically scaffolds the corresponding shared foundation assets to the project root:
+When initializing a Folio workspace, Basecamp automatically scaffolds the corresponding shared foundation assets to the project root:
 - `packages.typ`: Modular Typst preamble hub (`cetz`, `fletcher`, `physica`, `merman`, `tablex`, `algorithmic`, `codly`).
 - `packages.tex`: Modular LaTeX preamble hub (`amsmath`, `mathtools`, `tikz`, `pgfplots`, `booktabs`, `tcolorbox`, `cleveref`).
 - `library.bib`: Shared BibTeX bibliography database.
 - `report.typ`, `slides.typ`, `paper.typ`: Re-usable Typst layout functions for Markdown conversion and native Typst authoring.
 
-#### Interactive Package Configurator (`flaker packages`)
+#### Interactive Package Configurator (`basecamp packages`)
 You can dynamically assemble your package manifest at any time with sane defaults preselected:
 ```bash
-flaker packages typ                  # Interactively configure packages.typ via multi-select
-flaker packages tex                  # Interactively configure packages.tex via multi-select
-flaker init folio slides --packages  # Interactively choose package bundles during init
+basecamp packages typ                  # Interactively configure packages.typ via multi-select
+basecamp packages tex                  # Interactively configure packages.tex via multi-select
+basecamp init folio slides --packages  # Interactively choose package bundles during init
 ```
 
 ---
 
-## 🧩 Custom User Roles (`~/.config/flaker/roles.toml`)
+## 🧩 Custom User Roles (`~/.config/basecamp/roles.toml`)
 
-You can define your own project roles and aliases without modifying Flaker. Create `~/.config/flaker/roles.toml`:
+You can define your own project roles and aliases without modifying Basecamp. Create `~/.config/basecamp/roles.toml`:
 
 ```toml
 [roles.ocaml]
@@ -190,30 +193,30 @@ ignores = ["_build/"]
 ml = "ocaml"
 ```
 
-Flaker will automatically merge your custom roles into `flaker list`, `flaker info`, and all scaffolding commands. You can also place custom starter templates inside `~/.config/flaker/templates/<role_name>/`.
+Basecamp will automatically merge your custom roles into `basecamp list`, `basecamp info`, and all scaffolding commands. You can also place custom starter templates inside `~/.config/basecamp/templates/<role_name>/`.
 
 ---
 
 ## 🛠️ Home Manager Configuration
 
-Add Flaker to your `flake.nix`:
+Add Basecamp to your `flake.nix`:
 
 ```nix
 {
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    flaker = {
-      url = "github:SpanishSyntax/Flaker";
+    basecamp = {
+      url = "github:SpanishSyntax/Basecamp";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
-  outputs = { self, nixpkgs, flaker, ... }: {
+  outputs = { self, nixpkgs, basecamp, ... }: {
     homeConfigurations.user = home-manager.lib.homeManagerConfiguration {
       modules = [
-        flaker.homeManagerModules.default
+        basecamp.homeManagerModules.default
         {
-          programs.flaker.enable = true;
+          programs.basecamp.enable = true;
         }
       ];
     };
@@ -221,25 +224,29 @@ Add Flaker to your `flake.nix`:
 }
 ```
 
-Once enabled, `flaker` is directly accessible in your interactive shell.
+Once enabled, `basecamp` is directly accessible in your interactive shell.
 
 ---
 
 ## 📁 Repository Structure
 
 ```text
-Flaker/
+Basecamp/
 ├── flake.nix               # Flake package & Home Manager module definition
 ├── pyproject.toml          # Standard PEP 517 / 621 Python project packaging
 ├── MANIFEST.in             # Manifest guaranteeing template asset bundling
 ├── LICENSE                 # MIT License
 ├── README.md               # Documentation & usage guide
-└── flaker/
-    ├── __init__.py         # Package metadata
-    ├── __main__.py         # python -m flaker entrypoint
-    ├── cli.py              # CLI core logic, role registry, TUI & git engine
-    ├── flake.template      # Base devShell template
-    └── templates/          # Starter project templates for 20+ ecosystems
+└── src/
+    └── basecamp/
+        ├── __init__.py         # Package metadata
+        ├── __main__.py         # python -m basecamp entrypoint
+        ├── cli/                # Command handlers & CLI parser
+        ├── core/               # Role models, registry, and environment generator
+        ├── scaffold/           # Asset scaffolding, git staging, and manifests
+        ├── ui/                 # Prism terminal UI facade
+        ├── flake.template      # Base devShell template
+        └── templates/          # Starter project templates for 20+ ecosystems
         ├── c/
         ├── cpp/
         ├── dotnet/

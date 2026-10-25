@@ -1,6 +1,6 @@
 from pathlib import Path
 import tempfile
-from flaker.cli import (
+from basecamp.cli import (
     build_builtin_role_registry,
     prepare_flake_env,
     scaffold_assets,
@@ -8,8 +8,8 @@ from flaker.cli import (
 )
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-TEMPLATE_PATH = REPO_ROOT / "flaker" / "flake.template"
-ASSETS_DIR = REPO_ROOT / "flaker" / "templates"
+TEMPLATE_PATH = REPO_ROOT / "src" / "basecamp" / "flake.template"
+ASSETS_DIR = REPO_ROOT / "src" / "basecamp" / "templates"
 
 
 def test_prepare_flake_env():

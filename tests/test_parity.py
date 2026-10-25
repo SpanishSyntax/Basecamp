@@ -5,26 +5,26 @@ import sys
 import tempfile
 from pathlib import Path
 
-from flaker.cli.resolver import (
+from basecamp.cli.resolver import (
     find_role_for_standalone_target,
     resolve_role_target,
 )
-from flaker.core.environment import prepare_flake_env
-from flaker.core.registry import (
+from basecamp.core.environment import prepare_flake_env
+from basecamp.core.registry import (
     BUILTIN_ALIASES,
     build_builtin_role_registry,
     resolve_nixpkgs_url,
 )
-from flaker.scaffold.engine import scaffold_assets
-from flaker.scaffold.manifests import (
+from basecamp.scaffold.engine import scaffold_assets
+from basecamp.scaffold.manifests import (
     LATEX_PACKAGE_BUNDLES,
     TYPST_PACKAGE_BUNDLES,
     generate_packages_manifest,
 )
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-TEMPLATE_PATH = REPO_ROOT / "flaker" / "flake.template"
-ASSETS_DIR = REPO_ROOT / "flaker" / "templates"
+TEMPLATE_PATH = REPO_ROOT / "src" / "basecamp" / "flake.template"
+ASSETS_DIR = REPO_ROOT / "src" / "basecamp" / "templates"
 
 
 def run_flaker(*args: str, cwd: Path | None = None) -> subprocess.CompletedProcess[str]:
@@ -32,8 +32,9 @@ def run_flaker(*args: str, cwd: Path | None = None) -> subprocess.CompletedProce
 
     env = dict(os.environ)
     existing_pp = os.environ.get("PYTHONPATH", "")
-    env["PYTHONPATH"] = f"{REPO_ROOT}:{existing_pp}" if existing_pp else str(REPO_ROOT)
-    cmd = [sys.executable, "-m", "flaker", *args]
+    src_dir = str(REPO_ROOT / "src")
+    env["PYTHONPATH"] = f"{src_dir}:{existing_pp}" if existing_pp else src_dir
+    cmd = [sys.executable, "-m", "basecamp", *args]
     return subprocess.run(
         cmd,
         cwd=cwd or REPO_ROOT,

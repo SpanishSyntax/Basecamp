@@ -1,2 +1,2 @@
-include flaker/flake.template
-recursive-include flaker/templates *
+include src/basecamp/flake.template
+recursive-include src/basecamp/templates *

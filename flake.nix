@@ -1,11 +1,11 @@
 {
-  description = "Flaker - Single-File Nix-Shell & Development Workspace Creator";
+  description = "Basecamp - Single-File Nix-Shell & Development Workspace Creator";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
-    rime = {
-      url = "github:SpanishSyntax/Rime";
+    prism = {
+      url = "github:SpanishSyntax/Prism";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
@@ -14,14 +14,14 @@
     self,
     nixpkgs,
     flake-utils,
-    rime,
+    prism,
   }: let
     systems = flake-utils.lib.defaultSystems;
   in
     flake-utils.lib.eachSystem systems (system: let
       pkgs = import nixpkgs {
         inherit system;
-        overlays = [rime.overlays.default];
+        overlays = [prism.overlays.default];
       };
       lib = pkgs.lib;
 
@@ -42,8 +42,8 @@
         runtimeLibs
       );
 
-      flakerPackage = pkgs.python3Packages.buildPythonApplication {
-        pname = "flaker";
+      basecampPackage = pkgs.python3Packages.buildPythonApplication {
+        pname = "basecamp";
         version = "0.3.0";
         src = ./.;
         pyproject = true;
@@ -53,7 +53,7 @@
         ];
 
         propagatedBuildInputs = [
-          pkgs.python3Packages.rime
+          pkgs.python3Packages.prism
         ];
 
         nativeBuildInputs = [
@@ -61,14 +61,15 @@
         ];
 
         postFixup = ''
-          wrapProgram $out/bin/flaker \
+          wrapProgram $out/bin/basecamp \
             --prefix PATH : ${lib.makeBinPath [pkgs.direnv]} \
             --set LIBS_LIST "${libsList}" \
-            --set FLAKE_TEMPLATE "$out/${pkgs.python3.sitePackages}/flaker/flake.template" \
-            --set FLAKER_ASSETS "$out/${pkgs.python3.sitePackages}/flaker/templates"
+            --set FLAKE_TEMPLATE "$out/${pkgs.python3.sitePackages}/basecamp/flake.template" \
+            --set BASECAMP_ASSETS "$out/${pkgs.python3.sitePackages}/basecamp/templates" \
+            --set FLAKER_ASSETS "$out/${pkgs.python3.sitePackages}/basecamp/templates"
 
           # Prune compiled bytecode from template scaffolding directory
-          find $out/${pkgs.python3.sitePackages}/flaker/templates -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+          find $out/${pkgs.python3.sitePackages}/basecamp/templates -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
         '';
 
         nativeCheckInputs = [
@@ -86,25 +87,30 @@
 
         meta = with lib; {
           description = "Fast, modular Nix development environment and project scaffolding tool";
-          homepage = "https://github.com/SpanishSyntax/Flaker";
+          homepage = "https://github.com/SpanishSyntax/Basecamp";
           license = licenses.mit;
-          mainProgram = "flaker";
+          mainProgram = "basecamp";
         };
       };
     in {
       packages = {
-        default = flakerPackage;
-        flaker = flakerPackage;
+        default = basecampPackage;
+        basecamp = basecampPackage;
+        flaker = basecampPackage;
       };
 
       apps = {
         default = {
           type = "app";
-          program = "${flakerPackage}/bin/flaker";
+          program = "${basecampPackage}/bin/basecamp";
+        };
+        basecamp = {
+          type = "app";
+          program = "${basecampPackage}/bin/basecamp";
         };
         flaker = {
           type = "app";
-          program = "${flakerPackage}/bin/flaker";
+          program = "${basecampPackage}/bin/basecamp";
         };
       };
 
@@ -113,7 +119,7 @@
           python3
           python3Packages.setuptools
           python3Packages.pytest
-          python3Packages.rime
+          python3Packages.prism
           direnv
         ];
       };
@@ -121,30 +127,31 @@
     // {
       overlays = {
         default = final: prev: {
-          flaker = self.packages.${prev.stdenv.hostPlatform.system}.default;
+          basecamp = self.packages.${prev.stdenv.hostPlatform.system}.default;
         };
+        basecamp = self.overlays.default;
         flaker = self.overlays.default;
       };
 
       nixosModules = {
-        default = self.nixosModules.flaker;
-        flaker = {
+        default = self.nixosModules.basecamp;
+        basecamp = {
           config,
           lib,
           pkgs,
           ...
         }: let
-          cfg = config.programs.flaker;
+          cfg = config.programs.basecamp;
           system = pkgs.stdenv.hostPlatform.system;
-          defaultFlaker = self.packages.${system}.default;
+          defaultBasecamp = self.packages.${system}.default;
         in {
-          options.programs.flaker = {
-            enable = lib.mkEnableOption "Flaker - Single-File Nix-Shell & Development Workspace Creator";
+          options.programs.basecamp = {
+            enable = lib.mkEnableOption "Basecamp - Single-File Nix-Shell & Development Workspace Creator";
 
             package = lib.mkOption {
               type = lib.types.package;
-              default = defaultFlaker;
-              description = "The Flaker package to use.";
+              default = defaultBasecamp;
+              description = "The Basecamp package to use.";
             };
           };
 
@@ -152,45 +159,47 @@
             environment.systemPackages = [cfg.package];
           };
         };
+        flaker = self.nixosModules.basecamp;
       };
 
       homeManagerModules = {
-        default = self.homeManagerModules.flaker;
-        flaker = {
+        default = self.homeManagerModules.basecamp;
+        basecamp = {
           config,
           lib,
           pkgs,
           ...
         }: let
-          cfg = config.programs.flaker;
+          cfg = config.programs.basecamp;
           tomlFormat = pkgs.formats.toml {};
           system = pkgs.stdenv.hostPlatform.system;
-          defaultFlaker = self.packages.${system}.default;
+          defaultBasecamp = self.packages.${system}.default;
         in {
-          options.programs.flaker = {
-            enable = lib.mkEnableOption "Flaker - Single-File Nix-Shell & Development Workspace Creator";
+          options.programs.basecamp = {
+            enable = lib.mkEnableOption "Basecamp - Single-File Nix-Shell & Development Workspace Creator";
 
             package = lib.mkOption {
               type = lib.types.package;
-              default = defaultFlaker;
-              description = "The Flaker package to use.";
+              default = defaultBasecamp;
+              description = "The Basecamp package to use.";
             };
 
             settings = lib.mkOption {
               type = tomlFormat.type;
               default = {};
-              description = "Custom roles and aliases written to ~/.config/flaker/roles.toml.";
+              description = "Custom roles and aliases written to ~/.config/basecamp/roles.toml.";
             };
           };
 
           config = lib.mkIf cfg.enable {
             home.packages = [cfg.package];
 
-            xdg.configFile."flaker/roles.toml" = lib.mkIf (cfg.settings != {}) {
+            xdg.configFile."basecamp/roles.toml" = lib.mkIf (cfg.settings != {}) {
               source = tomlFormat.generate "roles.toml" cfg.settings;
             };
           };
         };
+        flaker = self.homeManagerModules.basecamp;
       };
     };
 }

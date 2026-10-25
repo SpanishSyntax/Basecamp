@@ -1,4 +1,4 @@
-from flaker.cli import (
+from basecamp.cli import (
     BUILTIN_ALIASES,
     build_builtin_role_registry,
     find_role_for_standalone_target,

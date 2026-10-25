@@ -1,9 +1,9 @@
 from pathlib import Path
-from flaker.cli import generate_packages_manifest
+from basecamp.cli import generate_packages_manifest
 
 
 def test_typst_starter_templates_root_import():
-    templates_dir = Path(__file__).resolve().parent.parent / "flaker" / "templates" / "folio" / "starter"
+    templates_dir = Path(__file__).resolve().parent.parent / "src" / "basecamp" / "templates" / "folio" / "starter"
     typ_files = list(templates_dir.glob("*.typ"))
     assert len(typ_files) >= 3
     for typ_file in typ_files:

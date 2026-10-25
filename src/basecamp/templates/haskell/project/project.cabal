@@ -1,0 +1,12 @@
+cabal-version:      3.0
+name:               __PROJECT_NAME__
+version:            0.1.0.0
+synopsis:           Haskell project scaffolded with Basecamp
+license:            MIT
+build-type:         Simple
+
+executable __PROJECT_NAME__
+    main-is:          Main.hs
+    build-depends:    base >= 4.14 && < 5
+    hs-source-dirs:   app
+    default-language: Haskell2010
