@@ -52,12 +52,12 @@ def main() -> None:
     template_path_env = os.environ.get("FLAKE_TEMPLATE")
     template_path = Path(template_path_env) if template_path_env else fallback_template
 
-    assets_dir_env = os.environ.get("BASECAMP_ASSETS") or os.environ.get("FLAKER_ASSETS")
+    assets_dir_env = os.environ.get("BASECAMP_ASSETS")
     primary_assets_dir = Path(assets_dir_env) if assets_dir_env else fallback_assets
 
     libs_list = os.environ.get("LIBS_LIST", default_runtime_libs).replace(",", " ")
 
-    # Load custom configuration from ~/.config/basecamp/roles.toml (or legacy flaker)
+    # Load custom configuration from ~/.config/basecamp/roles.toml
     user_roles, user_aliases, custom_asset_dirs = load_user_config()
     all_asset_dirs = custom_asset_dirs + [primary_assets_dir]
 

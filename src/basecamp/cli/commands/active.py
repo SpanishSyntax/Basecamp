@@ -98,7 +98,7 @@ def detect_active_roles(
     """
     Parses flake.nix content to detect active roles, extra packages, and nixpkgs channel.
     Uses a multi-tier resolution strategy:
-      1. Explicit Basecamp metadata tag comment: `# [basecamp] roles: <roles>` (or legacy `[flaker]`)
+      1. Explicit Basecamp metadata tag comment: `# [basecamp] roles: <roles>`
       2. Shell hook banner matching: `printf '...⛺  [basecamp]... <name> ...active'`
       3. Package signature matching from `packages = with pkgs; [...]`
     """
@@ -117,7 +117,7 @@ def detect_active_roles(
 
     # 1. Check explicit Basecamp roles metadata comment
     comment_match = re.search(
-        r"#\s*\[(?:basecamp|flaker)\]\s*roles:\s*(.+)$", flake_content, re.MULTILINE | re.IGNORECASE
+        r"#\s*\[basecamp\]\s*roles:\s*(.+)$", flake_content, re.MULTILINE | re.IGNORECASE
     )
     if comment_match:
         raw_tokens = comment_match.group(1).split()
@@ -132,10 +132,8 @@ def detect_active_roles(
                 )
 
     # 2. Check shell hooks for status banners and hook matches
-    # Match legacy / current: \033[1m<name>\033[0m ... active
-    # Match Option C: \033[1m<name>\033[0m \033[2m
     banner_matches = re.findall(
-        r"\[(?:basecamp|flaker)\]\\033\[0m.*?\\033\[1m([^\\]+)\\033\[0m.*?active", flake_content
+        r"\[basecamp\]\\033\[0m.*?\\033\[1m([^\\]+)\\033\[0m.*?active", flake_content
     )
     badge_matches = re.findall(
         r"\\033\[1m([^\\]+)\\033\[0m\s*\\033\[2m", flake_content

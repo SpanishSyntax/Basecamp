@@ -46,8 +46,8 @@ def build_shell_hooks(
         if r_key in roles_db:
             role = roles_db[r_key]
             for hook in role.hooks:
-                # Exclude any legacy fmt_status printf lines
-                if any(sig in hook for sig in ("❄️  [flaker]", "⛺  [basecamp]", "[basecamp]", "[flaker]")) and "\\033[1m" in hook:
+                # Exclude any fmt_status printf lines
+                if any(sig in hook for sig in ("⛺  [basecamp]", "[basecamp]")) and "\\033[1m" in hook:
                     continue
                 lines.append(hook)
 

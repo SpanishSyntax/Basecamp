@@ -50,24 +50,6 @@ def test_detect_active_roles_metadata_comment():
     assert channel == "nixos-26.05"
 
 
-def test_detect_active_roles_legacy_metadata_comment():
-    roles_db = build_builtin_role_registry("test_proj")
-    flake_content = """
-# [flaker] roles: python rust folio
-{
-  inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
-  };
-}
-"""
-    diags, extra, channel = detect_active_roles(flake_content, roles_db, {})
-    detected_keys = [d.role_key for d in diags]
-    assert "python" in detected_keys
-    assert "rust" in detected_keys
-    assert "folio" in detected_keys
-    assert channel == "nixos-26.05"
-
-
 def test_diagnose_flake_helper():
     roles_db = build_builtin_role_registry("test_proj")
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -96,30 +78,6 @@ def test_detect_active_roles_from_shell_hooks():
       shellHook = ''
         printf '\033[1;34m⛺  [basecamp]\033[0m 🐍 \033[1mPython\033[0m (uv + ruff) active\n'
         printf '\033[1;34m⛺  [basecamp]\033[0m 🦀 \033[1mRust\033[0m (stable) active\n'
-      '';
-    };
-  };
-}
-"""
-    diags, extra, channel = detect_active_roles(flake_content, roles_db, {})
-    detected_keys = [d.role_key for d in diags]
-    assert "python" in detected_keys
-    assert "rust" in detected_keys
-
-
-def test_detect_active_roles_from_legacy_shell_hooks():
-    roles_db = build_builtin_role_registry("test_proj")
-    flake_content = r"""
-{
-  inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
-  };
-  outputs = { ... }: {
-    devShells.x86_64-linux.default = pkgs.mkShell {
-      packages = with pkgs; [ uv python314 rust-bin ];
-      shellHook = ''
-        printf '\033[1;34m❄️  [flaker]\033[0m 🐍 \033[1mPython\033[0m (uv + ruff) active\n'
-        printf '\033[1;34m❄️  [flaker]\033[0m 🦀 \033[1mRust\033[0m (stable) active\n'
       '';
     };
   };

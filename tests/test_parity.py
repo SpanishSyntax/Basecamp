@@ -27,7 +27,7 @@ TEMPLATE_PATH = REPO_ROOT / "src" / "basecamp" / "flake.template"
 ASSETS_DIR = REPO_ROOT / "src" / "basecamp" / "templates"
 
 
-def run_flaker(*args: str, cwd: Path | None = None) -> subprocess.CompletedProcess[str]:
+def run_basecamp(*args: str, cwd: Path | None = None) -> subprocess.CompletedProcess[str]:
     import os
 
     env = dict(os.environ)
@@ -93,33 +93,33 @@ def test_standalone_target_matching():
 
 
 def test_cli_dry_run_parity():
-    # flaker init rust --dry-run
-    res = run_flaker("init", "rust", "--dry-run")
+    # basecamp init rust --dry-run
+    res = run_basecamp("init", "rust", "--dry-run")
     assert res.returncode == 0
     assert "Generated flake.nix" in res.stdout
     assert "rust-overlay" in res.stdout
     assert "cargo-expand" in res.stdout
 
-    # flaker init folio slides --dry-run
-    res = run_flaker("init", "folio", "slides", "--dry-run")
+    # basecamp init folio slides --dry-run
+    res = run_basecamp("init", "folio", "slides", "--dry-run")
     assert res.returncode == 0
     assert "Generated flake.nix" in res.stdout
     assert "typst" in res.stdout
 
-    # flaker new slides --dry-run
-    res = run_flaker("new", "slides", "--dry-run")
+    # basecamp new slides --dry-run
+    res = run_basecamp("new", "slides", "--dry-run")
     assert res.returncode == 0
     assert "Would scaffold" in res.stdout
     assert "slides.md" in res.stdout
 
-    # flaker new typ:paper --dry-run
-    res = run_flaker("new", "typ:paper", "--dry-run")
+    # basecamp new typ:paper --dry-run
+    res = run_basecamp("new", "typ:paper", "--dry-run")
     assert res.returncode == 0
     assert "Would scaffold" in res.stdout
     assert "paper.typ" in res.stdout
 
-    # flaker new tex:slides --dry-run
-    res = run_flaker("new", "tex:slides", "--dry-run")
+    # basecamp new tex:slides --dry-run
+    res = run_basecamp("new", "tex:slides", "--dry-run")
     assert res.returncode == 0
     assert "Would scaffold" in res.stdout
     assert "slides.tex" in res.stdout
@@ -128,8 +128,8 @@ def test_cli_dry_run_parity():
 def test_cli_execution_in_tempdir():
     with tempfile.TemporaryDirectory() as tmpdir:
         tmp = Path(tmpdir)
-        # Test: flaker init py --no-direnv --no-git
-        res = run_flaker("init", "py", "--no-direnv", "--no-git", cwd=tmp)
+        # Test: basecamp init py --no-direnv --no-git
+        res = run_basecamp("init", "py", "--no-direnv", "--no-git", cwd=tmp)
         assert res.returncode == 0
         assert (tmp / "flake.nix").exists()
         assert (tmp / "pyproject.toml").exists()
@@ -146,8 +146,8 @@ def test_cli_execution_in_tempdir():
 def test_cli_project_command():
     with tempfile.TemporaryDirectory() as tmpdir:
         tmp = Path(tmpdir)
-        # Test: flaker project folio
-        res = run_flaker("project", "folio", "--no-git", cwd=tmp)
+        # Test: basecamp project folio
+        res = run_basecamp("project", "folio", "--no-git", cwd=tmp)
         assert res.returncode == 0
         # Project assets for folio include packages.typ, report.typ, library.bib
         assert (tmp / "packages.typ").exists()
@@ -158,8 +158,8 @@ def test_cli_project_command():
 def test_cli_shell_command():
     with tempfile.TemporaryDirectory() as tmpdir:
         tmp = Path(tmpdir)
-        # Test: flaker shell rust next --no-git --no-direnv
-        res = run_flaker("shell", "rust", "next", "--no-git", "--no-direnv", cwd=tmp)
+        # Test: basecamp shell rust next --no-git --no-direnv
+        res = run_basecamp("shell", "rust", "next", "--no-git", "--no-direnv", cwd=tmp)
         assert res.returncode == 0
         assert (tmp / "flake.nix").exists()
         # Should not scaffold starter files

@@ -34,7 +34,6 @@ testpaths = ["tests"]
 
 [project.scripts]
 basecamp = "basecamp.cli:main"
-flaker = "basecamp.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

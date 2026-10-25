@@ -9,23 +9,14 @@ from basecamp.ui import ui
 
 
 def load_user_config() -> tuple[dict[str, Role], dict[str, str], list[Path]]:
-    """Loads custom roles, aliases, and templates from ~/.config/basecamp/roles.toml (falling back to flaker)."""
+    """Loads custom roles, aliases, and templates from ~/.config/basecamp/roles.toml."""
     xdg_base = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config"))
     config_dir = xdg_base / "basecamp"
     roles_file = config_dir / "roles.toml"
-    
-    # Fallback to flaker if basecamp config does not exist
-    legacy_dir = xdg_base / "flaker"
-    legacy_file = legacy_dir / "roles.toml"
-    if not roles_file.exists() and legacy_file.exists():
-        roles_file = legacy_file
-        config_dir = legacy_dir
 
     extra_roles: dict[str, Role] = {}
     extra_aliases: dict[str, str] = {}
     custom_asset_dirs: list[Path] = [config_dir / "templates"]
-    if legacy_dir.exists() and (legacy_dir / "templates") not in custom_asset_dirs:
-        custom_asset_dirs.append(legacy_dir / "templates")
 
     if roles_file.exists():
         try:

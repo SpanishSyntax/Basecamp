@@ -65,8 +65,7 @@
             --prefix PATH : ${lib.makeBinPath [pkgs.direnv]} \
             --set LIBS_LIST "${libsList}" \
             --set FLAKE_TEMPLATE "$out/${pkgs.python3.sitePackages}/basecamp/flake.template" \
-            --set BASECAMP_ASSETS "$out/${pkgs.python3.sitePackages}/basecamp/templates" \
-            --set FLAKER_ASSETS "$out/${pkgs.python3.sitePackages}/basecamp/templates"
+            --set BASECAMP_ASSETS "$out/${pkgs.python3.sitePackages}/basecamp/templates"
 
           # Prune compiled bytecode from template scaffolding directory
           find $out/${pkgs.python3.sitePackages}/basecamp/templates -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
@@ -96,7 +95,6 @@
       packages = {
         default = basecampPackage;
         basecamp = basecampPackage;
-        flaker = basecampPackage;
       };
 
       apps = {
@@ -105,10 +103,6 @@
           program = "${basecampPackage}/bin/basecamp";
         };
         basecamp = {
-          type = "app";
-          program = "${basecampPackage}/bin/basecamp";
-        };
-        flaker = {
           type = "app";
           program = "${basecampPackage}/bin/basecamp";
         };
@@ -130,7 +124,6 @@
           basecamp = self.packages.${prev.stdenv.hostPlatform.system}.default;
         };
         basecamp = self.overlays.default;
-        flaker = self.overlays.default;
       };
 
       nixosModules = {
@@ -159,7 +152,6 @@
             environment.systemPackages = [cfg.package];
           };
         };
-        flaker = self.nixosModules.basecamp;
       };
 
       homeManagerModules = {
@@ -199,7 +191,6 @@
             };
           };
         };
-        flaker = self.homeManagerModules.basecamp;
       };
     };
 }
