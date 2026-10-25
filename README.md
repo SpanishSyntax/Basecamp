@@ -1,4 +1,4 @@
-# Basecamp ⛺⚡
+# Basecamp ⛺
 
 > **Fast, Modular Nix Development Environments & Instant Project Scaffolding**
 
