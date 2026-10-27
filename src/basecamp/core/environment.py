@@ -32,83 +32,21 @@ def build_shell_hooks(
     resolved_roles: list[str],
     roles_db: dict[str, Role],
 ) -> list[str]:
-    """Constructs the unified Prism-style closed box panel with error trapping and status badges."""
-    lines: list[str] = [
-        "_bc_err=0",
-        "_bc_w=76",
-        "_bc_inner=$((_bc_w - 5))",
-    ]
-
-    # 1. Per-role error flags and setup commands
+    """Collects minimal functional shell hooks for resolved roles."""
+    lines: list[str] = []
     for r_key in resolved_roles:
-        safe_key = re.sub(r"[^a-zA-Z0-9_]", "_", r_key)
-        lines.append(f"_bc_err_{safe_key}=0")
         if r_key in roles_db:
             role = roles_db[r_key]
             for hook in role.hooks:
-                # Exclude any fmt_status printf lines
-                if any(sig in hook for sig in ("⛺  [basecamp]", "[basecamp]")) and "\\033[1m" in hook:
+                # Exclude any status printf lines
+                if "printf" in hook and any(sig in hook for sig in ("[basecamp]", "[flaker]")):
                     continue
-                lines.append(hook)
-
-    # 2. Path detection & formatting
-    lines.extend([
-        '_bc_root="\'\'${DIRENV_DIR#-}"',
-        '[ -z "$_bc_root" ] && _bc_root="$PWD"',
-        '_bc_dir="~\'\'${PWD#\'\'$HOME}"',
-        '_bc_flake="~\'\'${_bc_root#\'\'$HOME}/flake.nix"',
-        'if [ "$((12 + \'\'${#_bc_dir}))" -gt "$_bc_inner" ]; then _bc_dir="...\'\'${_bc_dir: -$((_bc_inner - 15))}"; fi',
-        'if [ "$((12 + \'\'${#_bc_flake}))" -gt "$_bc_inner" ]; then _bc_flake="...\'\'${_bc_flake: -$((_bc_inner - 15))}"; fi',
-        '_bc_pad_dir=$((_bc_inner - 12 - \'\'${#_bc_dir}))',
-        '_bc_pad_flake=$((_bc_inner - 12 - \'\'${#_bc_flake}))',
-    ])
-
-    # 3. Card Header & Separator
-    lines.extend([
-        '_bc_top_fill=$(printf "%*s" $((_bc_w - 23)) "")',
-        '_bc_top_fill=\'\'${_bc_top_fill// /─}',
-        '_bc_sep=$(printf "%*s" $((_bc_w - 2)) "")',
-        '_bc_sep=\'\'${_bc_sep// /─}',
-        "printf '\\033[0;36m╭─ \\033[1m⛺  Workspace Roles\\033[0m \\033[0;36m%s╮\\033[0m\\n' \"$_bc_top_fill\"",
-        "printf '\\033[0;36m│\\033[0m  \\033[1mDirectory:\\033[0m  %s%*s \\033[0;36m│\\033[0m\\n' \"$_bc_dir\" \"$_bc_pad_dir\" \"\"",
-        "printf '\\033[0;36m│\\033[0m  \\033[1mFlake:\\033[0m      %s%*s \\033[0;36m│\\033[0m\\n' \"$_bc_flake\" \"$_bc_pad_flake\" \"\"",
-        "printf '\\033[0;36m├%s┤\\033[0m\\n' \"$_bc_sep\"",
-    ])
-
-    # 4. Status badges for each role
-    for r_key in resolved_roles:
-        safe_key = re.sub(r"[^a-zA-Z0-9_]", "_", r_key)
-        if r_key in roles_db:
-            role = roles_db[r_key]
-            icon = getattr(role, "icon", None) or "⛺"
-            name = getattr(role, "display_name", None) or r_key.title()
-            detail = getattr(role, "status_detail", None) or role.description
-        else:
-            icon = "📦"
-            name = r_key
-            detail = "Package"
-
-        lines.append(
-            f'_bc_pad_{safe_key}=$((_bc_inner - 10 - {len(name)} - {len(detail)}))\n'
-            f"          [ \"$_bc_pad_{safe_key}\" -lt 0 ] && _bc_pad_{safe_key}=0\n"
-            f'          if [ "$_bc_err_{safe_key}" -eq 0 ]; then\n'
-            f"            printf '\\033[0;36m│\\033[0m  \\033[1;32m✓\\033[0m {icon} \\033[1m{name}\\033[0m   \\033[2m({detail})\\033[0m%*s \\033[0;36m│\\033[0m\\n' \"$_bc_pad_{safe_key}\" \"\"\n"
-            f"          else\n"
-            f"            _bc_pad_err=$((_bc_inner - 10 - {len(name)} - 14))\n"
-            f"            [ \"$_bc_pad_err\" -lt 0 ] && _bc_pad_err=0\n"
-            f"            printf '\\033[0;36m│\\033[0m  \\033[1;31m✗\\033[0m {icon} \\033[1m{name}\\033[0m   \\033[1;31m(setup failed)\\033[0m%*s \\033[0;36m│\\033[0m\\n' \"$_bc_pad_err\" \"\"\n"
-            f"          fi"
-        )
-
-    # 5. Footer and Notification on failure
-    lines.append(
-        "printf '\\033[0;36m╰%s╯\\033[0m\\n' \"$_bc_sep\""
-    )
-    lines.append(
-        'if [ "$_bc_err" -ne 0 ]; then\n'
-        '            type notify-send >/dev/null 2>&1 && notify-send -u critical "⛺ Basecamp" "Workspace role setup failed in $(basename "$PWD")"\n'
-        '          fi'
-    )
+                # Strip legacy error trapping flags if present
+                clean_hook = re.sub(r"\s*\|\|\s*\{\s*_(?:bc|flk)_err[^}]*\};?", "", hook)
+                clean_hook = clean_hook.strip()
+                if clean_hook and clean_hook not in lines:
+                    lines.append(clean_hook)
+    return lines
 
     return lines
 
@@ -167,6 +105,12 @@ def prepare_flake_env(
         "overlays = [ inputs.rust-overlay.overlays.default ];" if has_rust else ""
     )
 
+    hooks_block = (
+        ("\n          " + "\n          ".join(selected_hooks))
+        if selected_hooks
+        else ""
+    )
+
     template_content = template_path.read_text(encoding="utf-8")
 
     rendered = (
@@ -176,6 +120,7 @@ def prepare_flake_env(
         .replace("/* __RUST_OVERLAY__ */", rust_overlay)
         .replace("__LIBS_LIST__", libs_list)
         .replace("__PKGS_LIST__", " ".join(selected_pkgs))
+        .replace("\n          __SHELL_HOOKS__", hooks_block)
         .replace("__SHELL_HOOKS__", "\n          ".join(selected_hooks))
     )
 

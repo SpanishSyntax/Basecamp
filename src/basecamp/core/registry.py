@@ -43,8 +43,7 @@ def build_builtin_role_registry(folder_name: str) -> dict[str, Role]:
                 "lldb",
             ],
             hooks=[
-                f"[ -f Cargo.toml ] || cargo init --name {folder_name} >/dev/null 2>&1 || {{ _bc_err=1; _bc_err_rust=1; }}",
-                fmt_status("🦀", "Rust", "stable toolchain + rust-analyzer"),
+                f"[ -f Cargo.toml ] || cargo init --name {folder_name}",
             ],
             ignores=["target/", "**/*.rs.bk"],
         ),
@@ -63,7 +62,7 @@ def build_builtin_role_registry(folder_name: str) -> dict[str, Role]:
                 "ninja",
                 "clang-tools",
             ],
-            hooks=[fmt_status("⚡", "C", "GCC/Clang + clangd")],
+            hooks=[],
             ignores=[
                 "build/",
                 "bin/",
@@ -89,7 +88,7 @@ def build_builtin_role_registry(folder_name: str) -> dict[str, Role]:
                 "ninja",
                 "clang-tools",
             ],
-            hooks=[fmt_status("⚡", "C++", "GCC/Clang + clangd")],
+            hooks=[],
             ignores=[
                 "build/",
                 "bin/",
@@ -114,8 +113,7 @@ def build_builtin_role_registry(folder_name: str) -> dict[str, Role]:
                 "delve",
             ],
             hooks=[
-                f"[ -f go.mod ] || go mod init {folder_name} >/dev/null 2>&1 || {{ _bc_err=1; _bc_err_go=1; }}",
-                fmt_status("🐹", "Go", "Go toolchain + gopls"),
+                f"[ -f go.mod ] || go mod init {folder_name}",
             ],
             ignores=["bin/", "dist/"],
         ),
@@ -129,9 +127,7 @@ def build_builtin_role_registry(folder_name: str) -> dict[str, Role]:
                 "zig",
                 "zls",
             ],
-            hooks=[
-                fmt_status("⚡", "Zig", "Zig toolchain + zls"),
-            ],
+            hooks=[],
             ignores=["zig-cache/", "zig-out/"],
         ),
         "java": Role(
@@ -149,7 +145,6 @@ def build_builtin_role_registry(folder_name: str) -> dict[str, Role]:
             ],
             hooks=[
                 'export JAVA_HOME="${pkgs.jdk25}/lib/openjdk"',
-                fmt_status("☕", "Java", "JDK 25 + jdtls"),
             ],
             ignores=["target/", ".gradle/", "build/"],
         ),
@@ -165,7 +160,6 @@ def build_builtin_role_registry(folder_name: str) -> dict[str, Role]:
             ],
             hooks=[
                 'export DOTNET_ROOT="${pkgs.dotnet-sdk_9}"',
-                fmt_status("🔷", ".NET", ".NET 9 SDK + Omnisharp"),
             ],
             ignores=["bin/", "obj/"],
         ),
@@ -187,9 +181,8 @@ def build_builtin_role_registry(folder_name: str) -> dict[str, Role]:
             hooks=[
                 'export PYTHONPATH="$PWD\'\'${PYTHONPATH:+:$PYTHONPATH}"',
                 "export UV_PYTHON_DOWNLOADS=never",
-                "if [ -f pyproject.toml ]; then uv sync --quiet || { _bc_err=1; _bc_err_python=1; }; elif [ -f requirements.txt ] && [ ! -d .venv ]; then (uv venv --quiet && uv pip install -r requirements.txt --quiet) || { _bc_err=1; _bc_err_python=1; }; fi",
-                "if [ -d .venv ]; then source .venv/bin/activate || { _bc_err=1; _bc_err_python=1; }; fi",
-                fmt_status("🐍", "Python", "uv + ruff + ty"),
+                "if [ -f pyproject.toml ]; then uv sync --quiet; elif [ -f requirements.txt ] && [ ! -d .venv ]; then (uv venv --quiet && uv pip install -r requirements.txt --quiet); fi",
+                "if [ -d .venv ]; then source .venv/bin/activate; fi",
             ],
             ignores=[
                 "__pycache__/",
@@ -216,9 +209,8 @@ def build_builtin_role_registry(folder_name: str) -> dict[str, Role]:
             hooks=[
                 'export PYTHONPATH="$PWD\'\'${PYTHONPATH:+:$PYTHONPATH}"',
                 "export UV_PYTHON_DOWNLOADS=never",
-                "if [ -f pyproject.toml ]; then uv sync --quiet || { _bc_err=1; _bc_err_barograph=1; }; fi",
-                "if [ -d .venv ]; then source .venv/bin/activate || { _bc_err=1; _bc_err_barograph=1; }; fi",
-                fmt_status("📈", "Barograph", "Barograph Plot Engine + Scientific Stack"),
+                "if [ -f pyproject.toml ]; then uv sync --quiet; fi",
+                "if [ -d .venv ]; then source .venv/bin/activate; fi",
             ],
             ignores=[
                 "__pycache__/",
@@ -239,7 +231,7 @@ def build_builtin_role_registry(folder_name: str) -> dict[str, Role]:
                 '(julia-bin.withPackages [ "ControlSystems" "DifferentialEquations" "GLMakie" "CairoMakie" "LanguageServer" ])',
                 "julia-formatter",
             ],
-            hooks=[fmt_status("🔵", "Julia", "Julia S&C + Formatter")],
+            hooks=[],
             ignores=[],
         ),
         # ------------------------------------------------------------
@@ -252,7 +244,7 @@ def build_builtin_role_registry(folder_name: str) -> dict[str, Role]:
             display_name="JS/TS",
             status_detail="Bun + vtsls + prettierd",
             pkgs=["bun", "vtsls", "typescript", "prettierd"],
-            hooks=[fmt_status("🟦", "JS/TS", "Bun + vtsls + prettierd")],
+            hooks=[],
             ignores=["node_modules/", "dist/"],
         ),
         "svelte": Role(
@@ -269,8 +261,7 @@ def build_builtin_role_registry(folder_name: str) -> dict[str, Role]:
                 "prettierd",
             ],
             hooks=[
-                "[ -f package.json ] || bun create svelte@latest . >/dev/null 2>&1 || { _bc_err=1; _bc_err_svelte=1; }",
-                fmt_status("🟧", "Svelte 5", "Bun + svelte-ls"),
+                "[ -f package.json ] || bun create svelte@latest .",
             ],
             ignores=["node_modules/", ".svelte-kit/", "build/"],
         ),
@@ -288,8 +279,7 @@ def build_builtin_role_registry(folder_name: str) -> dict[str, Role]:
                 "prettierd",
             ],
             hooks=[
-                "[ -f package.json ] || bun create vue@latest >/dev/null 2>&1 || { _bc_err=1; _bc_err_vue=1; }",
-                fmt_status("🟢", "Vue", "Bun + vue-ls"),
+                "[ -f package.json ] || bun create vue@latest",
             ],
             ignores=["node_modules/", "dist/"],
         ),
@@ -306,8 +296,7 @@ def build_builtin_role_registry(folder_name: str) -> dict[str, Role]:
                 "prettierd",
             ],
             hooks=[
-                "[ -f package.json ] || bun create next-app >/dev/null 2>&1 || { _bc_err=1; _bc_err_next=1; }",
-                fmt_status("⚛️ ", "Next.js", "Bun + vtsls"),
+                "[ -f package.json ] || bun create next-app",
             ],
             ignores=["node_modules/", ".next/", "out/"],
         ),
@@ -321,9 +310,7 @@ def build_builtin_role_registry(folder_name: str) -> dict[str, Role]:
             display_name="Gleam",
             status_detail="Gleam + Erlang runtime",
             pkgs=["gleam", "erlang", "rebar3"],
-            hooks=[
-                fmt_status("🌸", "Gleam", "Gleam + Erlang runtime"),
-            ],
+            hooks=[],
             ignores=["build/"],
         ),
         "elixir": Role(
@@ -333,9 +320,7 @@ def build_builtin_role_registry(folder_name: str) -> dict[str, Role]:
             display_name="Elixir",
             status_detail="Elixir + Mix + elixir-ls",
             pkgs=["elixir", "elixir-ls"],
-            hooks=[
-                fmt_status("💧", "Elixir", "Elixir + Mix + elixir-ls"),
-            ],
+            hooks=[],
             ignores=["_build/", "deps/"],
         ),
         "haskell": Role(
@@ -351,9 +336,7 @@ def build_builtin_role_registry(folder_name: str) -> dict[str, Role]:
                 "hlint",
                 "ormolu",
             ],
-            hooks=[
-                fmt_status("λ ", "Haskell", "GHC + Cabal + HLS + Ormolu"),
-            ],
+            hooks=[],
             ignores=["dist-newstyle/", ".cabal-sandbox/"],
         ),
         # ------------------------------------------------------------
@@ -375,7 +358,6 @@ def build_builtin_role_registry(folder_name: str) -> dict[str, Role]:
             ],
             hooks=[
                 'export TYPST_ROOT="$PWD"',
-                fmt_status("📝", "Snowpack", "Polyglot Document Engine (Typst + LaTeX)"),
             ],
             ignores=[
                 "*.aux",
@@ -469,9 +451,7 @@ def build_builtin_role_registry(folder_name: str) -> dict[str, Role]:
                 "k9s",
                 "dive",
             ],
-            hooks=[
-                fmt_status("🐳", "DevOps", "Docker + K8s tooling"),
-            ],
+            hooks=[],
             ignores=[],
         ),
     }
