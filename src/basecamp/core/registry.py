@@ -168,12 +168,12 @@ def build_builtin_role_registry(folder_name: str) -> dict[str, Role]:
         # ------------------------------------------------------------
         "python": Role(
             category="Data & Scientific",
-            description="Python 3.14 + uv + ruff + ty",
+            description="Python 3 + uv + ruff + ty",
             icon="🐍",
             display_name="Python",
             status_detail="uv + ruff + ty",
             pkgs=[
-                "python314",
+                "python3",
                 "uv",
                 "ruff",
                 "ty",
@@ -201,7 +201,7 @@ def build_builtin_role_registry(folder_name: str) -> dict[str, Role]:
             display_name="Barograph",
             status_detail="Barograph Plot Engine + Scientific Stack",
             pkgs=[
-                "python314",
+                "python3",
                 "uv",
                 "ruff",
                 "ty",

@@ -2,5 +2,5 @@
 name = "__PROJECT_NAME__"
 version = "0.1.0"
 description = "Clean, lightweight Python workspace"
-requires-python = ">=3.14"
+requires-python = ">=3.13"
 dependencies = []

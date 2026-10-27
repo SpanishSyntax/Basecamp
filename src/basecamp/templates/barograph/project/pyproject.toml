@@ -2,14 +2,14 @@
 name = "__PROJECT_NAME__"
 version = "0.1.0"
 description = "Barograph simulation & plotting workspace"
-requires-python = ">=3.14"
+requires-python = ">=3.13"
 dependencies = [
-  "control>=0.10.2",
-  "kaleido>=1.4.0",
-  "matplotlib>=3.11.2",
-  "numpy>=2.5.3",
-  "plotly>=7.1.0",
-  "rich>=15.0.0",
-  "scipy>=1.18.1",
-  "sympy>=1.14.0",
+  "control",
+  "kaleido",
+  "matplotlib",
+  "numpy",
+  "plotly",
+  "rich",
+  "scipy",
+  "sympy",
 ]
