@@ -139,7 +139,7 @@ def test_cli_execution_in_tempdir():
         assert (tmp / "main.py").exists()
 
         flake_content = (tmp / "flake.nix").read_text()
-        assert "python314" in flake_content
+        assert "python3" in flake_content
         assert "uv" in flake_content
 
         pyproject_content = (tmp / "pyproject.toml").read_text()

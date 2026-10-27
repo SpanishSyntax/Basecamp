@@ -53,7 +53,7 @@ def test_basecamp_info_python():
     res = run_basecamp("info", "python")
     assert res.returncode == 0
     assert "Role Information: python" in res.stdout
-    assert "python314" in res.stdout
+    assert "python3" in res.stdout
 
 
 def test_basecamp_info_snowpack():

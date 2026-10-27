@@ -39,7 +39,7 @@ def test_prepare_flake_env():
 
         content = flake_file.read_text()
         assert "rust-overlay" in content
-        assert "python314" in content
+        assert "python3" in content
         assert "github:NixOS/nixpkgs/nixos-26.05" in content
 
         gitignore_content = gitignore_file.read_text()
