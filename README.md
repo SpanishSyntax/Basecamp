@@ -129,7 +129,7 @@ Options:
 | **Rust** | `rust` | `rs` | Oxalica Rust Stable + `rust-analyzer`, `lldb` | `cargo-fmt` |
 | **Zig** | `zig` | - | Zig Compiler + `zls` (LSP) | Built-in `zig fmt` |
 | **Python** | `python` | `py` | Python 3.14 + `uv`, `ty` | `ruff` (LSP + Formatter) |
-| **Math & Visual** | `mathvis` | `mv` | Python 3.14 + `uv`, `ty` | `ruff` + Scientific Stack |
+| **Barograph / Plotting** | `barograph` | `bg`, `baro` | Python 3.14 + `uv`, `ty` | `ruff` + Barograph Scientific Stack |
 | **Go** | `go` | - | Go + `gopls`, `delve` | `goimports` (`gotools`), `golangci-lint` |
 | **C** | `c` | - | GCC, GDB, CMake, Ninja, `clangd` | `clang-format` |
 | **C++** | `cpp` | - | GCC, GDB, CMake, Ninja, `clangd` | `clang-format` |
@@ -257,7 +257,7 @@ Basecamp/
         ├── haskell/
         ├── java/
         ├── julia/
-        ├── mathvis/
+        ├── barograph/
         ├── ops/
         ├── python/
         ├── rust/

@@ -101,7 +101,7 @@ def test_detect_active_roles_from_option_c_badges():
       shellHook = ''
         printf '\033[1;34m⛺  [basecamp]\033[0m \033[1mWorkspace Initialized:\033[0m\n'
         printf ' \033[2m│\033[0m  \033[1;32m✓\033[0m 📝 \033[1mFolio\033[0m \033[2m(Polyglot)\033[0m\n'
-        printf ' \033[2m│\033[0m  \033[1;32m✓\033[0m 📐 \033[1mMathvis\033[0m \033[2m(Scientific Stack)\033[0m\n'
+        printf ' \033[2m│\033[0m  \033[1;32m✓\033[0m 📈 \033[1mBarograph\033[0m \033[2m(Scientific Stack)\033[0m\n'
       '';
     };
   };
@@ -110,7 +110,7 @@ def test_detect_active_roles_from_option_c_badges():
     diags, extra, channel = detect_active_roles(flake_content, roles_db, {})
     detected_keys = [d.role_key for d in diags]
     assert "folio" in detected_keys
-    assert "mathvis" in detected_keys
+    assert "barograph" in detected_keys
 
 
 def test_detect_active_roles_from_package_signatures():

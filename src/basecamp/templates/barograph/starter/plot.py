@@ -1,3 +1,5 @@
+"""First Eigenfunction of the L-Shaped Membrane."""
+
 import numpy as np
 import plotly.graph_objects as go
 from rich import print as rprint
@@ -28,12 +30,12 @@ def generate_l_membrane():
     return x, y, Z
 
 
-rprint("[bold cyan]📐 Systems & Control Simulation Engine Initialized[/bold cyan]")
+rprint("[bold cyan]📈 Barograph Simulation Engine Initialized[/bold cyan]")
 rprint("[bold]Rendering:[/bold] First Eigenfunction of the L-Shaped Membrane...")
 
 x, y, z = generate_l_membrane()
 
-# Build root Plotly Figure (automatically detected and served by Prism)
+# Build root Plotly Figure (automatically detected and served by Barograph)
 fig = go.Figure(
     data=[
         go.Surface(
@@ -55,7 +57,7 @@ fig = go.Figure(
 )
 
 fig.update_layout(
-    title="<b>First Eigenfunction of the L-shaped Membrane</b><br><sup>Visualized via Prism</sup>",
+    title="<b>First Eigenfunction of the L-shaped Membrane</b><br><sup>Visualized via Barograph</sup>",
     margin=dict(l=40, r=40, t=60, b=40),
     scene=dict(
         xaxis=dict(visible=False),

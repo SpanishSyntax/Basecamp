@@ -201,12 +201,12 @@ def build_builtin_role_registry(folder_name: str) -> dict[str, Role]:
                 "*.egg-info/",
             ],
         ),
-        "mathvis": Role(
+        "barograph": Role(
             category="Data & Scientific",
-            description="Python 3.14 + scientific computation stack",
-            icon="📐",
-            display_name="Mathvis",
-            status_detail="πthon 3.14 + Scientific Stack",
+            description="Barograph plot engine + Python scientific computation stack",
+            icon="📈",
+            display_name="Barograph",
+            status_detail="Barograph Plot Engine + Scientific Stack",
             pkgs=[
                 "python314",
                 "uv",
@@ -216,9 +216,9 @@ def build_builtin_role_registry(folder_name: str) -> dict[str, Role]:
             hooks=[
                 'export PYTHONPATH="$PWD\'\'${PYTHONPATH:+:$PYTHONPATH}"',
                 "export UV_PYTHON_DOWNLOADS=never",
-                "if [ -f pyproject.toml ]; then uv sync --quiet || { _bc_err=1; _bc_err_mathvis=1; }; fi",
-                "if [ -d .venv ]; then source .venv/bin/activate || { _bc_err=1; _bc_err_mathvis=1; }; fi",
-                fmt_status("📐", "Mathvis", "πthon 3.14 + Scientific Stack"),
+                "if [ -f pyproject.toml ]; then uv sync --quiet || { _bc_err=1; _bc_err_barograph=1; }; fi",
+                "if [ -d .venv ]; then source .venv/bin/activate || { _bc_err=1; _bc_err_barograph=1; }; fi",
+                fmt_status("📈", "Barograph", "Barograph Plot Engine + Scientific Stack"),
             ],
             ignores=[
                 "__pycache__/",
@@ -482,7 +482,9 @@ BUILTIN_ALIASES: dict[str, str] = {
     "rs": "rust",
     "react": "next",
     "js": "ts",
-    "mv": "mathvis",
+    "bg": "barograph",
+    "baro": "barograph",
+    "barograph": "barograph",
     "md": "folio:paper",
     "typ": "folio:typst-report",
     "typst": "folio:typst-report",

@@ -1,7 +1,7 @@
 [project]
 name = "__PROJECT_NAME__"
 version = "0.1.0"
-description = "S&C Symbolic math printing calculator"
+description = "Barograph simulation & plotting workspace"
 requires-python = ">=3.14"
 dependencies = [
   "control>=0.10.2",

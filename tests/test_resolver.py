@@ -22,7 +22,9 @@ def test_resolve_nixpkgs_url():
 def test_builtin_aliases():
     assert BUILTIN_ALIASES["py"] == "python"
     assert BUILTIN_ALIASES["rs"] == "rust"
-    assert BUILTIN_ALIASES["mv"] == "mathvis"
+    assert BUILTIN_ALIASES["bg"] == "barograph"
+    assert BUILTIN_ALIASES["baro"] == "barograph"
+    assert BUILTIN_ALIASES["barograph"] == "barograph"
     assert BUILTIN_ALIASES["md"] == "folio:paper"
     assert BUILTIN_ALIASES["slides"] == "folio:slides"
     assert BUILTIN_ALIASES["beamer"] == "folio:latex-slides"

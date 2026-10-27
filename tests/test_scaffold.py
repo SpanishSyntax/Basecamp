@@ -116,3 +116,28 @@ def test_scaffold_folio_slides():
         content = slides_file.read_text()
         assert "Quantum Control" in content
         assert "Dr. Marie" in content
+
+
+def test_scaffold_barograph_assets():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmp_path = Path(tmpdir)
+        roles = build_builtin_role_registry("test_bg")
+        scaffold_assets(
+            target_dir=tmp_path,
+            project_name="test_bg",
+            resolved_roles=["barograph"],
+            assets_dirs=[ASSETS_DIR],
+            scope="all",
+            force=True,
+            dry_run=False,
+            auto_git=False,
+            project_root=tmp_path,
+            roles_db=roles,
+        )
+        assert (tmp_path / "pyproject.toml").exists()
+        assert (tmp_path / "plot.py").exists()
+        assert (tmp_path / "dashboard.py").exists()
+        dash_content = (tmp_path / "dashboard.py").read_text()
+        assert "Barograph" in dash_content
+        assert "test_bg" in dash_content
+

@@ -70,7 +70,7 @@ def print_help() -> None:
   basecamp new tex:slides                  # Drop native LaTeX Beamer presentation (slides.tex)
   basecamp new paper                       # Direct shortcut to drop paper.md in current folder
   basecamp init folio -m slides            # Bootstrap slides using explicit --mode flag
-  basecamp new mv                          # Drop mathvis plot.py in current experiment folder
+  basecamp new bg                          # Drop Barograph starter (plot.py + dashboard.py) in current folder
   basecamp new typ                         # Drop native Typst report (report.typ) in current folder
   basecamp shell rust next                 # Setup DevShell without scaffolding files
   basecamp project folio                   # Scaffold layout templates & library.bib to project root

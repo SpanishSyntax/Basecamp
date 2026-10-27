@@ -48,7 +48,7 @@ def test_builtin_registry_completeness():
     roles = build_builtin_role_registry("test_proj")
     expected_roles = {
         "rust", "c", "cpp", "go", "zig", "java", "dotnet",
-        "python", "mathvis", "julia", "ts", "svelte", "vue",
+        "python", "barograph", "julia", "ts", "svelte", "vue",
         "next", "gleam", "elixir", "haskell", "folio", "ops"
     }
     assert expected_roles.issubset(set(roles.keys()))
@@ -71,7 +71,9 @@ def test_alias_parity():
     assert BUILTIN_ALIASES["py"] == "python"
     assert BUILTIN_ALIASES["rs"] == "rust"
     assert BUILTIN_ALIASES["js"] == "ts"
-    assert BUILTIN_ALIASES["mv"] == "mathvis"
+    assert BUILTIN_ALIASES["bg"] == "barograph"
+    assert BUILTIN_ALIASES["baro"] == "barograph"
+    assert BUILTIN_ALIASES["barograph"] == "barograph"
     assert BUILTIN_ALIASES["md"] == "folio:paper"
     assert BUILTIN_ALIASES["slides"] == "folio:slides"
     assert BUILTIN_ALIASES["paper"] == "folio:paper"
