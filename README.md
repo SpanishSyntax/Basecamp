@@ -37,14 +37,14 @@ nix run github:SpanishSyntax/Basecamp -- init python
 # Initialize a Zig project with zls and build.zig
 nix run github:SpanishSyntax/Basecamp -- init zig
 
-# Initialize a Folio workspace for clean Markdown report
-basecamp init folio report
+# Initialize a Snowpack workspace for clean Markdown report
+basecamp init snowpack report
 
-# Initialize a Folio workspace specifically for 16:9 slides presentation
-basecamp init folio slides
+# Initialize a Snowpack workspace specifically for 16:9 slides presentation
+basecamp init snowpack slides
 
-# Initialize a Folio workspace for an academic IEEE paper
-basecamp init folio paper
+# Initialize a Snowpack workspace for an academic IEEE paper
+basecamp init snowpack paper
 
 # Initialize native Typst or LaTeX workspaces directly
 basecamp init typ                        # Native Typst workspace (report.typ + packages.typ)
@@ -66,7 +66,7 @@ basecamp new mv
 basecamp shell rust next
 
 # Scaffold project foundation files (packages.typ, report.typ, library.bib) to project root
-basecamp project folio
+basecamp project snowpack
 
 # Combine roles: Rust backend + Next.js frontend + DevOps containers
 nix run github:SpanishSyntax/Basecamp -- init rust next ops
@@ -106,8 +106,8 @@ Options:
   -t, --target TARGET  Alias for --mode.
   -e, --engine ENGINE  Compilation engine for Markdown ('typst' or 'latex').
   -p, --packages       Prompt to interactively configure packages dynamically.
-  --title TITLE        Document title for Folio documents.
-  --author AUTHOR      Document author for Folio documents.
+  --title TITLE        Document title for Snowpack documents.
+  --author AUTHOR      Document author for Snowpack documents.
   --theme THEME        Presentation theme for slides ('dark' or 'light').
   -f, --force          Overwrite existing files without confirmation prompts.
   -n, --dry-run        Preview generated files in stdout without writing.
@@ -143,16 +143,16 @@ Options:
 | **Svelte** | `svelte` | - | Bun, `svelte-language-server`, `vtsls` | `prettierd` |
 | **Vue** | `vue` | - | Bun, `vue-language-server`, `vtsls` | `prettierd` |
 | **Next.js** | `next` | `react` | Bun, `vtsls`, `typescript` | `prettierd` |
-| **Folio (Markdown)** | `folio` / `md` | `md:report`, `md:slides`, `md:paper`, `report`, `slides`, `paper` | `pandoc`, `typst`, `tectonic`, `tinymist`, `texlab` | `typstyle` |
-| **Folio (Typst)** | `typst` / `typ` | `typ:report`, `typ:slides`, `typ:paper`, `typst:report`, `typst:slides`, `typst:paper` | `typst`, `tinymist` (LSP) | `typstyle` |
-| **Folio (LaTeX)** | `latex` / `tex` | `tex:report`, `tex:slides`, `tex:paper`, `latex:report`, `latex:slides`, `latex:paper`, `beamer` | `tectonic`, `texlab` (LSP) | - |
+| **Snowpack (Markdown)** | `snowpack` / `md` | `snow`, `md:report`, `md:slides`, `md:paper`, `report`, `slides`, `paper` | `pandoc`, `typst`, `tectonic`, `tinymist`, `texlab` | `typstyle` |
+| **Snowpack (Typst)** | `typst` / `typ` | `typ:report`, `typ:slides`, `typ:paper`, `typst:report`, `typst:slides`, `typst:paper` | `typst`, `tinymist` (LSP) | `typstyle` |
+| **Snowpack (LaTeX)** | `latex` / `tex` | `tex:report`, `tex:slides`, `tex:paper`, `latex:report`, `latex:slides`, `latex:paper`, `beamer` | `tectonic`, `texlab` (LSP) | - |
 | **DevOps & Cloud** | `ops` | `devops`, `docker` | `docker-compose`, `lazydocker`, `kubectl`, `helm`, `k9s`, `dive` | - |
 
 ---
 
-## 📝 Folio Document Engine (Standardized 3×3 Matrix)
+## 📝 Snowpack Document Engine (Standardized 3×3 Matrix)
 
-Basecamp provides a symmetrical 9-way document scaffolding engine for [Folio](https://github.com/SpanishSyntax/Folio). Every document archetype is available across all three supported markup languages:
+Basecamp provides a symmetrical 9-way document scaffolding engine for Snowpack. Every document archetype is available across all three supported markup languages:
 
 | Document Archetype | Markdown (`.md`) | Typst (`.typ`) | LaTeX (`.tex`) | Output / Layout Specification |
 | :--- | :--- | :--- | :--- | :--- |
@@ -161,7 +161,7 @@ Basecamp provides a symmetrical 9-way document scaffolding engine for [Folio](ht
 | **Academic Paper** | `paper.md` | `paper.typ` | `paper.tex` | Dual-column IEEE Computer Society publication |
 
 ### Foundation Assets (`project/`)
-When initializing a Folio workspace, Basecamp automatically scaffolds the corresponding shared foundation assets to the project root:
+When initializing a Snowpack workspace, Basecamp automatically scaffolds the corresponding shared foundation assets to the project root:
 - `packages.typ`: Modular Typst preamble hub (`cetz`, `fletcher`, `physica`, `merman`, `tablex`, `algorithmic`, `codly`).
 - `packages.tex`: Modular LaTeX preamble hub (`amsmath`, `mathtools`, `tikz`, `pgfplots`, `booktabs`, `tcolorbox`, `cleveref`).
 - `library.bib`: Shared BibTeX bibliography database.
@@ -170,9 +170,9 @@ When initializing a Folio workspace, Basecamp automatically scaffolds the corres
 #### Interactive Package Configurator (`basecamp packages`)
 You can dynamically assemble your package manifest at any time with sane defaults preselected:
 ```bash
-basecamp packages typ                  # Interactively configure packages.typ via multi-select
-basecamp packages tex                  # Interactively configure packages.tex via multi-select
-basecamp init folio slides --packages  # Interactively choose package bundles during init
+basecamp packages typ                     # Interactively configure packages.typ via multi-select
+basecamp packages tex                     # Interactively configure packages.tex via multi-select
+basecamp init snowpack slides --packages  # Interactively choose package bundles during init
 ```
 
 ---
@@ -251,7 +251,7 @@ Basecamp/
         ├── cpp/
         ├── dotnet/
         ├── elixir/
-        ├── folio/
+        ├── snowpack/
         ├── gleam/
         ├── go/
         ├── haskell/

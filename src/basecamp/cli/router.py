@@ -176,7 +176,7 @@ def main() -> None:
                         resolved_roles.append(canonical_role)
                     continue
 
-            # 2. Colon notation (e.g. folio:slides, folio:paper, md:report, typst:report)
+            # 2. Colon notation (e.g. snowpack:slides, snowpack:paper, md:report, typst:report)
             if ":" in item:
                 r_part, _, t_part = item.partition(":")
                 canonical_role = aliases.get(r_part.lower(), r_part.lower()).split(":", 1)[0]
@@ -299,7 +299,7 @@ def main() -> None:
     nixpkgs_url = resolve_nixpkgs_url(parsed.channel)
 
     configure_packages = False
-    if "folio" in resolved_roles:
+    if "snowpack" in resolved_roles:
         if parsed.no_packages_flag:
             configure_packages = False
         elif parsed.configure_packages_flag:

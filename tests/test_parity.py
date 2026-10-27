@@ -49,21 +49,21 @@ def test_builtin_registry_completeness():
     expected_roles = {
         "rust", "c", "cpp", "go", "zig", "java", "dotnet",
         "python", "barograph", "julia", "ts", "svelte", "vue",
-        "next", "gleam", "elixir", "haskell", "folio", "ops"
+        "next", "gleam", "elixir", "haskell", "snowpack", "ops"
     }
     assert expected_roles.issubset(set(roles.keys()))
 
-    # Verify Folio targets
-    folio = roles["folio"]
-    assert "report" in folio.targets
-    assert "slides" in folio.targets
-    assert "paper" in folio.targets
-    assert "typst-report" in folio.targets
-    assert "typst-slides" in folio.targets
-    assert "typst-paper" in folio.targets
-    assert "latex-report" in folio.targets
-    assert "latex-slides" in folio.targets
-    assert "latex-paper" in folio.targets
+    # Verify Snowpack targets
+    snowpack = roles["snowpack"]
+    assert "report" in snowpack.targets
+    assert "slides" in snowpack.targets
+    assert "paper" in snowpack.targets
+    assert "typst-report" in snowpack.targets
+    assert "typst-slides" in snowpack.targets
+    assert "typst-paper" in snowpack.targets
+    assert "latex-report" in snowpack.targets
+    assert "latex-slides" in snowpack.targets
+    assert "latex-paper" in snowpack.targets
 
 
 def test_alias_parity():
@@ -74,24 +74,25 @@ def test_alias_parity():
     assert BUILTIN_ALIASES["bg"] == "barograph"
     assert BUILTIN_ALIASES["baro"] == "barograph"
     assert BUILTIN_ALIASES["barograph"] == "barograph"
-    assert BUILTIN_ALIASES["md"] == "folio:paper"
-    assert BUILTIN_ALIASES["slides"] == "folio:slides"
-    assert BUILTIN_ALIASES["paper"] == "folio:paper"
-    assert BUILTIN_ALIASES["report"] == "folio:report"
-    assert BUILTIN_ALIASES["typ"] == "folio:typst-report"
-    assert BUILTIN_ALIASES["tex"] == "folio:latex-report"
-    assert BUILTIN_ALIASES["beamer"] == "folio:latex-slides"
-    assert BUILTIN_ALIASES["typ:paper"] == "folio:typst-paper"
-    assert BUILTIN_ALIASES["tex:slides"] == "folio:latex-slides"
+    assert BUILTIN_ALIASES["snow"] == "snowpack"
+    assert BUILTIN_ALIASES["md"] == "snowpack:paper"
+    assert BUILTIN_ALIASES["slides"] == "snowpack:slides"
+    assert BUILTIN_ALIASES["paper"] == "snowpack:paper"
+    assert BUILTIN_ALIASES["report"] == "snowpack:report"
+    assert BUILTIN_ALIASES["typ"] == "snowpack:typst-report"
+    assert BUILTIN_ALIASES["tex"] == "snowpack:latex-report"
+    assert BUILTIN_ALIASES["beamer"] == "snowpack:latex-slides"
+    assert BUILTIN_ALIASES["typ:paper"] == "snowpack:typst-paper"
+    assert BUILTIN_ALIASES["tex:slides"] == "snowpack:latex-slides"
 
 
 def test_standalone_target_matching():
     roles = build_builtin_role_registry("test_proj")
-    assert find_role_for_standalone_target("slides", roles) == ("folio", "slides")
-    assert find_role_for_standalone_target("paper", roles) == ("folio", "paper")
-    assert find_role_for_standalone_target("report", roles) == ("folio", "report")
-    assert find_role_for_standalone_target("typst-paper", roles) == ("folio", "typst-paper")
-    assert find_role_for_standalone_target("latex-slides", roles) == ("folio", "latex-slides")
+    assert find_role_for_standalone_target("slides", roles) == ("snowpack", "slides")
+    assert find_role_for_standalone_target("paper", roles) == ("snowpack", "paper")
+    assert find_role_for_standalone_target("report", roles) == ("snowpack", "report")
+    assert find_role_for_standalone_target("typst-paper", roles) == ("snowpack", "typst-paper")
+    assert find_role_for_standalone_target("latex-slides", roles) == ("snowpack", "latex-slides")
 
 
 def test_cli_dry_run_parity():
@@ -102,8 +103,8 @@ def test_cli_dry_run_parity():
     assert "rust-overlay" in res.stdout
     assert "cargo-expand" in res.stdout
 
-    # basecamp init folio slides --dry-run
-    res = run_basecamp("init", "folio", "slides", "--dry-run")
+    # basecamp init snowpack slides --dry-run
+    res = run_basecamp("init", "snowpack", "slides", "--dry-run")
     assert res.returncode == 0
     assert "Generated flake.nix" in res.stdout
     assert "typst" in res.stdout
@@ -148,10 +149,10 @@ def test_cli_execution_in_tempdir():
 def test_cli_project_command():
     with tempfile.TemporaryDirectory() as tmpdir:
         tmp = Path(tmpdir)
-        # Test: basecamp project folio
-        res = run_basecamp("project", "folio", "--no-git", cwd=tmp)
+        # Test: basecamp project snowpack
+        res = run_basecamp("project", "snowpack", "--no-git", cwd=tmp)
         assert res.returncode == 0
-        # Project assets for folio include packages.typ, report.typ, library.bib
+        # Project assets for snowpack include packages.typ, report.typ, library.bib
         assert (tmp / "packages.typ").exists()
         assert (tmp / "library.bib").exists()
         assert not (tmp / "main.py").exists()

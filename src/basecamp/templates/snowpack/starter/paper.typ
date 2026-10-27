@@ -1,5 +1,5 @@
 // ========================================================
-// FOLIO IEEE ACADEMIC PAPER TEMPLATE
+// SNOWPACK IEEE ACADEMIC PAPER TEMPLATE
 // Powered by @preview/charged-ieee:0.1.4 with Markdown Interop
 // ========================================================
 #import "@preview/charged-ieee:0.1.4": ieee

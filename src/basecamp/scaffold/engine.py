@@ -25,15 +25,15 @@ def resolve_document_metadata(
     configure_packages: bool = False,
     interactive: bool = True,
 ) -> dict[str, str]:
-    """Interactively prompts or resolves document metadata when scaffolding Folio documents."""
+    """Interactively prompts or resolves document metadata when scaffolding Snowpack documents."""
     meta: dict[str, str] = {}
-    if "folio" not in resolved_roles:
+    if "snowpack" not in resolved_roles:
         return meta
 
     meta["date"] = time.strftime("%B %Y")
     meta["dependency"] = "Department of Systems & Control"
 
-    target = role_targets.get("folio", "")
+    target = role_targets.get("snowpack", "")
     git_author = get_git_author()
     default_title = project_name.replace("-", " ").replace("_", " ").title()
     default_author = git_author if git_author else "Author"

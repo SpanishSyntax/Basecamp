@@ -1,5 +1,5 @@
 // ========================================================
-// FOLIO PRESENTATION TEMPLATE (16:9 Widescreen / 1080p)
+// SNOWPACK PRESENTATION TEMPLATE (16:9 Widescreen / 1080p)
 // Apple Keynote-Inspired Minimalist Design System for Typst
 // ========================================================
 #import "/packages.typ": *
@@ -65,7 +65,7 @@
 #let horizontalrule = pagebreak(weak: true)
 
 #let slides(
-  title: "Folio Presentation",
+  title: "Snowpack Presentation",
   subtitle: none,
   author: "Author",
   dependency: none,

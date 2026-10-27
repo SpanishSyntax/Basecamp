@@ -46,7 +46,7 @@ def test_basecamp_list():
     assert "Basecamp Roles Registry" in res.stdout
     assert "python" in res.stdout
     assert "rust" in res.stdout
-    assert "folio" in res.stdout
+    assert "snowpack" in res.stdout
 
 
 def test_basecamp_info_python():
@@ -56,10 +56,10 @@ def test_basecamp_info_python():
     assert "python314" in res.stdout
 
 
-def test_basecamp_info_folio():
-    res = run_basecamp("info", "folio")
+def test_basecamp_info_snowpack():
+    res = run_basecamp("info", "snowpack")
     assert res.returncode == 0
-    assert "Role Information: folio" in res.stdout
+    assert "Role Information: snowpack" in res.stdout
     assert "typst" in res.stdout
 
 

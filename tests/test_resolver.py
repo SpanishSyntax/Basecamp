@@ -25,35 +25,36 @@ def test_builtin_aliases():
     assert BUILTIN_ALIASES["bg"] == "barograph"
     assert BUILTIN_ALIASES["baro"] == "barograph"
     assert BUILTIN_ALIASES["barograph"] == "barograph"
-    assert BUILTIN_ALIASES["md"] == "folio:paper"
-    assert BUILTIN_ALIASES["slides"] == "folio:slides"
-    assert BUILTIN_ALIASES["beamer"] == "folio:latex-slides"
+    assert BUILTIN_ALIASES["snow"] == "snowpack"
+    assert BUILTIN_ALIASES["md"] == "snowpack:paper"
+    assert BUILTIN_ALIASES["slides"] == "snowpack:slides"
+    assert BUILTIN_ALIASES["beamer"] == "snowpack:latex-slides"
 
 
 def test_resolve_role_target():
     roles = build_builtin_role_registry("my_test_proj")
-    assert resolve_role_target("folio", "report", roles) == "report"
-    assert resolve_role_target("folio", "md-report", roles) == "report"
-    assert resolve_role_target("folio", "slides", roles) == "slides"
-    assert resolve_role_target("folio", "presentation", roles) == "slides"
-    assert resolve_role_target("folio", "typst-paper", roles) == "typst-paper"
-    assert resolve_role_target("folio", "typ", roles) == "typst-paper"
-    assert resolve_role_target("folio", "latex-slides", roles) == "latex-slides"
-    assert resolve_role_target("folio", "beamer", roles) == "latex-slides"
-    assert resolve_role_target("folio", "nonexistent", roles) is None
+    assert resolve_role_target("snowpack", "report", roles) == "report"
+    assert resolve_role_target("snowpack", "md-report", roles) == "report"
+    assert resolve_role_target("snowpack", "slides", roles) == "slides"
+    assert resolve_role_target("snowpack", "presentation", roles) == "slides"
+    assert resolve_role_target("snowpack", "typst-paper", roles) == "typst-paper"
+    assert resolve_role_target("snowpack", "typ", roles) == "typst-paper"
+    assert resolve_role_target("snowpack", "latex-slides", roles) == "latex-slides"
+    assert resolve_role_target("snowpack", "beamer", roles) == "latex-slides"
+    assert resolve_role_target("snowpack", "nonexistent", roles) is None
     assert resolve_role_target("python", "any", roles) is None
 
 
 def test_find_role_for_standalone_target():
     roles = build_builtin_role_registry("my_test_proj")
     match = find_role_for_standalone_target("slides", roles)
-    assert match == ("folio", "slides")
+    assert match == ("snowpack", "slides")
 
     match = find_role_for_standalone_target("paper", roles)
-    assert match == ("folio", "paper")
+    assert match == ("snowpack", "paper")
 
     match = find_role_for_standalone_target("typ-report", roles)
-    assert match == ("folio", "typst-report")
+    assert match == ("snowpack", "typst-report")
 
     match = find_role_for_standalone_target("nonexistent", roles)
     assert match is None

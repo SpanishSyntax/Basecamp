@@ -35,7 +35,7 @@ def run_basecamp(*args: str, cwd: Path | None = None) -> subprocess.CompletedPro
 def test_detect_active_roles_metadata_comment():
     roles_db = build_builtin_role_registry("test_proj")
     flake_content = """
-# [basecamp] roles: python rust folio
+# [basecamp] roles: python rust snowpack
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
@@ -46,7 +46,7 @@ def test_detect_active_roles_metadata_comment():
     detected_keys = [d.role_key for d in diags]
     assert "python" in detected_keys
     assert "rust" in detected_keys
-    assert "folio" in detected_keys
+    assert "snowpack" in detected_keys
     assert channel == "nixos-26.05"
 
 
@@ -100,7 +100,7 @@ def test_detect_active_roles_from_option_c_badges():
       packages = with pkgs; [];
       shellHook = ''
         printf '\033[1;34m⛺  [basecamp]\033[0m \033[1mWorkspace Initialized:\033[0m\n'
-        printf ' \033[2m│\033[0m  \033[1;32m✓\033[0m 📝 \033[1mFolio\033[0m \033[2m(Polyglot)\033[0m\n'
+        printf ' \033[2m│\033[0m  \033[1;32m✓\033[0m 📝 \033[1mSnowpack\033[0m \033[2m(Polyglot)\033[0m\n'
         printf ' \033[2m│\033[0m  \033[1;32m✓\033[0m 📈 \033[1mBarograph\033[0m \033[2m(Scientific Stack)\033[0m\n'
       '';
     };
@@ -109,7 +109,7 @@ def test_detect_active_roles_from_option_c_badges():
 """
     diags, extra, channel = detect_active_roles(flake_content, roles_db, {})
     detected_keys = [d.role_key for d in diags]
-    assert "folio" in detected_keys
+    assert "snowpack" in detected_keys
     assert "barograph" in detected_keys
 
 
@@ -127,7 +127,7 @@ def test_detect_active_roles_from_package_signatures():
 """
     diags, extra, channel = detect_active_roles(flake_content, roles_db, {})
     detected_keys = [d.role_key for d in diags]
-    assert "folio" in detected_keys
+    assert "snowpack" in detected_keys
     assert "my-custom-tool" in extra
     assert channel == "nixos-unstable"
 
@@ -177,7 +177,7 @@ def test_cli_active_polyglot():
     with tempfile.TemporaryDirectory() as tmpdir:
         tmp = Path(tmpdir)
         # Bootstrap polyglot workspace
-        init_res = run_basecamp("init", "py", "rust", "folio", "--no-direnv", "--no-git", cwd=tmp)
+        init_res = run_basecamp("init", "py", "rust", "snowpack", "--no-direnv", "--no-git", cwd=tmp)
         assert init_res.returncode == 0
 
         res = run_basecamp("active", cwd=tmp)
@@ -185,5 +185,5 @@ def test_cli_active_polyglot():
         assert "Active Roles Diagnostic" in res.stdout
         assert "python" in res.stdout
         assert "rust" in res.stdout
-        assert "folio" in res.stdout
+        assert "snowpack" in res.stdout
         assert "role(s) configured" in res.stdout

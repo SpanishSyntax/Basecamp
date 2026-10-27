@@ -40,8 +40,8 @@ def print_help() -> None:
   -p, --packages       Configure packages dynamically (default in interactive mode).
   --no-pkg             Skip interactive package bundle selection.
   --no-packages        Alias for --no-pkg.
-  --title TITLE        Document title for Folio documents.
-  --author AUTHOR      Document author for Folio documents.
+  --title TITLE        Document title for Snowpack documents.
+  --author AUTHOR      Document author for Snowpack documents.
   --theme THEME        Presentation theme for slides ('dark' or 'light').
   -f, --force          Overwrite existing files without confirmation prompts.
   -n, --dry-run        Preview generated files in stdout without writing.
@@ -57,10 +57,10 @@ def print_help() -> None:
   basecamp                                 # Interactive Bun-style stack selector
   basecamp init py                         # Setup Python DevShell, root configs, and starter
   basecamp init py cpp rust typ            # Polyglot multi-language workspace bootstrap
-  basecamp init folio report               # Setup Folio workspace for clean report document
-  basecamp init folio slides               # Setup Folio workspace for 16:9 presentation slides
-  basecamp init folio paper                # Setup Folio workspace for IEEE 2-column paper
-  basecamp init folio slides --packages    # Scaffold slides and interactively pick package bundles
+  basecamp init snowpack report            # Setup Snowpack workspace for clean report document
+  basecamp init snowpack slides            # Setup Snowpack workspace for 16:9 presentation slides
+  basecamp init snowpack paper             # Setup Snowpack workspace for IEEE 2-column paper
+  basecamp init snowpack slides --packages # Scaffold slides and interactively pick package bundles
   basecamp packages typ                    # Interactively configure Typst packages (packages.typ)
   basecamp packages tex                    # Interactively configure LaTeX packages (packages.tex)
   basecamp init typ                        # Setup native Typst workspace (report.typ + packages.typ)
@@ -69,11 +69,11 @@ def print_help() -> None:
   basecamp new typ:paper                   # Drop native Typst IEEE 2-column paper (paper.typ)
   basecamp new tex:slides                  # Drop native LaTeX Beamer presentation (slides.tex)
   basecamp new paper                       # Direct shortcut to drop paper.md in current folder
-  basecamp init folio -m slides            # Bootstrap slides using explicit --mode flag
+  basecamp init snowpack -m slides         # Bootstrap slides using explicit --mode flag
   basecamp new bg                          # Drop Barograph starter (plot.py + dashboard.py) in current folder
   basecamp new typ                         # Drop native Typst report (report.typ) in current folder
   basecamp shell rust next                 # Setup DevShell without scaffolding files
-  basecamp project folio                   # Scaffold layout templates & library.bib to project root
+  basecamp project snowpack                # Scaffold layout templates & library.bib to project root
   basecamp list                            # View all registered language roles & aliases
   basecamp active                          # Diagnose active roles on current workspace flake
   basecamp list --active                   # Show active roles on current flake

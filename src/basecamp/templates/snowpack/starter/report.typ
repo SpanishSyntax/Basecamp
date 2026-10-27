@@ -1,5 +1,5 @@
 // ========================================================
-// FOLIO MINIMAL SANS-SERIF REPORT TEMPLATE (Typst 0.13+)
+// SNOWPACK MINIMAL SANS-SERIF REPORT TEMPLATE (Typst 0.13+)
 // ========================================================
 #import "@preview/mmdr:0.2.2": mermaid
 #import "/packages.typ": *

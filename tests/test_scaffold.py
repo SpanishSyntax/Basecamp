@@ -85,11 +85,11 @@ def test_scaffold_python_assets():
         assert (tmp_path / "main.py").exists()
 
 
-def test_scaffold_folio_slides():
+def test_scaffold_snowpack_slides():
     with tempfile.TemporaryDirectory() as tmpdir:
         tmp_path = Path(tmpdir)
         roles = build_builtin_role_registry("test_slides")
-        role_targets = {"folio": "slides"}
+        role_targets = {"snowpack": "slides"}
         metadata = {
             "title": "Quantum Control",
             "author": "Dr. Marie",
@@ -100,7 +100,7 @@ def test_scaffold_folio_slides():
         scaffold_assets(
             target_dir=tmp_path,
             project_name="test_slides",
-            resolved_roles=["folio"],
+            resolved_roles=["snowpack"],
             assets_dirs=[ASSETS_DIR],
             scope="starter",
             force=True,
