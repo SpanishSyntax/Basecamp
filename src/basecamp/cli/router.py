@@ -40,6 +40,14 @@ def main() -> None:
         sys.exit(0)
 
     if any(a in ("-V", "--version", "-v", "version") for a in sys.argv[1:]):
+        if ui.is_json:
+            import json
+
+            print(json.dumps({"app": "basecamp", "version": __version__}))
+            sys.exit(0)
+        if ui.is_agent:
+            print(f"basecamp {__version__}")
+            sys.exit(0)
         print(f"{ui.badge()} {ui.bold(f'v{__version__}')}")
         sys.exit(0)
 
@@ -123,13 +131,13 @@ def main() -> None:
 
     # Interactive trigger if no arguments provided in a TTY
     if not filtered_args:
-        if sys.stdin.isatty():
+        if sys.stdin.isatty() and not ui.is_agent:
             command, resolved_roles, role_targets = run_interactive_mode(
                 roles_db, aliases, current_dir, project_root
             )
         else:
             print_help()
-            sys.exit(1)
+            sys.exit(0 if ui.is_agent else 1)
     elif filtered_args[0] == "interactive":
         command, resolved_roles, role_targets = run_interactive_mode(
             roles_db, aliases, current_dir, project_root
@@ -140,7 +148,7 @@ def main() -> None:
 
         # If subcommand given without roles in a TTY (e.g. 'basecamp new' or 'basecamp init')
         if command in ("init", "new", "shell", "project") and not unparsed_roles:
-            if sys.stdin.isatty():
+            if sys.stdin.isatty() and not ui.is_agent:
                 sorted_roles = sorted(roles_db.keys())
                 role_options = [
                     (r, f"{r:<10} [{roles_db[r].category}]", roles_db[r].description)

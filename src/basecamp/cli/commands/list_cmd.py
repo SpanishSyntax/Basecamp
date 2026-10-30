@@ -8,6 +8,21 @@ from basecamp.ui import ui
 
 def display_roles_list(roles_db: dict[str, Role], aliases: dict[str, str]) -> None:
     """Prints a clean, formatted terminal table of all registered roles inside a ui.panel."""
+    if ui.is_json:
+        import json
+
+        data = [
+            {
+                "role": r_key,
+                "category": roles_db[r_key].category,
+                "description": roles_db[r_key].description,
+                "aliases": [a for a, target in aliases.items() if target == r_key],
+            }
+            for r_key in sorted(roles_db.keys())
+        ]
+        print(json.dumps({"status": "ok", "count": len(data), "roles": data}, indent=2))
+        return
+
     categories: dict[str, list[str]] = {}
     for r_key, role in roles_db.items():
         categories.setdefault(role.category, []).append(r_key)
@@ -33,8 +48,9 @@ def display_roles_list(roles_db: dict[str, Role], aliases: dict[str, str]) -> No
             cat_col = f"{role.category:<18}"
             panel_lines.append(f"{r_col}  {cat_col}  {role.description}")
 
-    ui.panel("⛺  Basecamp Roles Registry", panel_lines, width=box_w)
-    ui.info(
-        f"Run '{ui.bold('basecamp info <role>')}' for packages, hooks, and starter files.\n",
-        symbol="💡",
-    )
+    ui.panel("Basecamp Roles Registry", panel_lines, width=box_w)
+    if not ui.is_agent:
+        ui.info(
+            f"Run '{ui.bold('basecamp info <role>')}' for packages, hooks, and starter files.\n",
+            symbol="💡",
+        )

@@ -264,14 +264,51 @@ def display_active_roles(
     """Renders formatted terminal diagnosis panel of active flake roles."""
     flake_path = project_root / "flake.nix"
     if not flake_path.exists():
+        if ui.is_json:
+            import json
+
+            print(
+                json.dumps(
+                    {
+                        "status": "error",
+                        "error": f"No flake.nix found in {project_root} or its parent directories.",
+                        "project_root": str(project_root),
+                    }
+                )
+            )
+            return
         ui.error(f"No flake.nix found in {project_root} or its parent directories.")
-        ui.info(
-            f"Run '{ui.bold('basecamp init <roles...>')}' to bootstrap a reproducible DevShell.\n",
-            symbol="💡",
-        )
+        if not ui.is_agent:
+            ui.info(
+                f"Run '{ui.bold('basecamp init <roles...>')}' to bootstrap a reproducible DevShell.\n",
+                symbol="💡",
+            )
         return
 
     diag = diagnose_flake(project_root, roles_db, aliases)
+
+    if ui.is_json:
+        import json
+
+        data = {
+            "status": "ok",
+            "project_root": str(diag.project_root),
+            "flake_path": str(diag.flake_path),
+            "channel": diag.channel,
+            "active_roles": [
+                {
+                    "role": r.role_key,
+                    "category": r.role.category,
+                    "description": r.role.description,
+                    "detection_method": r.detection_method,
+                }
+                for r in diag.active_roles
+            ],
+            "extra_packages": diag.extra_packages,
+            "discovered_artifacts": diag.discovered_artifacts,
+        }
+        print(json.dumps(data, indent=2))
+        return
 
     term_cols = shutil.get_terminal_size(fallback=(88, 24)).columns
     box_w = min(88, max(36, term_cols - 2))
@@ -289,17 +326,20 @@ def display_active_roles(
 
     if not diag.active_roles:
         panel_lines.append(
-            ui.yellow("⚠️  No active Basecamp roles identified in flake.nix.")
+            ui.yellow("No active Basecamp roles identified in flake.nix.")
+            if ui.is_agent
+            else ui.yellow("⚠️  No active Basecamp roles identified in flake.nix.")
         )
         if diag.extra_packages:
             panel_lines.append(
                 f"{ui.bold('Detected Packages:')} {', '.join(diag.extra_packages[:8])}"
             )
-        ui.panel("⛺  Basecamp Active Roles Diagnostic", panel_lines, width=box_w)
-        ui.info(
-            f"Run '{ui.bold('basecamp list')}' to see available roles, or '{ui.bold('basecamp shell <roles...>')}' to configure Basecamp roles.\n",
-            symbol="💡",
-        )
+        ui.panel("Basecamp Active Roles Diagnostic", panel_lines, width=box_w)
+        if not ui.is_agent:
+            ui.info(
+                f"Run '{ui.bold('basecamp list')}' to see available roles, or '{ui.bold('basecamp shell <roles...>')}' to configure Basecamp roles.\n",
+                symbol="💡",
+            )
         return
 
     hdr_role = ui.bold(f"{'ROLE':<10}")
@@ -332,8 +372,9 @@ def display_active_roles(
             pkgs_str += f", +{len(diag.extra_packages) - 8} more"
         panel_lines.append(f"{ui.bold('Extra Packages:')}  {pkgs_str}")
 
-    ui.panel("⛺  Basecamp Active Roles Diagnostic", panel_lines, width=box_w)
-    ui.info(
-        f"Run '{ui.bold('basecamp info <role>')}' for packages, hooks, and template files.\n",
-        symbol="💡",
-    )
+    ui.panel("Basecamp Active Roles Diagnostic", panel_lines, width=box_w)
+    if not ui.is_agent:
+        ui.info(
+            f"Run '{ui.bold('basecamp info <role>')}' for packages, hooks, and template files.\n",
+            symbol="💡",
+        )

@@ -26,6 +26,23 @@ def display_role_info(
     role = roles_db[resolved_name]
     rev_aliases = [a for a, t in aliases.items() if t == resolved_name]
 
+    if ui.is_json:
+        import json
+
+        data = {
+            "status": "ok",
+            "role": resolved_name,
+            "category": role.category,
+            "description": role.description,
+            "aliases": sorted(rev_aliases),
+            "packages": role.pkgs,
+            "hooks": role.hooks,
+            "targets": role.targets,
+            "ignores": role.ignores,
+        }
+        print(json.dumps(data, indent=2))
+        return
+
     ui.header(f"Role Information: {resolved_name}", width=76)
     print(f"  {ui.bold('Category')}    : {role.category}")
     print(
@@ -54,6 +71,10 @@ def display_role_info(
     for hook in role.hooks:
         print(f"    • {ui.dim(hook)}")
 
+    box_icon = "" if ui.is_agent else "📦 "
+    doc_icon = "" if ui.is_agent else "📄 "
+    ban_icon = "" if ui.is_agent else "🚫 "
+
     if role.targets:
         print(f"\n  {ui.bold('Template Assets by Target:')}")
         for t_name, t_meta in role.targets.items():
@@ -64,7 +85,7 @@ def display_role_info(
                 details.append(f"foundation: {', '.join(p_files)}")
             if s_files:
                 details.append(f"starter: {', '.join(s_files)}")
-            print(f"    📦 {ui.cyan(t_name):<10} -> {'; '.join(details)}")
+            print(f"    {box_icon}{ui.cyan(t_name):<10} -> {'; '.join(details)}")
 
     # Inspect template files
     project_files: list[str] = []
@@ -105,12 +126,12 @@ def display_role_info(
         if project_files:
             print(f"\n  {ui.bold('Project Root Foundation Files (basecamp project):')}")
             for pf in project_files:
-                print(f"    📦 {ui.cyan(pf)}")
+                print(f"    {box_icon}{ui.cyan(pf)}")
 
         if starter_files:
             print(f"\n  {ui.bold('Starter / Leaf Files (basecamp new):')}")
             for sf in starter_files:
-                print(f"    📄 {ui.green(sf)}")
+                print(f"    {doc_icon}{ui.green(sf)}")
         elif not project_files:
             print(f"\n  {ui.bold('Template Files:')}")
             print(f"    {ui.dim('(No template files for this role; DevShell only)')}")
@@ -118,6 +139,7 @@ def display_role_info(
     if role.ignores:
         print(f"\n  {ui.bold('Default .gitignore Rules:')}")
         for ign in role.ignores:
-            print(f"    🚫 {ui.dim(ign)}")
+            print(f"    {ban_icon}{ui.dim(ign)}")
 
-    print(ui.blue("=" * 76) + "\n")
+    if not ui.is_agent:
+        print(ui.blue("=" * 76) + "\n")

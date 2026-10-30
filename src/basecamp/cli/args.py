@@ -15,6 +15,38 @@ __all__ = [
 
 def print_help() -> None:
     """Prints the CLI usage instructions."""
+    if ui.is_agent:
+        print("""Basecamp - Polyglot Nix Flake DevShell & Scaffolding Engine
+Usage: basecamp [command] [roles...] [options]
+
+Commands:
+  init [roles...]    Create full setup (flake, envrc, project configs, starter)
+  new <target>       Add starter file (main.py, report.md, etc.)
+  shell [roles...]   Add flake.nix and .envrc
+  project [roles...] Add project configs
+  packages <role>    Configure package bundles
+  list [--json]      List available roles and stacks
+  active [--json]    Diagnose and display active roles on current flake
+  info <role>        Display detailed information for a role
+
+Options:
+  -A, --agent          Compact machine/agent friendly output mode
+  --json               Structured JSON output mode
+  -m, --mode MODE      Document operating mode / target (report, slides, paper)
+  -t, --target TARGET  Alias for --mode
+  -e, --engine ENGINE  Compilation engine for Markdown ('typst' or 'latex')
+  -f, --force          Overwrite existing files without confirmation prompts
+  -n, --dry-run        Preview generated files in stdout without writing
+  -c, --channel NAME   Nixpkgs channel (default: nixos-26.05)
+  --no-direnv          Skip generating .envrc and skip 'direnv allow'
+  --no-git             Do not automatically stage generated files with 'git add'
+  --color MODE         Color output mode: auto, always, never
+  --no-color           Disable colored output
+  -h, --help           Show this help message and exit
+  -V, -v, --version    Show version and exit
+""")
+        return
+
     print(f"""{ui.badge()} {ui.bold("Polyglot Nix Flake DevShell & Scaffolding Engine")}
 
 {ui.blue("Usage:")}
@@ -33,6 +65,8 @@ def print_help() -> None:
   interactive  Launch interactive stack and command selector.
 
 {ui.blue("Options:")}
+  -A, --agent          Compact agent-friendly output mode.
+  --json               Structured JSON output mode.
   -a, --active         Show only active roles on current flake.
   -m, --mode MODE      Document operating mode / target (report, slides, paper).
   -t, --target TARGET  Alias for --mode.
@@ -112,6 +146,8 @@ def parse_cli_args(args: list[str]) -> ParsedArgs:
             parsed.dry_run = True
         elif arg in ("-a", "--active"):
             parsed.active = True
+        elif arg in ("-A", "--agent", "--json"):
+            pass
         elif arg == "--no-git":
             parsed.auto_git = False
         elif arg == "--no-direnv":
