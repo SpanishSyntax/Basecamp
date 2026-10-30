@@ -9,8 +9,6 @@ from basecamp.ui import ui
 def display_roles_list(roles_db: dict[str, Role], aliases: dict[str, str]) -> None:
     """Prints a clean, formatted terminal table of all registered roles inside a ui.panel."""
     if ui.is_json:
-        import json
-
         data = [
             {
                 "role": r_key,
@@ -20,7 +18,7 @@ def display_roles_list(roles_db: dict[str, Role], aliases: dict[str, str]) -> No
             }
             for r_key in sorted(roles_db.keys())
         ]
-        print(json.dumps({"status": "ok", "count": len(data), "roles": data}, indent=2))
+        ui.json({"status": "ok", "count": len(data), "roles": data})
         return
 
     categories: dict[str, list[str]] = {}

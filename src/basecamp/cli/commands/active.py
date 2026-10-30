@@ -265,16 +265,12 @@ def display_active_roles(
     flake_path = project_root / "flake.nix"
     if not flake_path.exists():
         if ui.is_json:
-            import json
-
-            print(
-                json.dumps(
-                    {
-                        "status": "error",
-                        "error": f"No flake.nix found in {project_root} or its parent directories.",
-                        "project_root": str(project_root),
-                    }
-                )
+            ui.json(
+                {
+                    "status": "error",
+                    "error": f"No flake.nix found in {project_root} or its parent directories.",
+                    "project_root": str(project_root),
+                }
             )
             return
         ui.error(f"No flake.nix found in {project_root} or its parent directories.")
@@ -288,8 +284,6 @@ def display_active_roles(
     diag = diagnose_flake(project_root, roles_db, aliases)
 
     if ui.is_json:
-        import json
-
         data = {
             "status": "ok",
             "project_root": str(diag.project_root),
@@ -307,7 +301,7 @@ def display_active_roles(
             "extra_packages": diag.extra_packages,
             "discovered_artifacts": diag.discovered_artifacts,
         }
-        print(json.dumps(data, indent=2))
+        ui.json(data)
         return
 
     term_cols = shutil.get_terminal_size(fallback=(88, 24)).columns

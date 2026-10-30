@@ -27,8 +27,6 @@ def display_role_info(
     rev_aliases = [a for a, t in aliases.items() if t == resolved_name]
 
     if ui.is_json:
-        import json
-
         data = {
             "status": "ok",
             "role": resolved_name,
@@ -40,7 +38,7 @@ def display_role_info(
             "targets": role.targets,
             "ignores": role.ignores,
         }
-        print(json.dumps(data, indent=2))
+        ui.json(data)
         return
 
     ui.header(f"Role Information: {resolved_name}", width=76)
