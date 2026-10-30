@@ -8,6 +8,26 @@ from basecamp.ui import ui
 
 def display_roles_list(roles_db: dict[str, Role], aliases: dict[str, str]) -> None:
     """Prints a clean, formatted terminal table of all registered roles inside a ui.panel."""
+    if getattr(ui, "is_toon", False):
+        data = [
+            {
+                "role": r_key,
+                "category": roles_db[r_key].category,
+                "description": roles_db[r_key].description,
+            }
+            for r_key in sorted(roles_db.keys())
+        ]
+        if hasattr(ui, "toon"):
+            ui.toon({"status": "ok", "count": len(data), "roles": data})
+        else:
+            try:
+                from prism.toon import encode_toon
+                print(encode_toon({"status": "ok", "count": len(data), "roles": data}))
+            except ImportError:
+                import json
+                print(json.dumps({"status": "ok", "count": len(data), "roles": data}, indent=2))
+        return
+
     if ui.is_json:
         data = [
             {

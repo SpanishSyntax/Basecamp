@@ -32,6 +32,7 @@ Commands:
 Options:
   -A, --agent          Compact machine/agent friendly output mode
   --json               Structured JSON output mode
+  --toon               Token-Oriented Object Notation (TOON) output mode
   -m, --mode MODE      Document operating mode / target (report, slides, paper)
   -t, --target TARGET  Alias for --mode
   -e, --engine ENGINE  Compilation engine for Markdown ('typst' or 'latex')
@@ -146,7 +147,7 @@ def parse_cli_args(args: list[str]) -> ParsedArgs:
             parsed.dry_run = True
         elif arg in ("-a", "--active"):
             parsed.active = True
-        elif arg in ("-A", "--agent", "--json"):
+        elif arg in ("-A", "--agent", "--json", "--toon"):
             pass
         elif arg == "--no-git":
             parsed.auto_git = False
