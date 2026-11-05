@@ -43,7 +43,7 @@ fig = go.Figure(
             y=y,
             z=z,
             colorscale="Jet",  # The classic retro MATLAB colorscale
-            showscale=False,   # Clean logo presentation
+            showscale=False,  # Clean logo presentation
             contours=dict(
                 z=dict(
                     show=True,
@@ -63,8 +63,6 @@ fig.update_layout(
         xaxis=dict(visible=False),
         yaxis=dict(visible=False),
         zaxis=dict(visible=False),
-        camera=dict(
-            eye=dict(x=-1.5, y=-1.5, z=1.2)
-        ),
+        camera=dict(eye=dict(x=-1.5, y=-1.5, z=1.2)),
     ),
 )

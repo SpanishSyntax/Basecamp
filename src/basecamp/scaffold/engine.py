@@ -62,7 +62,10 @@ def resolve_document_metadata(
                     "Select compilation engine for Markdown:",
                     [
                         ("typst", "Typst (recommended, ultra-fast hermetic layout)"),
-                        ("latex", "LaTeX (Tectonic + Pandoc, academic TeX typesetting)"),
+                        (
+                            "latex",
+                            "LaTeX (Tectonic + Pandoc, academic TeX typesetting)",
+                        ),
                     ],
                 )
         elif target.startswith("latex") or target.startswith("tex"):
@@ -187,7 +190,10 @@ def scaffold_assets(
                         )
 
                     # Dynamic engine filtering for Markdown targets
-                    if target_name in ("report", "slides", "paper") and dir_type == "project":
+                    if (
+                        target_name in ("report", "slides", "paper")
+                        and dir_type == "project"
+                    ):
                         if metadata and metadata.get("engine") == "latex":
                             allowed_files = ["packages.tex", "library.bib"]
                         else:
@@ -287,7 +293,9 @@ def scaffold_assets(
                     author_fb = get_git_author() or "Author"
                     dep_fb = "Department of Systems & Control"
                     system_date = time.strftime("%B %Y")
-                    date_fb = (metadata.get("date") if metadata else None) or system_date
+                    date_fb = (
+                        metadata.get("date") if metadata else None
+                    ) or system_date
 
                     if dest_path.suffix == ".tex":
                         title_fb = title_fb.replace("&", r"\&")

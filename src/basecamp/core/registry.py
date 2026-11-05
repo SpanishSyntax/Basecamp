@@ -179,7 +179,7 @@ def build_builtin_role_registry(folder_name: str) -> dict[str, Role]:
                 "ty",
             ],
             hooks=[
-                'export PYTHONPATH="$PWD\'\'${PYTHONPATH:+:$PYTHONPATH}"',
+                "export PYTHONPATH=\"$PWD''${PYTHONPATH:+:$PYTHONPATH}\"",
                 "export UV_PYTHON_DOWNLOADS=never",
                 "if [ -f pyproject.toml ]; then uv sync --quiet; elif [ -f requirements.txt ] && [ ! -d .venv ]; then (uv venv --quiet && uv pip install -r requirements.txt --quiet); fi",
                 "if [ -d .venv ]; then source .venv/bin/activate; fi",
@@ -207,7 +207,7 @@ def build_builtin_role_registry(folder_name: str) -> dict[str, Role]:
                 "ty",
             ],
             hooks=[
-                'export PYTHONPATH="$PWD\'\'${PYTHONPATH:+:$PYTHONPATH}"',
+                "export PYTHONPATH=\"$PWD''${PYTHONPATH:+:$PYTHONPATH}\"",
                 "export UV_PYTHON_DOWNLOADS=never",
                 "if [ -f pyproject.toml ]; then uv sync --quiet; fi",
                 "if [ -d .venv ]; then source .venv/bin/activate; fi",
@@ -382,7 +382,14 @@ def build_builtin_role_registry(folder_name: str) -> dict[str, Role]:
                     "project": ["packages.typ", "slides.typ", "library.bib"],
                     "starter": ["slides.md"],
                     "description": "Polyglot Markdown 16:9 slides (slides.md + packages + library.bib)",
-                    "aliases": ["md-slides", "presentation", "slodes", "slide", "deck", "ppt"],
+                    "aliases": [
+                        "md-slides",
+                        "presentation",
+                        "slodes",
+                        "slide",
+                        "deck",
+                        "ppt",
+                    ],
                 },
                 "paper": {
                     "project": ["packages.typ", "paper.typ", "library.bib"],

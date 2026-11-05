@@ -94,7 +94,9 @@ def main() -> None:
     # Handle 'basecamp info <role>'
     if filtered_args and filtered_args[0] in ("info", "show"):
         if len(filtered_args) < 2:
-            ui.error("Missing role name for 'basecamp info'. Example: basecamp info python")
+            ui.error(
+                "Missing role name for 'basecamp info'. Example: basecamp info python"
+            )
             sys.exit(1)
         display_role_info(filtered_args[1], roles_db, aliases, all_asset_dirs)
         sys.exit(0)
@@ -173,8 +175,12 @@ def main() -> None:
             # 1. Check if alias directly maps to role:target
             if raw_lower in aliases and ":" in aliases[raw_lower]:
                 r_part, _, t_part = aliases[raw_lower].partition(":")
-                canonical_role = aliases.get(r_part.lower(), r_part.lower()).split(":", 1)[0]
-                resolved_t = resolve_role_target(canonical_role, t_part, roles_db) or t_part
+                canonical_role = aliases.get(r_part.lower(), r_part.lower()).split(
+                    ":", 1
+                )[0]
+                resolved_t = (
+                    resolve_role_target(canonical_role, t_part, roles_db) or t_part
+                )
                 if canonical_role in roles_db:
                     role_targets[canonical_role] = resolved_t
                     if canonical_role not in resolved_roles:
@@ -184,15 +190,18 @@ def main() -> None:
             # 2. Colon notation (e.g. snowpack:slides, snowpack:paper, md:report, typst:report)
             if ":" in item:
                 r_part, _, t_part = item.partition(":")
-                canonical_role = aliases.get(r_part.lower(), r_part.lower()).split(":", 1)[0]
+                canonical_role = aliases.get(r_part.lower(), r_part.lower()).split(
+                    ":", 1
+                )[0]
                 if canonical_role in roles_db and roles_db[canonical_role].targets:
                     composite = f"{r_part.lower()}-{t_part.lower()}"
-                    resolved_t = (
-                        resolve_role_target(canonical_role, composite, roles_db)
-                        or resolve_role_target(canonical_role, t_part, roles_db)
-                    )
+                    resolved_t = resolve_role_target(
+                        canonical_role, composite, roles_db
+                    ) or resolve_role_target(canonical_role, t_part, roles_db)
                     if not resolved_t:
-                        valid_tgts = ", ".join(list(roles_db[canonical_role].targets.keys()))
+                        valid_tgts = ", ".join(
+                            list(roles_db[canonical_role].targets.keys())
+                        )
                         ui.error(
                             f"Unknown target '{t_part}' for role '{canonical_role}'. Available targets: {valid_tgts}"
                         )
@@ -208,7 +217,11 @@ def main() -> None:
             # 3. Check if item is a target for the immediately preceding role
             if resolved_roles:
                 last_role = resolved_roles[-1]
-                if last_role in roles_db and roles_db[last_role].targets and last_role not in role_targets:
+                if (
+                    last_role in roles_db
+                    and roles_db[last_role].targets
+                    and last_role not in role_targets
+                ):
                     resolved_t = resolve_role_target(last_role, item, roles_db)
                     if resolved_t:
                         role_targets[last_role] = resolved_t
@@ -286,7 +299,11 @@ def main() -> None:
         sys.exit(0)
 
     # Handle 'basecamp new packages' / 'basecamp new pkg'
-    if command == "new" and unparsed_roles and unparsed_roles[0].lower() in ("packages", "pkg", "package"):
+    if (
+        command == "new"
+        and unparsed_roles
+        and unparsed_roles[0].lower() in ("packages", "pkg", "package")
+    ):
         preferred = unparsed_roles[1] if len(unparsed_roles) > 1 else None
         configure_packages_interactive(preferred, dest_dir=current_dir)
         sys.exit(0)
@@ -310,7 +327,7 @@ def main() -> None:
         elif parsed.configure_packages_flag:
             configure_packages = True
 
-    interactive_meta = (command == "new")
+    interactive_meta = command == "new"
 
     doc_metadata = resolve_document_metadata(
         project_name=project_name,

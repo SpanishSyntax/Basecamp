@@ -22,10 +22,16 @@ def display_roles_list(roles_db: dict[str, Role], aliases: dict[str, str]) -> No
         else:
             try:
                 from prism.toon import encode_toon
+
                 print(encode_toon({"status": "ok", "count": len(data), "roles": data}))
             except ImportError:
                 import json
-                print(json.dumps({"status": "ok", "count": len(data), "roles": data}, indent=2))
+
+                print(
+                    json.dumps(
+                        {"status": "ok", "count": len(data), "roles": data}, indent=2
+                    )
+                )
         return
 
     if ui.is_json:

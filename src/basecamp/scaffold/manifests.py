@@ -13,7 +13,7 @@ TYPST_PACKAGE_BUNDLES: list[dict[str, Any]] = [
         "desc": "TikZ-like vector drawing canvas & scientific plotting engine",
         "default": True,
         "snippet": (
-            "// --- 1. Vector Drawing & Graphing (The \"TikZ\" of Typst) ---\n"
+            '// --- 1. Vector Drawing & Graphing (The "TikZ" of Typst) ---\n'
             "// CeTZ provides a comprehensive TikZ-inspired vector canvas\n"
             '#import "@preview/cetz:0.5.2"\n'
         ),

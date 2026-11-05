@@ -102,7 +102,9 @@ def test_mcp_execute_list() -> None:
 
 
 def test_mcp_execute_list_active(tmp_path: Path) -> None:
-    res = execute_tool("basecamp_list", {"active_only": True, "project_dir": str(tmp_path)})
+    res = execute_tool(
+        "basecamp_list", {"active_only": True, "project_dir": str(tmp_path)}
+    )
     assert res["status"] == "ok"
     assert res["active_only"] is True
     assert res["has_flake"] is False

@@ -14,7 +14,9 @@ from basecamp.core.registry import build_builtin_role_registry
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
 
-def run_basecamp(*args: str, cwd: Path | None = None) -> subprocess.CompletedProcess[str]:
+def run_basecamp(
+    *args: str, cwd: Path | None = None
+) -> subprocess.CompletedProcess[str]:
     """Helper to run basecamp CLI in a subprocess with PYTHONPATH set."""
     import os
 
@@ -54,7 +56,9 @@ def test_diagnose_flake_helper():
     roles_db = build_builtin_role_registry("test_proj")
     with tempfile.TemporaryDirectory() as tmpdir:
         tmp = Path(tmpdir)
-        (tmp / "flake.nix").write_text("# [basecamp] roles: python\n{\n  inputs.nixpkgs.url = \"github:NixOS/nixpkgs/nixos-26.05\";\n}\n")
+        (tmp / "flake.nix").write_text(
+            '# [basecamp] roles: python\n{\n  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";\n}\n'
+        )
         (tmp / "pyproject.toml").write_text("[project]\nname = 'test'\n")
 
         diag = diagnose_flake(tmp, roles_db, {})
@@ -177,7 +181,9 @@ def test_cli_active_polyglot():
     with tempfile.TemporaryDirectory() as tmpdir:
         tmp = Path(tmpdir)
         # Bootstrap polyglot workspace
-        init_res = run_basecamp("init", "py", "rust", "snowpack", "--no-direnv", "--no-git", cwd=tmp)
+        init_res = run_basecamp(
+            "init", "py", "rust", "snowpack", "--no-direnv", "--no-git", cwd=tmp
+        )
         assert init_res.returncode == 0
 
         res = run_basecamp("active", cwd=tmp)

@@ -1,10 +1,10 @@
-from pathlib import Path
 import tempfile
+from pathlib import Path
+
 from basecamp.cli import (
     build_builtin_role_registry,
     prepare_flake_env,
     scaffold_assets,
-    update_gitignore,
 )
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -140,4 +140,3 @@ def test_scaffold_barograph_assets():
         dash_content = (tmp_path / "dashboard.py").read_text()
         assert "Barograph" in dash_content
         assert "test_bg" in dash_content
-

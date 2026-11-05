@@ -136,7 +136,6 @@ def process_metrics(dataset: list[dict]) -> dict:
     """Calculates summary statistics for public innovation indicators."""
     total = sum(item.get("score", 0) for item in dataset)
     return {"average": total / len(dataset) if dataset else 0}
-
 ```
 
 ---

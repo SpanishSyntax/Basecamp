@@ -39,10 +39,14 @@ def build_shell_hooks(
             role = roles_db[r_key]
             for hook in role.hooks:
                 # Exclude any status printf lines
-                if "printf" in hook and any(sig in hook for sig in ("[basecamp]", "[flaker]")):
+                if "printf" in hook and any(
+                    sig in hook for sig in ("[basecamp]", "[flaker]")
+                ):
                     continue
                 # Strip legacy error trapping flags if present
-                clean_hook = re.sub(r"\s*\|\|\s*\{\s*_(?:bc|flk)_err[^}]*\};?", "", hook)
+                clean_hook = re.sub(
+                    r"\s*\|\|\s*\{\s*_(?:bc|flk)_err[^}]*\};?", "", hook
+                )
                 clean_hook = clean_hook.strip()
                 if clean_hook and clean_hook not in lines:
                     lines.append(clean_hook)
@@ -106,9 +110,7 @@ def prepare_flake_env(
     )
 
     hooks_block = (
-        ("\n          " + "\n          ".join(selected_hooks))
-        if selected_hooks
-        else ""
+        ("\n          " + "\n          ".join(selected_hooks)) if selected_hooks else ""
     )
 
     template_content = template_path.read_text(encoding="utf-8")

@@ -31,7 +31,11 @@ def run_interactive_mode(
             pass
 
     ws_status = (
-        ui.green(f"active ({active_roles_summary})" if active_roles_summary else "active (flake.nix)")
+        ui.green(
+            f"active ({active_roles_summary})"
+            if active_roles_summary
+            else "active (flake.nix)"
+        )
         if has_root_flake
         else ui.yellow("uninitialized")
     )
@@ -54,7 +58,11 @@ def run_interactive_mode(
         except ValueError:
             rel = current_dir.name
         cmd_options = [
-            ("new", f"Add starter file in ./{rel}/", "Starter file in current directory"),
+            (
+                "new",
+                f"Add starter file in ./{rel}/",
+                "Starter file in current directory",
+            ),
             ("shell", "Add flake.nix and .envrc", "DevShell at project root"),
             ("project", "Add project configs", "Root configs (pyproject.toml, etc.)"),
             ("init", "Create full setup", "Full workspace setup at project root"),
@@ -62,7 +70,11 @@ def run_interactive_mode(
     elif has_root_flake:
         ui.info(f"Active workspace detected at {ui.bold(str(project_root))}")
         cmd_options = [
-            ("active", "Diagnose active roles", "List active roles, channel & packages in flake.nix"),
+            (
+                "active",
+                "Diagnose active roles",
+                "List active roles, channel & packages in flake.nix",
+            ),
             ("new", "Add starter file", "Starter file in current directory"),
             ("shell", "Add flake.nix and .envrc", "DevShell at root"),
             ("project", "Add project configs", "Root configs (pyproject.toml, etc.)"),

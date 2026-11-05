@@ -16,11 +16,7 @@ from __future__ import annotations
 import ast
 import html
 import json
-import os
 import shutil
-import subprocess
-import sys
-import time
 from pathlib import Path
 from typing import Any
 
@@ -40,7 +36,13 @@ class PlotScriptMeta:
         self.title, self.description = self._extract_docstring_and_title()
 
     def _extract_docstring_and_title(self) -> tuple[str, str]:
-        title = self.name.replace(".py", "").replace("plot_", "").replace("plot", "Main Plot").replace("_", " ").title()
+        title = (
+            self.name.replace(".py", "")
+            .replace("plot_", "")
+            .replace("plot", "Main Plot")
+            .replace("_", " ")
+            .title()
+        )
         description = ""
         try:
             content = self.path.read_text(encoding="utf-8")
@@ -57,7 +59,11 @@ class PlotScriptMeta:
                     line = line.strip()
                     if line.startswith("#") and not line.startswith("#!"):
                         candidate = line.lstrip("#").strip()
-                        if candidate and not candidate.startswith("---") and not candidate.startswith("Build"):
+                        if (
+                            candidate
+                            and not candidate.startswith("---")
+                            and not candidate.startswith("Build")
+                        ):
                             title = candidate
                             break
         except Exception:
@@ -92,7 +98,11 @@ def discover_plot_scripts(base_dir: Path) -> list[PlotScriptMeta]:
     plots_dir = base_dir / "plots"
     if plots_dir.is_dir():
         for item in sorted(plots_dir.glob("*.py")):
-            if item.is_file() and not item.name.startswith(".") and item not in candidates:
+            if (
+                item.is_file()
+                and not item.name.startswith(".")
+                and item not in candidates
+            ):
                 candidates.append(item)
 
     return [PlotScriptMeta(p, base_dir) for p in candidates]
@@ -724,14 +734,22 @@ if __name__ == "__main__":
             cleaned = [re.sub(r"\[/?[a-zA-Z0-9_\s=]+\]", "", str(a)) for a in args]
             print(*cleaned, **kwargs)
 
-    rprint(f"[bold cyan]📈 Barograph Hub Dashboard Initialized for {PROJECT_NAME}[/bold cyan]")
-    rprint(f"[dim]Discovered {len(dashboard.scripts)} plot script(s) in {PROJECT_DIR}[/dim]")
+    rprint(
+        f"[bold cyan]📈 Barograph Hub Dashboard Initialized for {PROJECT_NAME}[/bold cyan]"
+    )
+    rprint(
+        f"[dim]Discovered {len(dashboard.scripts)} plot script(s) in {PROJECT_DIR}[/dim]"
+    )
     for s in dashboard.scripts:
-        rprint(f"  • [bold]{s.name}[/bold] -> [italic]{s.title}[/italic] ({s.size_kb:.1f} KB)")
+        rprint(
+            f"  • [bold]{s.name}[/bold] -> [italic]{s.title}[/italic] ({s.size_kb:.1f} KB)"
+        )
 
     # If barograph binary is available, suggest or launch serve
     if shutil.which("barograph"):
-        rprint("\n[bold green]Tip:[/bold green] Run [cyan]barograph serve[/cyan] for live preview and hot reload.")
+        rprint(
+            "\n[bold green]Tip:[/bold green] Run [cyan]barograph serve[/cyan] for live preview and hot reload."
+        )
     else:
         out_file = PROJECT_DIR / "index.html"
         dashboard.write_html(out_file)

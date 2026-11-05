@@ -7,19 +7,10 @@ from pathlib import Path
 
 from basecamp.cli.resolver import (
     find_role_for_standalone_target,
-    resolve_role_target,
 )
-from basecamp.core.environment import prepare_flake_env
 from basecamp.core.registry import (
     BUILTIN_ALIASES,
     build_builtin_role_registry,
-    resolve_nixpkgs_url,
-)
-from basecamp.scaffold.engine import scaffold_assets
-from basecamp.scaffold.manifests import (
-    LATEX_PACKAGE_BUNDLES,
-    TYPST_PACKAGE_BUNDLES,
-    generate_packages_manifest,
 )
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -27,7 +18,9 @@ TEMPLATE_PATH = REPO_ROOT / "src" / "basecamp" / "flake.template"
 ASSETS_DIR = REPO_ROOT / "src" / "basecamp" / "templates"
 
 
-def run_basecamp(*args: str, cwd: Path | None = None) -> subprocess.CompletedProcess[str]:
+def run_basecamp(
+    *args: str, cwd: Path | None = None
+) -> subprocess.CompletedProcess[str]:
     import os
 
     env = dict(os.environ)
@@ -47,9 +40,25 @@ def run_basecamp(*args: str, cwd: Path | None = None) -> subprocess.CompletedPro
 def test_builtin_registry_completeness():
     roles = build_builtin_role_registry("test_proj")
     expected_roles = {
-        "rust", "c", "cpp", "go", "zig", "java", "dotnet",
-        "python", "barograph", "julia", "ts", "svelte", "vue",
-        "next", "gleam", "elixir", "haskell", "snowpack", "ops"
+        "rust",
+        "c",
+        "cpp",
+        "go",
+        "zig",
+        "java",
+        "dotnet",
+        "python",
+        "barograph",
+        "julia",
+        "ts",
+        "svelte",
+        "vue",
+        "next",
+        "gleam",
+        "elixir",
+        "haskell",
+        "snowpack",
+        "ops",
     }
     assert expected_roles.issubset(set(roles.keys()))
 
@@ -91,8 +100,14 @@ def test_standalone_target_matching():
     assert find_role_for_standalone_target("slides", roles) == ("snowpack", "slides")
     assert find_role_for_standalone_target("paper", roles) == ("snowpack", "paper")
     assert find_role_for_standalone_target("report", roles) == ("snowpack", "report")
-    assert find_role_for_standalone_target("typst-paper", roles) == ("snowpack", "typst-paper")
-    assert find_role_for_standalone_target("latex-slides", roles) == ("snowpack", "latex-slides")
+    assert find_role_for_standalone_target("typst-paper", roles) == (
+        "snowpack",
+        "typst-paper",
+    )
+    assert find_role_for_standalone_target("latex-slides", roles) == (
+        "snowpack",
+        "latex-slides",
+    )
 
 
 def test_cli_dry_run_parity():

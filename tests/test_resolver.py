@@ -11,12 +11,11 @@ def test_resolve_nixpkgs_url():
     assert resolve_nixpkgs_url(None) == "github:NixOS/nixpkgs/nixos-26.05"
     assert resolve_nixpkgs_url("26.05") == "github:NixOS/nixpkgs/nixos-26.05"
     assert resolve_nixpkgs_url("unstable") == "github:NixOS/nixpkgs/nixpkgs-unstable"
-    assert resolve_nixpkgs_url("nixos-unstable") == "github:NixOS/nixpkgs/nixos-unstable"
-    assert resolve_nixpkgs_url("24.11") == "github:NixOS/nixpkgs/nixos-24.11"
     assert (
-        resolve_nixpkgs_url("github:custom/nixpkgs")
-        == "github:custom/nixpkgs"
+        resolve_nixpkgs_url("nixos-unstable") == "github:NixOS/nixpkgs/nixos-unstable"
     )
+    assert resolve_nixpkgs_url("24.11") == "github:NixOS/nixpkgs/nixos-24.11"
+    assert resolve_nixpkgs_url("github:custom/nixpkgs") == "github:custom/nixpkgs"
 
 
 def test_builtin_aliases():

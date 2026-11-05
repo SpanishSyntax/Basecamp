@@ -117,7 +117,9 @@ def detect_active_roles(
 
     # 1. Check explicit Basecamp roles metadata comment
     comment_match = re.search(
-        r"#\s*\[basecamp\]\s*roles:\s*(.+)$", flake_content, re.MULTILINE | re.IGNORECASE
+        r"#\s*\[basecamp\]\s*roles:\s*(.+)$",
+        flake_content,
+        re.MULTILINE | re.IGNORECASE,
     )
     if comment_match:
         raw_tokens = comment_match.group(1).split()
@@ -135,9 +137,7 @@ def detect_active_roles(
     banner_matches = re.findall(
         r"\[basecamp\]\\033\[0m.*?\\033\[1m([^\\]+)\\033\[0m.*?active", flake_content
     )
-    badge_matches = re.findall(
-        r"\\033\[1m([^\\]+)\\033\[0m\s*\\033\[2m", flake_content
-    )
+    badge_matches = re.findall(r"\\033\[1m([^\\]+)\\033\[0m\s*\\033\[2m", flake_content)
     for b_name in banner_matches + badge_matches:
         clean_b = b_name.strip().lower()
         role_key = BANNER_NAME_TO_ROLE.get(clean_b, clean_b)
@@ -154,7 +154,9 @@ def detect_active_roles(
         if r_key not in detected:
             for hook in role.hooks:
                 # If a significant part of the hook is present
-                if hook and (hook in flake_content or hook.splitlines()[0] in flake_content):
+                if hook and (
+                    hook in flake_content or hook.splitlines()[0] in flake_content
+                ):
                     detected[r_key] = ActiveRoleDiagnostic(
                         role_key=r_key,
                         role=role,
@@ -236,9 +238,7 @@ def diagnose_flake(
     except OSError:
         return FlakeWorkspaceDiagnosis(project_root=project_root, flake_path=flake_path)
 
-    active_roles, extra_pkgs, channel = detect_active_roles(
-        content, roles_db, aliases
-    )
+    active_roles, extra_pkgs, channel = detect_active_roles(content, roles_db, aliases)
 
     # Detect workspace files
     discovered: list[str] = []

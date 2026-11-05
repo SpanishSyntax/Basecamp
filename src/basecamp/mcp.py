@@ -199,7 +199,10 @@ def _handle_list(active_only: bool = False, project_dir: str = ".") -> dict[str,
 
 def _handle_info(role: str) -> dict[str, Any]:
     if not role or not role.strip():
-        return {"status": "error", "error": "'role' argument is required and cannot be empty."}
+        return {
+            "status": "error",
+            "error": "'role' argument is required and cannot be empty.",
+        }
 
     current_dir = Path.cwd()
     project_root = find_project_root(current_dir)
@@ -292,7 +295,10 @@ def _handle_init(
 ) -> dict[str, Any]:
     raw_roles = _normalize_roles(roles)
     if not raw_roles:
-        return {"status": "error", "error": "'roles' argument is required and cannot be empty."}
+        return {
+            "status": "error",
+            "error": "'roles' argument is required and cannot be empty.",
+        }
 
     target_dir = Path(project_dir).expanduser().resolve()
     target_dir.mkdir(parents=True, exist_ok=True)
@@ -326,7 +332,9 @@ def _handle_init(
         # Direct alias with colon target (e.g. md:report -> snowpack:report)
         if raw_lower in aliases and ":" in aliases[raw_lower]:
             r_part, _, t_part = aliases[raw_lower].partition(":")
-            canonical_role = aliases.get(r_part.lower(), r_part.lower()).split(":", 1)[0]
+            canonical_role = aliases.get(r_part.lower(), r_part.lower()).split(":", 1)[
+                0
+            ]
             resolved_t = resolve_role_target(canonical_role, t_part, roles_db) or t_part
             if canonical_role in roles_db:
                 role_targets[canonical_role] = resolved_t
@@ -337,13 +345,14 @@ def _handle_init(
         # Item with explicit colon (e.g. snowpack:slides)
         if ":" in item:
             r_part, _, t_part = item.partition(":")
-            canonical_role = aliases.get(r_part.lower(), r_part.lower()).split(":", 1)[0]
+            canonical_role = aliases.get(r_part.lower(), r_part.lower()).split(":", 1)[
+                0
+            ]
             if canonical_role in roles_db and roles_db[canonical_role].targets:
                 composite = f"{r_part.lower()}-{t_part.lower()}"
-                resolved_t = (
-                    resolve_role_target(canonical_role, composite, roles_db)
-                    or resolve_role_target(canonical_role, t_part, roles_db)
-                )
+                resolved_t = resolve_role_target(
+                    canonical_role, composite, roles_db
+                ) or resolve_role_target(canonical_role, t_part, roles_db)
                 role_targets[canonical_role] = resolved_t or t_part
             if canonical_role not in resolved_roles:
                 resolved_roles.append(canonical_role)
@@ -354,7 +363,10 @@ def _handle_init(
         canonical_role = aliased_val.split(":", 1)[0]
         if ":" in aliased_val:
             target_part = aliased_val.split(":", 1)[1]
-            resolved_t = resolve_role_target(canonical_role, target_part, roles_db) or target_part
+            resolved_t = (
+                resolve_role_target(canonical_role, target_part, roles_db)
+                or target_part
+            )
             role_targets[canonical_role] = resolved_t
         if canonical_role not in resolved_roles:
             resolved_roles.append(canonical_role)
@@ -437,7 +449,11 @@ def _handle_init(
 
     files_created: list[str] = []
     if not dry_run:
-        for p in [target_dir / "flake.nix", target_dir / ".envrc", target_dir / ".gitignore"]:
+        for p in [
+            target_dir / "flake.nix",
+            target_dir / ".envrc",
+            target_dir / ".gitignore",
+        ]:
             if p.exists():
                 files_created.append(str(p.relative_to(target_dir)))
         for item in target_dir.rglob("*"):
