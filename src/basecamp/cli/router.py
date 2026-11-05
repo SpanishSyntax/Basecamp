@@ -26,7 +26,6 @@ from basecamp.core.registry import (
     resolve_nixpkgs_url,
 )
 from basecamp.scaffold.engine import resolve_document_metadata, scaffold_assets
-from basecamp.scaffold.manifests import configure_packages_interactive
 from basecamp.ui import ui
 
 
@@ -294,8 +293,9 @@ def main() -> None:
 
     # Handle 'packages' / 'pkg' command
     if command in ("packages", "pkg", "package"):
-        preferred = unparsed_roles[0] if unparsed_roles else None
-        configure_packages_interactive(preferred, dest_dir=current_dir)
+        ui.info(
+            "Document package manifests are managed directly by Snowpack. Run 'snowpack init'."
+        )
         sys.exit(0)
 
     # Handle 'basecamp new packages' / 'basecamp new pkg'
@@ -304,8 +304,9 @@ def main() -> None:
         and unparsed_roles
         and unparsed_roles[0].lower() in ("packages", "pkg", "package")
     ):
-        preferred = unparsed_roles[1] if len(unparsed_roles) > 1 else None
-        configure_packages_interactive(preferred, dest_dir=current_dir)
+        ui.info(
+            "Document package manifests are managed directly by Snowpack. Run 'snowpack init'."
+        )
         sys.exit(0)
 
     # Enforce valid commands

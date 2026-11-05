@@ -122,10 +122,8 @@ def test_mcp_execute_info_snowpack() -> None:
     res = execute_tool("basecamp_info", {"role": "snowpack"})
     assert res["status"] == "ok"
     assert res["role"] == "snowpack"
-    assert "targets" in res
-    assert "report" in res["targets"]
-    assert "slides" in res["targets"]
-    assert "paper" in res["targets"]
+    assert "typst" in res["packages"]
+    assert "tinymist" in res["packages"]
 
 
 def test_mcp_execute_info_invalid() -> None:
@@ -151,21 +149,17 @@ def test_mcp_execute_init_scaffold(tmp_path: Path) -> None:
     res = execute_tool(
         "basecamp_init",
         {
-            "roles": ["snowpack"],
-            "mode": "report",
-            "engine": "typst",
-            "title": "MCP Test Doc",
-            "author": "Tester",
+            "roles": ["c"],
             "project_dir": str(tmp_path),
         },
     )
     assert res["status"] == "ok"
     assert (tmp_path / "flake.nix").exists()
-    assert (tmp_path / "report.typ").exists()
-    assert (tmp_path / "packages.typ").exists()
+    assert (tmp_path / "CMakeLists.txt").exists()
+    assert (tmp_path / "main.c").exists()
 
     flake_content = (tmp_path / "flake.nix").read_text()
-    assert "snowpack" in flake_content
+    assert "gcc" in flake_content
 
     # Attempting to re-init without force should return an error
     res_conflict = execute_tool(

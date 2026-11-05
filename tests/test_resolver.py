@@ -5,6 +5,7 @@ from basecamp.cli import (
     resolve_nixpkgs_url,
     resolve_role_target,
 )
+from basecamp.core.models import Role
 
 
 def test_resolve_nixpkgs_url():
@@ -25,35 +26,47 @@ def test_builtin_aliases():
     assert BUILTIN_ALIASES["baro"] == "barograph"
     assert BUILTIN_ALIASES["barograph"] == "barograph"
     assert BUILTIN_ALIASES["snow"] == "snowpack"
-    assert BUILTIN_ALIASES["md"] == "snowpack:paper"
-    assert BUILTIN_ALIASES["slides"] == "snowpack:slides"
-    assert BUILTIN_ALIASES["beamer"] == "snowpack:latex-slides"
+    assert BUILTIN_ALIASES["md"] == "snowpack"
+    assert BUILTIN_ALIASES["slides"] == "snowpack"
+    assert BUILTIN_ALIASES["beamer"] == "snowpack"
 
 
 def test_resolve_role_target():
-    roles = build_builtin_role_registry("my_test_proj")
-    assert resolve_role_target("snowpack", "report", roles) == "report"
-    assert resolve_role_target("snowpack", "md-report", roles) == "report"
-    assert resolve_role_target("snowpack", "slides", roles) == "slides"
-    assert resolve_role_target("snowpack", "presentation", roles) == "slides"
-    assert resolve_role_target("snowpack", "typst-paper", roles) == "typst-paper"
-    assert resolve_role_target("snowpack", "typ", roles) == "typst-paper"
-    assert resolve_role_target("snowpack", "latex-slides", roles) == "latex-slides"
-    assert resolve_role_target("snowpack", "beamer", roles) == "latex-slides"
-    assert resolve_role_target("snowpack", "nonexistent", roles) is None
+    roles = {
+        "custom": Role(
+            pkgs=[],
+            hooks=[],
+            targets={
+                "report": {"aliases": ["doc", "md-report"]},
+                "slides": {"aliases": ["presentation"]},
+            },
+        ),
+        "python": Role(pkgs=[], hooks=[]),
+    }
+    assert resolve_role_target("custom", "report", roles) == "report"
+    assert resolve_role_target("custom", "doc", roles) == "report"
+    assert resolve_role_target("custom", "slides", roles) == "slides"
+    assert resolve_role_target("custom", "presentation", roles) == "slides"
+    assert resolve_role_target("custom", "nonexistent", roles) is None
     assert resolve_role_target("python", "any", roles) is None
 
 
 def test_find_role_for_standalone_target():
-    roles = build_builtin_role_registry("my_test_proj")
+    roles = {
+        "custom": Role(
+            pkgs=[],
+            hooks=[],
+            targets={
+                "slides": {"aliases": ["presentation"]},
+                "paper": {"aliases": ["article"]},
+            },
+        ),
+    }
     match = find_role_for_standalone_target("slides", roles)
-    assert match == ("snowpack", "slides")
+    assert match == ("custom", "slides")
 
-    match = find_role_for_standalone_target("paper", roles)
-    assert match == ("snowpack", "paper")
-
-    match = find_role_for_standalone_target("typ-report", roles)
-    assert match == ("snowpack", "typst-report")
+    match = find_role_for_standalone_target("article", roles)
+    assert match == ("custom", "paper")
 
     match = find_role_for_standalone_target("nonexistent", roles)
     assert match is None

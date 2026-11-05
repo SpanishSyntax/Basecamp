@@ -15,7 +15,6 @@ from basecamp.core.registry import (
 from basecamp.mcp import TOOL_DEFINITIONS, StdioMCPServer, execute_tool
 from basecamp.scaffold.engine import scaffold_assets
 from basecamp.scaffold.git import update_gitignore
-from basecamp.scaffold.manifests import generate_packages_manifest
 
 __all__ = [
     "main",
@@ -25,7 +24,6 @@ __all__ = [
     "resolve_role_target",
     "find_role_for_standalone_target",
     "resolve_nixpkgs_url",
-    "generate_packages_manifest",
     "prepare_flake_env",
     "scaffold_assets",
     "update_gitignore",

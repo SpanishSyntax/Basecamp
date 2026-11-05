@@ -1,9 +1,0 @@
-
-[package]
-name = "__PROJECT_NAME__"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
-# Standard numerical traits for Rust math if needed
-num-traits = "0.2"

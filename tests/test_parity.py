@@ -62,17 +62,11 @@ def test_builtin_registry_completeness():
     }
     assert expected_roles.issubset(set(roles.keys()))
 
-    # Verify Snowpack targets
+    # Verify Snowpack is a decoupled environment provider
     snowpack = roles["snowpack"]
-    assert "report" in snowpack.targets
-    assert "slides" in snowpack.targets
-    assert "paper" in snowpack.targets
-    assert "typst-report" in snowpack.targets
-    assert "typst-slides" in snowpack.targets
-    assert "typst-paper" in snowpack.targets
-    assert "latex-report" in snowpack.targets
-    assert "latex-slides" in snowpack.targets
-    assert "latex-paper" in snowpack.targets
+    assert "typst" in snowpack.pkgs
+    assert "tinymist" in snowpack.pkgs
+    assert len(snowpack.targets) == 0
 
 
 def test_alias_parity():
@@ -84,30 +78,13 @@ def test_alias_parity():
     assert BUILTIN_ALIASES["baro"] == "barograph"
     assert BUILTIN_ALIASES["barograph"] == "barograph"
     assert BUILTIN_ALIASES["snow"] == "snowpack"
-    assert BUILTIN_ALIASES["md"] == "snowpack:paper"
-    assert BUILTIN_ALIASES["slides"] == "snowpack:slides"
-    assert BUILTIN_ALIASES["paper"] == "snowpack:paper"
-    assert BUILTIN_ALIASES["report"] == "snowpack:report"
-    assert BUILTIN_ALIASES["typ"] == "snowpack:typst-report"
-    assert BUILTIN_ALIASES["tex"] == "snowpack:latex-report"
-    assert BUILTIN_ALIASES["beamer"] == "snowpack:latex-slides"
-    assert BUILTIN_ALIASES["typ:paper"] == "snowpack:typst-paper"
-    assert BUILTIN_ALIASES["tex:slides"] == "snowpack:latex-slides"
-
-
-def test_standalone_target_matching():
-    roles = build_builtin_role_registry("test_proj")
-    assert find_role_for_standalone_target("slides", roles) == ("snowpack", "slides")
-    assert find_role_for_standalone_target("paper", roles) == ("snowpack", "paper")
-    assert find_role_for_standalone_target("report", roles) == ("snowpack", "report")
-    assert find_role_for_standalone_target("typst-paper", roles) == (
-        "snowpack",
-        "typst-paper",
-    )
-    assert find_role_for_standalone_target("latex-slides", roles) == (
-        "snowpack",
-        "latex-slides",
-    )
+    assert BUILTIN_ALIASES["md"] == "snowpack"
+    assert BUILTIN_ALIASES["slides"] == "snowpack"
+    assert BUILTIN_ALIASES["paper"] == "snowpack"
+    assert BUILTIN_ALIASES["report"] == "snowpack"
+    assert BUILTIN_ALIASES["typ"] == "snowpack"
+    assert BUILTIN_ALIASES["tex"] == "snowpack"
+    assert BUILTIN_ALIASES["beamer"] == "snowpack"
 
 
 def test_cli_dry_run_parity():
@@ -118,59 +95,42 @@ def test_cli_dry_run_parity():
     assert "rust-overlay" in res.stdout
     assert "cargo-expand" in res.stdout
 
-    # basecamp init snowpack slides --dry-run
-    res = run_basecamp("init", "snowpack", "slides", "--dry-run")
+    # basecamp init snowpack --dry-run
+    res = run_basecamp("init", "snowpack", "--dry-run")
     assert res.returncode == 0
     assert "Generated flake.nix" in res.stdout
     assert "typst" in res.stdout
 
-    # basecamp new slides --dry-run
-    res = run_basecamp("new", "slides", "--dry-run")
+    # basecamp new c --dry-run
+    res = run_basecamp("new", "c", "--dry-run")
     assert res.returncode == 0
     assert "Would scaffold" in res.stdout
-    assert "slides.md" in res.stdout
-
-    # basecamp new typ:paper --dry-run
-    res = run_basecamp("new", "typ:paper", "--dry-run")
-    assert res.returncode == 0
-    assert "Would scaffold" in res.stdout
-    assert "paper.typ" in res.stdout
-
-    # basecamp new tex:slides --dry-run
-    res = run_basecamp("new", "tex:slides", "--dry-run")
-    assert res.returncode == 0
-    assert "Would scaffold" in res.stdout
-    assert "slides.tex" in res.stdout
+    assert "main.c" in res.stdout
 
 
 def test_cli_execution_in_tempdir():
     with tempfile.TemporaryDirectory() as tmpdir:
         tmp = Path(tmpdir)
-        # Test: basecamp init py --no-direnv --no-git
-        res = run_basecamp("init", "py", "--no-direnv", "--no-git", cwd=tmp)
+        # Test: basecamp init c --no-direnv --no-git
+        res = run_basecamp("init", "c", "--no-direnv", "--no-git", cwd=tmp)
         assert res.returncode == 0
         assert (tmp / "flake.nix").exists()
-        assert (tmp / "pyproject.toml").exists()
-        assert (tmp / "main.py").exists()
+        assert (tmp / "CMakeLists.txt").exists()
+        assert (tmp / "main.c").exists()
 
         flake_content = (tmp / "flake.nix").read_text()
-        assert "python3" in flake_content
-        assert "uv" in flake_content
-
-        pyproject_content = (tmp / "pyproject.toml").read_text()
-        assert 'name = "' in pyproject_content
+        assert "gcc" in flake_content
+        assert "cmake" in flake_content
 
 
 def test_cli_project_command():
     with tempfile.TemporaryDirectory() as tmpdir:
         tmp = Path(tmpdir)
-        # Test: basecamp project snowpack
-        res = run_basecamp("project", "snowpack", "--no-git", cwd=tmp)
+        # Test: basecamp project c
+        res = run_basecamp("project", "c", "--no-git", cwd=tmp)
         assert res.returncode == 0
-        # Project assets for snowpack include packages.typ, report.typ, library.bib
-        assert (tmp / "packages.typ").exists()
-        assert (tmp / "library.bib").exists()
-        assert not (tmp / "main.py").exists()
+        assert (tmp / "CMakeLists.txt").exists()
+        assert not (tmp / "main.c").exists()
 
 
 def test_cli_shell_command():

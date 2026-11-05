@@ -6,11 +6,6 @@ from pathlib import Path
 
 from basecamp.core.models import Role
 from basecamp.scaffold.git import get_git_author, stage_git_files
-from basecamp.scaffold.manifests import (
-    LATEX_PACKAGE_BUNDLES,
-    TYPST_PACKAGE_BUNDLES,
-    generate_packages_manifest,
-)
 from basecamp.ui import ui
 
 
@@ -25,101 +20,14 @@ def resolve_document_metadata(
     configure_packages: bool = False,
     interactive: bool = True,
 ) -> dict[str, str]:
-    """Interactively prompts or resolves document metadata when scaffolding Snowpack documents."""
+    """Resolves basic project metadata for template rendering."""
     meta: dict[str, str] = {}
-    if "snowpack" not in resolved_roles:
-        return meta
-
-    meta["date"] = time.strftime("%B %Y")
-    meta["dependency"] = "Department of Systems & Control"
-
-    target = role_targets.get("snowpack", "")
     git_author = get_git_author()
-    default_title = project_name.replace("-", " ").replace("_", " ").title()
-    default_author = git_author if git_author else "Author"
-
-    is_markdown_target = target in ("report", "slides", "paper", "")
-
-    if interactive and sys.stdin.isatty():
-        # Title
-        if title_flag:
-            meta["title"] = title_flag
-        else:
-            meta["title"] = ui.prompt("Document title", default=default_title)
-
-        # Author
-        if author_flag:
-            meta["author"] = author_flag
-        else:
-            meta["author"] = ui.prompt("Author", default=default_author)
-
-        # Engine (prompted specifically for Markdown workspaces)
-        if is_markdown_target:
-            if engine_flag:
-                meta["engine"] = engine_flag.lower()
-            else:
-                meta["engine"] = ui.select(
-                    "Select compilation engine for Markdown:",
-                    [
-                        ("typst", "Typst (recommended, ultra-fast hermetic layout)"),
-                        (
-                            "latex",
-                            "LaTeX (Tectonic + Pandoc, academic TeX typesetting)",
-                        ),
-                    ],
-                )
-        elif target.startswith("latex") or target.startswith("tex"):
-            meta["engine"] = "latex"
-        else:
-            meta["engine"] = "typst"
-
-        # Theme (specifically for presentation slides)
-        if target in ("slides", "") or "slides" in target:
-            if theme_flag:
-                meta["theme"] = theme_flag.lower()
-            else:
-                meta["theme"] = ui.select(
-                    "Select presentation theme:",
-                    [
-                        ("dark", "Dark theme (recommended, 16:9 OLED Keynote style)"),
-                        ("light", "Light theme (clean paper / lecture style)"),
-                    ],
-                )
-        elif theme_flag:
-            meta["theme"] = theme_flag.lower()
-        else:
-            meta["theme"] = "dark"
-
-        if configure_packages:
-            is_tex = (
-                (meta.get("engine") == "latex")
-                or target.startswith("latex")
-                or target.startswith("tex")
-            )
-            fmt = "latex" if is_tex else "typst"
-            bundles = LATEX_PACKAGE_BUNDLES if is_tex else TYPST_PACKAGE_BUNDLES
-            options = [(b["id"], b["label"], b["desc"]) for b in bundles]
-            preselected = [b["id"] for b in bundles if b.get("default", False)]
-            chosen_ids = ui.multiselect(
-                f"Select {fmt.title()} packages to include:",
-                options,
-                preselected=preselected,
-            )
-            key = f"packages_{'tex' if is_tex else 'typ'}_content"
-            meta[key] = generate_packages_manifest(
-                fmt, chosen_ids if chosen_ids else preselected
-            )
-    else:
-        meta["title"] = title_flag or default_title
-        meta["author"] = author_flag or default_author
-        meta["theme"] = theme_flag.lower() if theme_flag else "dark"
-        if is_markdown_target:
-            meta["engine"] = engine_flag.lower() if engine_flag else "typst"
-        elif target.startswith("latex") or target.startswith("tex"):
-            meta["engine"] = "latex"
-        else:
-            meta["engine"] = "typst"
-
+    meta["author"] = author_flag or (git_author if git_author else "Author")
+    meta["title"] = (
+        title_flag or project_name.replace("-", " ").replace("_", " ").title()
+    )
+    meta["date"] = time.strftime("%B %Y")
     return meta
 
 

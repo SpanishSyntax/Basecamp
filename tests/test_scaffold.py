@@ -48,84 +48,14 @@ def test_prepare_flake_env():
         assert ".venv/" in gitignore_content
 
 
-def test_scaffold_python_assets():
+def test_scaffold_c_assets():
     with tempfile.TemporaryDirectory() as tmpdir:
         tmp_path = Path(tmpdir)
-        roles = build_builtin_role_registry("test_proj")
-        # Project assets (pyproject.toml)
+        roles = build_builtin_role_registry("test_c")
         scaffold_assets(
             target_dir=tmp_path,
-            project_name="test_proj",
-            resolved_roles=["python"],
-            assets_dirs=[ASSETS_DIR],
-            scope="project",
-            force=True,
-            dry_run=False,
-            auto_git=False,
-            project_root=tmp_path,
-            roles_db=roles,
-        )
-        assert (tmp_path / "pyproject.toml").exists()
-        content = (tmp_path / "pyproject.toml").read_text()
-        assert 'name = "test_proj"' in content
-
-        # Starter assets (main.py)
-        scaffold_assets(
-            target_dir=tmp_path,
-            project_name="test_proj",
-            resolved_roles=["python"],
-            assets_dirs=[ASSETS_DIR],
-            scope="starter",
-            force=True,
-            dry_run=False,
-            auto_git=False,
-            project_root=tmp_path,
-            roles_db=roles,
-        )
-        assert (tmp_path / "main.py").exists()
-
-
-def test_scaffold_snowpack_slides():
-    with tempfile.TemporaryDirectory() as tmpdir:
-        tmp_path = Path(tmpdir)
-        roles = build_builtin_role_registry("test_slides")
-        role_targets = {"snowpack": "slides"}
-        metadata = {
-            "title": "Quantum Control",
-            "author": "Dr. Marie",
-            "theme": "dark",
-            "engine": "typst",
-        }
-        # Starter assets (slides.md)
-        scaffold_assets(
-            target_dir=tmp_path,
-            project_name="test_slides",
-            resolved_roles=["snowpack"],
-            assets_dirs=[ASSETS_DIR],
-            scope="starter",
-            force=True,
-            dry_run=False,
-            auto_git=False,
-            project_root=tmp_path,
-            role_targets=role_targets,
-            roles_db=roles,
-            metadata=metadata,
-        )
-        slides_file = tmp_path / "slides.md"
-        assert slides_file.exists()
-        content = slides_file.read_text()
-        assert "Quantum Control" in content
-        assert "Dr. Marie" in content
-
-
-def test_scaffold_barograph_assets():
-    with tempfile.TemporaryDirectory() as tmpdir:
-        tmp_path = Path(tmpdir)
-        roles = build_builtin_role_registry("test_bg")
-        scaffold_assets(
-            target_dir=tmp_path,
-            project_name="test_bg",
-            resolved_roles=["barograph"],
+            project_name="test_c",
+            resolved_roles=["c"],
             assets_dirs=[ASSETS_DIR],
             scope="all",
             force=True,
@@ -134,9 +64,48 @@ def test_scaffold_barograph_assets():
             project_root=tmp_path,
             roles_db=roles,
         )
-        assert (tmp_path / "pyproject.toml").exists()
-        assert (tmp_path / "plot.py").exists()
-        assert (tmp_path / "dashboard.py").exists()
-        dash_content = (tmp_path / "dashboard.py").read_text()
-        assert "Barograph" in dash_content
-        assert "test_bg" in dash_content
+        assert (tmp_path / "CMakeLists.txt").exists()
+        assert (tmp_path / "main.c").exists()
+        cmake_content = (tmp_path / "CMakeLists.txt").read_text()
+        assert "test_c" in cmake_content
+
+
+def test_scaffold_cpp_assets():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmp_path = Path(tmpdir)
+        roles = build_builtin_role_registry("test_cpp")
+        scaffold_assets(
+            target_dir=tmp_path,
+            project_name="test_cpp",
+            resolved_roles=["cpp"],
+            assets_dirs=[ASSETS_DIR],
+            scope="all",
+            force=True,
+            dry_run=False,
+            auto_git=False,
+            project_root=tmp_path,
+            roles_db=roles,
+        )
+        assert (tmp_path / "CMakeLists.txt").exists()
+        assert (tmp_path / "main.cpp").exists()
+        cmake_content = (tmp_path / "CMakeLists.txt").read_text()
+        assert "test_cpp" in cmake_content
+
+
+def test_scaffold_ops_assets():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmp_path = Path(tmpdir)
+        roles = build_builtin_role_registry("test_ops")
+        scaffold_assets(
+            target_dir=tmp_path,
+            project_name="test_ops",
+            resolved_roles=["ops"],
+            assets_dirs=[ASSETS_DIR],
+            scope="project",
+            force=True,
+            dry_run=False,
+            auto_git=False,
+            project_root=tmp_path,
+            roles_db=roles,
+        )
+        assert (tmp_path / "compose.yaml").exists()

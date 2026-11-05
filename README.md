@@ -37,36 +37,11 @@ nix run github:SpanishSyntax/Basecamp -- init python
 # Initialize a Zig project with zls and build.zig
 nix run github:SpanishSyntax/Basecamp -- init zig
 
-# Initialize a Snowpack workspace for clean Markdown report
-basecamp init snowpack report
-
-# Initialize a Snowpack workspace specifically for 16:9 slides presentation
-basecamp init snowpack slides
-
-# Initialize a Snowpack workspace for an academic IEEE paper
-basecamp init snowpack paper
-
-# Initialize native Typst or LaTeX workspaces directly
-basecamp init typ                        # Native Typst workspace (report.typ + packages.typ)
-basecamp init tex                        # Native LaTeX workspace (report.tex + packages.tex)
-basecamp init typ:paper                  # Native Typst IEEE 2-column paper (paper.typ)
-basecamp init tex:slides                 # Native LaTeX 16:9 Beamer slides (slides.tex)
-
-# Drop starter documents directly using role shortcuts
-basecamp new slides                      # 16:9 Markdown presentation (slides.md)
-basecamp new paper                       # IEEE 2-column Markdown paper (paper.md)
-basecamp new report                      # Clean Markdown report document (report.md)
-basecamp new typ:paper                   # Native Typst paper (paper.typ)
-basecamp new tex:slides                  # Native LaTeX Beamer slides (slides.tex)
-
-# Drop a starter experiment file into current folder without touching root configs
-basecamp new mv
+# Initialize a Snowpack workspace (provisions Typst, Pandoc, Tinymist LSP, Tectonic)
+basecamp init snowpack
 
 # Generate only DevShell without starter files
 basecamp shell rust next
-
-# Scaffold project foundation files (packages.typ, report.typ, library.bib) to project root
-basecamp project snowpack
 
 # Combine roles: Rust backend + Next.js frontend + DevOps containers
 nix run github:SpanishSyntax/Basecamp -- init rust next ops
@@ -143,37 +118,22 @@ Options:
 | **Svelte** | `svelte` | - | Bun, `svelte-language-server`, `vtsls` | `prettierd` |
 | **Vue** | `vue` | - | Bun, `vue-language-server`, `vtsls` | `prettierd` |
 | **Next.js** | `next` | `react` | Bun, `vtsls`, `typescript` | `prettierd` |
-| **Snowpack (Markdown)** | `snowpack` / `md` | `snow`, `md:report`, `md:slides`, `md:paper`, `report`, `slides`, `paper` | `pandoc`, `typst`, `tectonic`, `tinymist`, `texlab` | `typstyle` |
-| **Snowpack (Typst)** | `typst` / `typ` | `typ:report`, `typ:slides`, `typ:paper`, `typst:report`, `typst:slides`, `typst:paper` | `typst`, `tinymist` (LSP) | `typstyle` |
-| **Snowpack (LaTeX)** | `latex` / `tex` | `tex:report`, `tex:slides`, `tex:paper`, `latex:report`, `latex:slides`, `latex:paper`, `beamer` | `tectonic`, `texlab` (LSP) | - |
+| **Snowpack** | `snowpack` | `snow`, `typst`, `typ`, `tex`, `latex`, `md`, `slides`, `paper`, `report` | `pandoc`, `typst`, `tectonic`, `tinymist`, `texlab` | `typstyle` |
 | **DevOps & Cloud** | `ops` | `devops`, `docker` | `docker-compose`, `lazydocker`, `kubectl`, `helm`, `k9s`, `dive` | - |
 
 ---
 
-## 📝 Snowpack Document Engine (Standardized 3×3 Matrix)
+## 📝 Snowpack & Iceberg Decoupling
 
-Basecamp provides a symmetrical 9-way document scaffolding engine for Snowpack. Every document archetype is available across all three supported markup languages:
-
-| Document Archetype | Markdown (`.md`) | Typst (`.typ`) | LaTeX (`.tex`) | Output / Layout Specification |
-| :--- | :--- | :--- | :--- | :--- |
-| **Technical Report** | `report.md` | `report.typ` | `report.tex` | Minimal sans-serif Inter layout (A4/Letter) |
-| **16:9 Presentation** | `slides.md` | `slides.typ` | `slides.tex` | Apple Keynote-inspired widescreen slide deck |
-| **Academic Paper** | `paper.md` | `paper.typ` | `paper.tex` | Dual-column IEEE Computer Society publication |
-
-### Foundation Assets (`project/`)
-When initializing a Snowpack workspace, Basecamp automatically scaffolds the corresponding shared foundation assets to the project root:
-- `packages.typ`: Modular Typst preamble hub (`cetz`, `fletcher`, `physica`, `merman`, `tablex`, `algorithmic`, `codly`).
-- `packages.tex`: Modular LaTeX preamble hub (`amsmath`, `mathtools`, `tikz`, `pgfplots`, `booktabs`, `tcolorbox`, `cleveref`).
-- `library.bib`: Shared BibTeX bibliography database.
-- `report.typ`, `slides.typ`, `paper.typ`: Re-usable Typst layout functions for Markdown conversion and native Typst authoring.
-
-#### Interactive Package Configurator (`basecamp packages`)
-You can dynamically assemble your package manifest at any time with sane defaults preselected:
-```bash
-basecamp packages typ                     # Interactively configure packages.typ via multi-select
-basecamp packages tex                     # Interactively configure packages.tex via multi-select
-basecamp init snowpack slides --packages  # Interactively choose package bundles during init
-```
+Basecamp strictly adheres to the Single Responsibility Principle:
+- **Basecamp** provides the developer environment: Nix `flake.nix`, `.envrc`, LSPs (`tinymist`, `texlab`), formatters (`typstyle`), compilers (`typst`, `tectonic`), and `TYPST_ROOT` environment hooks.
+- **Snowpack** handles document scaffolding directly via its own CLI:
+  ```bash
+  snowpack new slides      # Scaffold 16:9 Typst presentation
+  snowpack new paper       # Scaffold IEEE 2-column paper
+  snowpack new report      # Scaffold technical report
+  snowpack init            # Bootstrap complete workspace (packages.typ + bib + starter)
+  ```
 
 ---
 

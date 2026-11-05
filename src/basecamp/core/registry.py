@@ -127,7 +127,9 @@ def build_builtin_role_registry(folder_name: str) -> dict[str, Role]:
                 "zig",
                 "zls",
             ],
-            hooks=[],
+            hooks=[
+                "[ -f build.zig ] || zig init",
+            ],
             ignores=["zig-cache/", "zig-out/"],
         ),
         "java": Role(
@@ -160,6 +162,7 @@ def build_builtin_role_registry(folder_name: str) -> dict[str, Role]:
             ],
             hooks=[
                 'export DOTNET_ROOT="${pkgs.dotnet-sdk_9}"',
+                f"[ -f *.csproj ] || dotnet new console -n {folder_name} -o . --force",
             ],
             ignores=["bin/", "obj/"],
         ),
@@ -181,6 +184,7 @@ def build_builtin_role_registry(folder_name: str) -> dict[str, Role]:
             hooks=[
                 "export PYTHONPATH=\"$PWD''${PYTHONPATH:+:$PYTHONPATH}\"",
                 "export UV_PYTHON_DOWNLOADS=never",
+                f"[ -f pyproject.toml ] || [ -f requirements.txt ] || uv init --name {folder_name} --quiet",
                 "if [ -f pyproject.toml ]; then uv sync --quiet; elif [ -f requirements.txt ] && [ ! -d .venv ]; then (uv venv --quiet && uv pip install -r requirements.txt --quiet); fi",
                 "if [ -d .venv ]; then source .venv/bin/activate; fi",
             ],
@@ -244,7 +248,9 @@ def build_builtin_role_registry(folder_name: str) -> dict[str, Role]:
             display_name="JS/TS",
             status_detail="Bun + vtsls + prettierd",
             pkgs=["bun", "vtsls", "typescript", "prettierd"],
-            hooks=[],
+            hooks=[
+                "[ -f package.json ] || bun init -y",
+            ],
             ignores=["node_modules/", "dist/"],
         ),
         "svelte": Role(
@@ -310,7 +316,9 @@ def build_builtin_role_registry(folder_name: str) -> dict[str, Role]:
             display_name="Gleam",
             status_detail="Gleam + Erlang runtime",
             pkgs=["gleam", "erlang", "rebar3"],
-            hooks=[],
+            hooks=[
+                f"[ -f gleam.toml ] || gleam new . --name {folder_name}",
+            ],
             ignores=["build/"],
         ),
         "elixir": Role(
@@ -320,7 +328,9 @@ def build_builtin_role_registry(folder_name: str) -> dict[str, Role]:
             display_name="Elixir",
             status_detail="Elixir + Mix + elixir-ls",
             pkgs=["elixir", "elixir-ls"],
-            hooks=[],
+            hooks=[
+                f"[ -f mix.exs ] || mix new . --app {folder_name}",
+            ],
             ignores=["_build/", "deps/"],
         ),
         "haskell": Role(
@@ -336,7 +346,9 @@ def build_builtin_role_registry(folder_name: str) -> dict[str, Role]:
                 "hlint",
                 "ormolu",
             ],
-            hooks=[],
+            hooks=[
+                f"[ -f *.cabal ] || [ -f package.yaml ] || cabal init --non-interactive --package-name={folder_name}",
+            ],
             ignores=["dist-newstyle/", ".cabal-sandbox/"],
         ),
         # ------------------------------------------------------------
@@ -368,78 +380,6 @@ def build_builtin_role_registry(folder_name: str) -> dict[str, Role]:
                 "*.fdb_latexmk",
                 "*.fls",
             ],
-            targets={
-                # --------------------------------------------------------
-                # 1. Polyglot Markdown Workspaces (Frontmatter driven)
-                # --------------------------------------------------------
-                "report": {
-                    "project": ["packages.typ", "report.typ", "library.bib"],
-                    "starter": ["report.md"],
-                    "description": "Polyglot Markdown report (report.md + packages + library.bib)",
-                    "aliases": ["md-report", "doc", "document"],
-                },
-                "slides": {
-                    "project": ["packages.typ", "slides.typ", "library.bib"],
-                    "starter": ["slides.md"],
-                    "description": "Polyglot Markdown 16:9 slides (slides.md + packages + library.bib)",
-                    "aliases": [
-                        "md-slides",
-                        "presentation",
-                        "slodes",
-                        "slide",
-                        "deck",
-                        "ppt",
-                    ],
-                },
-                "paper": {
-                    "project": ["packages.typ", "paper.typ", "library.bib"],
-                    "starter": ["paper.md"],
-                    "description": "Polyglot Markdown IEEE paper (paper.md + packages + library.bib)",
-                    "aliases": ["md-paper", "ieee", "article", "default"],
-                },
-                # --------------------------------------------------------
-                # 2. Native Typst Workspaces
-                # --------------------------------------------------------
-                "typst-report": {
-                    "project": ["packages.typ", "library.bib"],
-                    "starter": ["report.typ"],
-                    "description": "Native Typst technical report (report.typ + packages.typ + library.bib)",
-                    "aliases": ["typ-report"],
-                },
-                "typst-slides": {
-                    "project": ["packages.typ", "library.bib"],
-                    "starter": ["slides.typ"],
-                    "description": "Native Typst 16:9 presentation (slides.typ + packages.typ + library.bib)",
-                    "aliases": ["typ-slides"],
-                },
-                "typst-paper": {
-                    "project": ["packages.typ", "library.bib"],
-                    "starter": ["paper.typ"],
-                    "description": "Native Typst IEEE 2-column paper (paper.typ + packages.typ + library.bib)",
-                    "aliases": ["typ-paper", "typst", "typ"],
-                },
-                # --------------------------------------------------------
-                # 3. Native LaTeX Workspaces
-                # --------------------------------------------------------
-                "latex-report": {
-                    "project": ["packages.tex", "library.bib"],
-                    "starter": ["report.tex"],
-                    "description": "Native LaTeX technical report (report.tex + packages.tex + library.bib)",
-                    "aliases": ["tex-report"],
-                },
-                "latex-slides": {
-                    "project": ["packages.tex", "library.bib"],
-                    "starter": ["slides.tex"],
-                    "description": "Native LaTeX 16:9 Beamer slides (slides.tex + packages.tex + library.bib)",
-                    "aliases": ["tex-slides", "beamer"],
-                },
-                "latex-paper": {
-                    "project": ["packages.tex", "library.bib"],
-                    "starter": ["paper.tex"],
-                    "description": "Native LaTeX IEEEtran paper (paper.tex + packages.tex + library.bib)",
-                    "aliases": ["tex-paper", "latex", "tex"],
-                },
-            },
         ),
         # ------------------------------------------------------------
         # Cloud & Infrastructure
@@ -474,50 +414,20 @@ BUILTIN_ALIASES: dict[str, str] = {
     "barograph": "barograph",
     "snow": "snowpack",
     "snowpack": "snowpack",
-    "md": "snowpack:paper",
-    "typ": "snowpack:typst-report",
-    "typst": "snowpack:typst-report",
-    "typst-paper": "snowpack:typst-paper",
-    "typst-report": "snowpack:typst-report",
-    "typst-slides": "snowpack:typst-slides",
-    "typst:paper": "snowpack:typst-paper",
-    "typst:report": "snowpack:typst-report",
-    "typst:slides": "snowpack:typst-slides",
-    "typ-paper": "snowpack:typst-paper",
-    "typ-report": "snowpack:typst-report",
-    "typ-slides": "snowpack:typst-slides",
-    "typ:paper": "snowpack:typst-paper",
-    "typ:report": "snowpack:typst-report",
-    "typ:slides": "snowpack:typst-slides",
-    "tex": "snowpack:latex-report",
-    "latex": "snowpack:latex-report",
-    "latex-paper": "snowpack:latex-paper",
-    "latex-report": "snowpack:latex-report",
-    "latex-slides": "snowpack:latex-slides",
-    "latex:paper": "snowpack:latex-paper",
-    "latex:report": "snowpack:latex-report",
-    "latex:slides": "snowpack:latex-slides",
-    "tex-report": "snowpack:latex-report",
-    "tex-slides": "snowpack:latex-slides",
-    "tex-paper": "snowpack:latex-paper",
-    "tex:report": "snowpack:latex-report",
-    "tex:slides": "snowpack:latex-slides",
-    "tex:paper": "snowpack:latex-paper",
-    "beamer": "snowpack:latex-slides",
+    "md": "snowpack",
+    "typ": "snowpack",
+    "typst": "snowpack",
+    "tex": "snowpack",
+    "latex": "snowpack",
+    "beamer": "snowpack",
     "hs": "haskell",
     "cs": "dotnet",
     "csharp": "dotnet",
     "devops": "ops",
     "docker": "ops",
     "ex": "elixir",
-    "slides": "snowpack:slides",
-    "presentation": "snowpack:slides",
-    "paper": "snowpack:paper",
-    "report": "snowpack:report",
-    "md-report": "snowpack:report",
-    "md-slides": "snowpack:slides",
-    "md-paper": "snowpack:paper",
-    "md:report": "snowpack:report",
-    "md:slides": "snowpack:slides",
-    "md:paper": "snowpack:paper",
+    "slides": "snowpack",
+    "presentation": "snowpack",
+    "paper": "snowpack",
+    "report": "snowpack",
 }
