@@ -52,8 +52,6 @@ def build_shell_hooks(
                     lines.append(clean_hook)
     return lines
 
-    return lines
-
 
 def prepare_flake_env(
     project_root: Path,

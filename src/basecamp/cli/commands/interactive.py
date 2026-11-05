@@ -64,7 +64,11 @@ def run_interactive_mode(
                 "Starter file in current directory",
             ),
             ("shell", "Add flake.nix and .envrc", "DevShell at project root"),
-            ("project", "Add project configs", "Root configs (pyproject.toml, etc.)"),
+            (
+                "project",
+                "Add project configs",
+                "Root configs (CMakeLists.txt, compose.yaml)",
+            ),
             ("init", "Create full setup", "Full workspace setup at project root"),
         ]
     elif has_root_flake:
@@ -77,7 +81,11 @@ def run_interactive_mode(
             ),
             ("new", "Add starter file", "Starter file in current directory"),
             ("shell", "Add flake.nix and .envrc", "DevShell at root"),
-            ("project", "Add project configs", "Root configs (pyproject.toml, etc.)"),
+            (
+                "project",
+                "Add project configs",
+                "Root configs (CMakeLists.txt, compose.yaml)",
+            ),
             (
                 "init",
                 "Create full setup",
@@ -88,7 +96,11 @@ def run_interactive_mode(
         cmd_options = [
             ("init", "Create full setup", "Flake, envrc, project configs, starter"),
             ("shell", "Add flake.nix and .envrc", "DevShell environment only"),
-            ("project", "Add project configs", "Root configs (pyproject.toml, etc.)"),
+            (
+                "project",
+                "Add project configs",
+                "Root configs (CMakeLists.txt, compose.yaml)",
+            ),
             ("new", "Add starter file", "Starter file in current directory"),
         ]
 

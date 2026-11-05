@@ -25,7 +25,7 @@ from basecamp.core.registry import (
     build_builtin_role_registry,
     resolve_nixpkgs_url,
 )
-from basecamp.scaffold.engine import resolve_document_metadata, scaffold_assets
+from basecamp.scaffold.engine import resolve_metadata, scaffold_assets
 
 BASECAMP_DIR = Path(__file__).resolve().parent
 FALLBACK_TEMPLATE = BASECAMP_DIR / "flake.template"
@@ -387,16 +387,9 @@ def _handle_init(
     nixpkgs_url = resolve_nixpkgs_url(channel)
     libs_list = os.environ.get("LIBS_LIST", DEFAULT_RUNTIME_LIBS).replace(",", " ")
 
-    doc_metadata = resolve_document_metadata(
+    doc_metadata = resolve_metadata(
         project_name=project_name,
-        resolved_roles=resolved_roles,
-        role_targets=role_targets,
-        title_flag=title or None,
         author_flag=author or None,
-        theme_flag="dark",
-        engine_flag=engine or "typst",
-        configure_packages=False,
-        interactive=False,
     )
 
     stdout_capture = io.StringIO()

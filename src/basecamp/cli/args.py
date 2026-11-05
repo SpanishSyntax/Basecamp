@@ -101,12 +101,6 @@ class ParsedArgs:
     no_direnv: bool = False
     channel: str | None = None
     target_flag: str | None = None
-    doc_title: str | None = None
-    doc_author: str | None = None
-    doc_theme: str | None = None
-    doc_engine: str | None = None
-    configure_packages_flag: bool = False
-    no_packages_flag: bool = False
     active: bool = False
 
 
@@ -128,10 +122,6 @@ def parse_cli_args(args: list[str]) -> ParsedArgs:
             parsed.auto_git = False
         elif arg == "--no-direnv":
             parsed.no_direnv = True
-        elif arg in ("-p", "--packages", "--pkg"):
-            parsed.configure_packages_flag = True
-        elif arg in ("--no-packages", "--no-pkg"):
-            parsed.no_packages_flag = True
         elif arg in ("--color", "--no-color") or arg.startswith("--color="):
             if arg == "--color" and i + 1 < len(args):
                 i += 1
@@ -149,46 +139,10 @@ def parse_cli_args(args: list[str]) -> ParsedArgs:
                 parsed.target_flag = args[i + 1]
                 i += 1
             else:
-                ui.error(f"{arg} requires a target name (e.g. report, slides, paper).")
+                ui.error(f"{arg} requires a target name.")
                 sys.exit(1)
         elif arg.startswith(("--mode=", "--target=", "--type=")):
             parsed.target_flag = arg.split("=", 1)[1]
-        elif arg in ("-e", "--engine"):
-            if i + 1 < len(args):
-                parsed.doc_engine = args[i + 1]
-                i += 1
-            else:
-                ui.error(f"{arg} requires 'typst' or 'latex'.")
-                sys.exit(1)
-        elif arg.startswith("--engine="):
-            parsed.doc_engine = arg.split("=", 1)[1]
-        elif arg == "--title":
-            if i + 1 < len(args):
-                parsed.doc_title = args[i + 1]
-                i += 1
-            else:
-                ui.error("--title requires a title string.")
-                sys.exit(1)
-        elif arg.startswith("--title="):
-            parsed.doc_title = arg.split("=", 1)[1]
-        elif arg == "--author":
-            if i + 1 < len(args):
-                parsed.doc_author = args[i + 1]
-                i += 1
-            else:
-                ui.error("--author requires an author string.")
-                sys.exit(1)
-        elif arg.startswith("--author="):
-            parsed.doc_author = arg.split("=", 1)[1]
-        elif arg == "--theme":
-            if i + 1 < len(args):
-                parsed.doc_theme = args[i + 1]
-                i += 1
-            else:
-                ui.error("--theme requires 'dark' or 'light'.")
-                sys.exit(1)
-        elif arg.startswith("--theme="):
-            parsed.doc_theme = arg.split("=", 1)[1]
         else:
             parsed.filtered_args.append(arg)
         i += 1

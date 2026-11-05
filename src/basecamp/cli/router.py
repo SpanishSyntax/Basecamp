@@ -25,7 +25,7 @@ from basecamp.core.registry import (
     build_builtin_role_registry,
     resolve_nixpkgs_url,
 )
-from basecamp.scaffold.engine import resolve_document_metadata, scaffold_assets
+from basecamp.scaffold.engine import resolve_metadata, scaffold_assets
 from basecamp.ui import ui
 
 
@@ -321,26 +321,7 @@ def main() -> None:
 
     nixpkgs_url = resolve_nixpkgs_url(parsed.channel)
 
-    configure_packages = False
-    if "snowpack" in resolved_roles:
-        if parsed.no_packages_flag:
-            configure_packages = False
-        elif parsed.configure_packages_flag:
-            configure_packages = True
-
-    interactive_meta = command == "new"
-
-    doc_metadata = resolve_document_metadata(
-        project_name=project_name,
-        resolved_roles=resolved_roles,
-        role_targets=role_targets,
-        title_flag=parsed.doc_title,
-        author_flag=parsed.doc_author,
-        theme_flag=parsed.doc_theme,
-        engine_flag=parsed.doc_engine,
-        configure_packages=configure_packages,
-        interactive=interactive_meta,
-    )
+    doc_metadata = resolve_metadata(project_name=project_name)
 
     # 1. DevShell generation (init and shell)
     if command in ("init", "shell"):
