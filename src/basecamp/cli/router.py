@@ -99,6 +99,12 @@ def main() -> None:
         display_role_info(filtered_args[1], roles_db, aliases, all_asset_dirs)
         sys.exit(0)
 
+    # Handle 'basecamp mcp'
+    if filtered_args and filtered_args[0] == "mcp":
+        from basecamp.mcp import main as mcp_main
+
+        sys.exit(mcp_main())
+
     COMMAND_ALIASES = {
         "starter": "new",
         "draft": "new",

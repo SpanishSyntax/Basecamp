@@ -28,6 +28,7 @@ Commands:
   list [--json]      List available roles and stacks
   active [--json]    Diagnose and display active roles on current flake
   info <role>        Display detailed information for a role
+  mcp                Launch native MCP stdio server
 
 Options:
   -A, --agent          Compact machine/agent friendly output mode
@@ -63,6 +64,7 @@ Options:
   list         List available roles and stacks.
   active       Diagnose and display active roles on current flake.
   info <role>  Display detailed information for a role.
+  mcp          Start native Model Context Protocol (MCP) stdio server.
   interactive  Launch interactive stack and command selector.
 
 {ui.blue("Options:")}

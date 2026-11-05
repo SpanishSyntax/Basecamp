@@ -12,6 +12,7 @@ from basecamp.core.registry import (
     build_builtin_role_registry,
     resolve_nixpkgs_url,
 )
+from basecamp.mcp import TOOL_DEFINITIONS, StdioMCPServer, execute_tool
 from basecamp.scaffold.engine import scaffold_assets
 from basecamp.scaffold.git import update_gitignore
 from basecamp.scaffold.manifests import generate_packages_manifest
@@ -28,4 +29,7 @@ __all__ = [
     "prepare_flake_env",
     "scaffold_assets",
     "update_gitignore",
+    "StdioMCPServer",
+    "TOOL_DEFINITIONS",
+    "execute_tool",
 ]
