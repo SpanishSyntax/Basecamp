@@ -20,11 +20,10 @@ def print_help() -> None:
 Usage: basecamp [command] [roles...] [options]
 
 Commands:
-  init [roles...]    Create full setup (flake, envrc, project configs, starter)
-  new <target>       Add starter file (main.py, report.md, etc.)
-  shell [roles...]   Add flake.nix and .envrc
-  project [roles...] Add project configs
-  packages <role>    Configure package bundles
+  init [roles...]    Create reproducible workspace (flake.nix, .envrc, toolchain hooks)
+  shell [roles...]   Generate flake.nix and .envrc only
+  new <role>         Add starter file for supported roles (c, cpp, ops)
+  project [roles...] Add project foundation configs (CMakeLists.txt, compose.yaml)
   list [--json]      List available roles and stacks
   active [--json]    Diagnose and display active roles on current flake
   info <role>        Display detailed information for a role
@@ -34,9 +33,6 @@ Options:
   -A, --agent          Compact machine/agent friendly output mode
   --json               Structured JSON output mode
   --toon               Token-Oriented Object Notation (TOON) output mode
-  -m, --mode MODE      Document operating mode / target (report, slides, paper)
-  -t, --target TARGET  Alias for --mode
-  -e, --engine ENGINE  Compilation engine for Markdown ('typst' or 'latex')
   -f, --force          Overwrite existing files without confirmation prompts
   -n, --dry-run        Preview generated files in stdout without writing
   -c, --channel NAME   Nixpkgs channel (default: nixos-26.05)
@@ -56,11 +52,10 @@ Options:
   basecamp <command> [roles...] [options]
 
 {ui.blue("Commands:")}
-  init         Create full setup (flake, envrc, project configs, starter).
-  new          Add starter file (main.py, report.md, etc.).
-  shell        Add flake.nix and .envrc.
-  project      Add project configs (pyproject.toml, packages.typ, etc.).
-  packages     Configure package bundles.
+  init         Create workspace (flake.nix, .envrc, toolchain hooks).
+  shell        Generate flake.nix and .envrc only.
+  new          Add starter file for supported roles (c, cpp, ops).
+  project      Add project configs (CMakeLists.txt, compose.yaml).
   list         List available roles and stacks.
   active       Diagnose and display active roles on current flake.
   info <role>  Display detailed information for a role.
@@ -71,15 +66,6 @@ Options:
   -A, --agent          Compact agent-friendly output mode.
   --json               Structured JSON output mode.
   -a, --active         Show only active roles on current flake.
-  -m, --mode MODE      Document operating mode / target (report, slides, paper).
-  -t, --target TARGET  Alias for --mode.
-  -e, --engine ENGINE  Compilation engine for Markdown ('typst' or 'latex').
-  -p, --packages       Configure packages dynamically (default in interactive mode).
-  --no-pkg             Skip interactive package bundle selection.
-  --no-packages        Alias for --no-pkg.
-  --title TITLE        Document title for Snowpack documents.
-  --author AUTHOR      Document author for Snowpack documents.
-  --theme THEME        Presentation theme for slides ('dark' or 'light').
   -f, --force          Overwrite existing files without confirmation prompts.
   -n, --dry-run        Preview generated files in stdout without writing.
   -c, --channel NAME   Nixpkgs channel (default: nixos-26.05, e.g. unstable, 24.11).
@@ -91,26 +77,13 @@ Options:
   -V, -v, --version    Show version and exit.
 
 {ui.blue("Examples:")}
-  basecamp                                 # Interactive Bun-style stack selector
-  basecamp init py                         # Setup Python DevShell, root configs, and starter
-  basecamp init py cpp rust typ            # Polyglot multi-language workspace bootstrap
-  basecamp init snowpack report            # Setup Snowpack workspace for clean report document
-  basecamp init snowpack slides            # Setup Snowpack workspace for 16:9 presentation slides
-  basecamp init snowpack paper             # Setup Snowpack workspace for IEEE 2-column paper
-  basecamp init snowpack slides --packages # Scaffold slides and interactively pick package bundles
-  basecamp packages typ                    # Interactively configure Typst packages (packages.typ)
-  basecamp packages tex                    # Interactively configure LaTeX packages (packages.tex)
-  basecamp init typ                        # Setup native Typst workspace (report.typ + packages.typ)
-  basecamp init tex                        # Setup native LaTeX workspace (report.tex + packages.tex)
-  basecamp new md:slides                   # Drop slides.md in current folder
-  basecamp new typ:paper                   # Drop native Typst IEEE 2-column paper (paper.typ)
-  basecamp new tex:slides                  # Drop native LaTeX Beamer presentation (slides.tex)
-  basecamp new paper                       # Direct shortcut to drop paper.md in current folder
-  basecamp init snowpack -m slides         # Bootstrap slides using explicit --mode flag
-  basecamp new bg                          # Drop Barograph starter (plot.py + dashboard.py) in current folder
-  basecamp new typ                         # Drop native Typst report (report.typ) in current folder
+  basecamp                                 # Interactive stack selector
+  basecamp init py                         # Setup Python DevShell (auto-runs uv init in shell)
+  basecamp init rust next ops              # Polyglot workspace (Rust + Next.js + Docker)
+  basecamp init snowpack                   # Setup Snowpack DevShell (Typst, Tinymist LSP, Tectonic)
   basecamp shell rust next                 # Setup DevShell without scaffolding files
-  basecamp project snowpack                # Scaffold layout templates & library.bib to project root
+  basecamp project c                       # Scaffold CMakeLists.txt to project root
+  basecamp new c                           # Drop main.c in current directory
   basecamp list                            # View all registered language roles & aliases
   basecamp active                          # Diagnose active roles on current workspace flake
   basecamp list --active                   # Show active roles on current flake

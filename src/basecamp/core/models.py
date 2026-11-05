@@ -5,16 +5,6 @@ from typing import Any
 
 
 @dataclass
-class TargetSpec:
-    """Specification for a role sub-target / document template."""
-
-    project: list[str] = field(default_factory=list)
-    starter: list[str] = field(default_factory=list)
-    description: str = ""
-    aliases: list[str] = field(default_factory=list)
-
-
-@dataclass
 class Role:
     """Definition of a development stack role."""
 
@@ -27,14 +17,3 @@ class Role:
     icon: str = "⛺"
     display_name: str = ""
     status_detail: str = ""
-
-
-@dataclass
-class PackageBundle:
-    """Definition of an optional or default package bundle (Typst/LaTeX)."""
-
-    id: str
-    label: str
-    desc: str
-    snippet: str
-    default: bool = False

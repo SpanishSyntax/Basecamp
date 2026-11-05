@@ -1,1 +1,1 @@
-"""Scaffolding engine, Git integration, and document package manifests for Basecamp."""
+"""Scaffolding engine and Git integration for Basecamp."""
