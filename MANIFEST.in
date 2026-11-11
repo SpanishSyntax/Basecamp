@@ -1,0 +1,2 @@
+include src/basecamp/flake.template
+recursive-include src/basecamp/templates *
