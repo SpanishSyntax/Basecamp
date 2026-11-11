@@ -2,11 +2,16 @@
   <img src="assets/banner.png" alt="Expedition basecamp tents pitched on arctic ice" width="100%" />
 </p>
 
-# ⛺ Basecamp
+# Basecamp ⛺
 
-> **Fast, Modular Nix Development Environments & Instant Project Scaffolding**
+A command-line tool for single-file Nix development shells (`flake.nix`), automatic `.envrc` direnv configuration, and multi-language starter project scaffolding.
 
-Basecamp is an opinionated, lightning-fast CLI utility that automates single-file Nix shell creation (`flake.nix`), sets up seamless `.envrc` direnv hooks, generates language-aware `.gitignore` files, and scaffolds modern starter templates for over 20 languages, frameworks, and cloud ecosystems.
+Basecamp generates reproducible, multi-platform development environments in milliseconds, wires direnv hooks, outputs language-aware `.gitignore` rules, and provisions complete starter templates across more than 20 programming language ecosystems.
+
+---
+
+> [!TIP]
+> **Documentation Site**: Comprehensive guides, complete role specifications, and advanced configuration options are available on the **[Documentation Site](https://spanishsyntax.github.io/Basecamp)**.
 
 ---
 
@@ -14,32 +19,33 @@ Basecamp is an opinionated, lightning-fast CLI utility that automates single-fil
 
 > **basecamp** (`/ˈbeɪs.kæmp/`) — *noun:* The primary staging outpost pitched at the foot of a glacier, stocking provisions, shelters, and technical climbing gear before an expedition pushes into unmapped arctic ice.
 
-You never venture onto polar ice sheets without first staging your rations, verifying ropes, and pitching insulated shelter. Exploring new software stacks without hermetic tooling carries the same risk of getting stranded.
+In arctic exploration, mountaineers never traverse an icefield without first establishing an insulated staging ground. Equipment is checked, ropes are measured, and shelters are anchored before setting foot on moving terrain. Attempting to navigate modern software development without hermetic tooling presents an equivalent risk: divergent compiler versions, missing dynamic libraries, and unpinned global state undermine system reliability.
 
-**Basecamp pitches your staging environment instantly:**
-- **Insulated Staging**: Automatically scaffolds single-file `flake.nix` development shells, wires `.envrc` direnv hooks, and generates language-aware `.gitignore` rules in seconds.
-- **Expedition Packs**: Supplies battle-tested starter configurations across 20+ programming languages, frameworks, and cloud ecosystems with zero global host pollution.
+**Basecamp establishes a secure development outpost in seconds:**
 
----
-
-## ✨ Features
-
-- ⚡ **Instant DevShells**: Generates reproducible, multi-platform `flake.nix` and `.envrc` configurations in milliseconds.
-- 🗂️ **Zero-Config Scaffolding**: Provides turnkey starter templates across 20+ language ecosystems with modern project structures (`main.py`, `Cargo.toml`, `build.zig`, `CMakeLists.txt`, `pom.xml`, etc.).
-- 🛡️ **Overwrite Protection (`-f / --force`)**: Protects existing configurations from accidental overwrites with confirmation prompts.
-- 🌿 **Automatic Git Staging**: Detects Git repositories and automatically stages generated files (`git add flake.nix .envrc .gitignore`) so Nix Flakes recognize them immediately.
-- 🚫 **Smart `.gitignore` Generation**: Appends standard Nix/direnv ignores (`.direnv/`, `result`) and role-specific cache/build directories (`.venv/`, `target/`, `node_modules/`, `zig-cache/`, `_build/`, etc.).
-- 🌐 **Configurable Nixpkgs Channels (`-c / --channel`)**: Easily switch between `nixos-26.05`, `unstable`, `24.11`, or custom flake URIs on the fly.
-- 🔍 **Discovery & Inspection (`list` & `info`)**: Browse all available roles, categories, and aliases, or inspect exact packages, LSPs, and shell hooks before scaffolding.
-- 🧭 **Interactive Stack Selector (`interactive`)**: Run `basecamp` with no arguments in any terminal for a clean interactive menu to choose stacks and commands.
-- 🧩 **Extensible User Roles (`~/.config/basecamp/roles.toml`)**: Define custom organization or project roles without modifying Basecamp's code.
-- 🔗 **Native Runtime Library Injection**: Automatically injects standard C runtime libraries (`stdenv.cc.cc.lib`, `zlib`, `glib`, `libxml2`, `openssl`, `libffi`) into `LD_LIBRARY_PATH`.
-- 🦀 **Rust-Overlay Integration**: Seamlessly pulls and activates the `oxalica/rust-overlay` toolchain with `rust-analyzer` when Rust roles are selected.
-- 🪶 **Pure & Ultra-Lightweight**: Zero external Python dependencies; 100% standard library core with sub-30ms startup.
+- **Hermetic Staging**: Automatically scaffolds single-file `flake.nix` development shells, wires `.envrc` direnv hooks, and writes language-aware `.gitignore` rules without global environment side effects.
+- **Expedition Packs**: Supplies battle-tested configurations across 20+ programming languages and frameworks, handling language servers, formatters, and native C runtime dependencies uniformly.
 
 ---
 
-## 🚀 Quick Start
+## Features
+
+- **Reproducible DevShells**: Generates multi-platform `flake.nix` and `.envrc` configurations in milliseconds.
+- **Turnkey Starter Scaffolding**: Provisions starter templates across 20+ language ecosystems with modern project structures (`main.py`, `Cargo.toml`, `build.zig`, `CMakeLists.txt`, `pom.xml`, etc.).
+- **Overwrite Protection**: Safeguards existing project files with interactive confirmation prompts unless `-f` / `--force` is specified.
+- **Automatic Git Staging**: Detects Git repositories and automatically stages generated files (`git add flake.nix .envrc .gitignore`) so Nix Flakes recognize them immediately.
+- **Language-Aware Ignore Rules**: Generates targeted `.gitignore` files combining standard Nix ignores (`.direnv/`, `result`) with role-specific build and cache directories (`.venv/`, `target/`, `node_modules/`, `zig-cache/`).
+- **Configurable Nixpkgs Channels**: Switch between `nixos-26.05`, `unstable`, `24.11`, or custom flake URIs via `-c` / `--channel`.
+- **Discovery and Inspection**: Interactively browse available roles via `basecamp list` or inspect package lists, language servers, and hooks with `basecamp info <role>`.
+- **Interactive Terminal Selector**: Run `basecamp` without arguments in an interactive terminal to launch the menu-driven stack and command selector.
+- **Extensible User Roles**: Define organization or project roles in `~/.config/basecamp/roles.toml` without modifying Basecamp sources.
+- **C Runtime Library Injection**: Automatically injects standard C runtime libraries (`stdenv.cc.cc.lib`, `zlib`, `glib`, `libxml2`, `openssl`, `libffi`) into `LD_LIBRARY_PATH`.
+- **Rust-Overlay Integration**: Seamlessly pulls and activates the `oxalica/rust-overlay` toolchain with `rust-analyzer` when Rust roles are selected.
+- **Lightweight Architecture**: Pure standard library core with sub-30ms startup.
+
+---
+
+## Quick Start
 
 Run Basecamp directly via Nix without installing:
 
@@ -52,9 +58,6 @@ nix run github:SpanishSyntax/Basecamp -- init python
 
 # Initialize a Zig project with zls and build.zig
 nix run github:SpanishSyntax/Basecamp -- init zig
-
-# Initialize a Snowpack workspace (provisions Typst, Pandoc, Tinymist LSP, Tectonic)
-basecamp init snowpack
 
 # Generate only DevShell without starter files
 basecamp shell rust next
@@ -74,7 +77,7 @@ nix run github:SpanishSyntax/Basecamp -- list
 
 ---
 
-## 💻 CLI Commands & Options
+## CLI Reference
 
 ```text
 Usage: basecamp [options]
@@ -89,7 +92,7 @@ Commands:
   list         List all available roles, categories, and aliases.
   active       Diagnose and display active roles on current flake.
   info <role>  Display detailed information, packages, and starter files for a role.
-  interactive  Launch interactive Bun-style role and command selector.
+  interactive  Launch interactive role and command selector.
 
 Options:
   -a, --active         Show only active roles on current flake.
@@ -113,7 +116,7 @@ Options:
 
 ---
 
-## 🧰 Supported Roles & Ecosystems
+## Supported Roles & Ecosystems
 
 | Ecosystem | Role | Aliases | Toolchain & LSP | Formatter / Linters |
 | :--- | :--- | :--- | :--- | :--- |
@@ -139,41 +142,27 @@ Options:
 
 ---
 
-## 📝 Snowpack & Iceberg Decoupling
+## Custom User Roles (`~/.config/basecamp/roles.toml`)
 
-Basecamp strictly adheres to the Single Responsibility Principle:
-- **Basecamp** provides the developer environment: Nix `flake.nix`, `.envrc`, LSPs (`tinymist`, `texlab`), formatters (`typstyle`), compilers (`typst`, `tectonic`), and `TYPST_ROOT` environment hooks.
-- **Snowpack** handles document scaffolding directly via its own CLI:
-  ```bash
-  snowpack new slides      # Scaffold 16:9 Typst presentation
-  snowpack new paper       # Scaffold IEEE 2-column paper
-  snowpack new report      # Scaffold technical report
-  snowpack init            # Bootstrap complete workspace (packages.typ + bib + starter)
-  ```
-
----
-
-## 🧩 Custom User Roles (`~/.config/basecamp/roles.toml`)
-
-You can define your own project roles and aliases without modifying Basecamp. Create `~/.config/basecamp/roles.toml`:
+Define custom project roles and aliases without modifying Basecamp in `~/.config/basecamp/roles.toml`:
 
 ```toml
 [roles.ocaml]
 category = "Functional"
 description = "OCaml compiler + dune + utop + ocaml-lsp"
 pkgs = ["ocaml", "dune_3", "ocamlPackages.utop", "ocamlPackages.ocaml-lsp"]
-hooks = ["printf '🐫 OCaml environment active\\n'"]
+hooks = ["printf 'OCaml environment active\\n'"]
 ignores = ["_build/"]
 
 [aliases]
 ml = "ocaml"
 ```
 
-Basecamp will automatically merge your custom roles into `basecamp list`, `basecamp info`, and all scaffolding commands. You can also place custom starter templates inside `~/.config/basecamp/templates/<role_name>/`.
+Basecamp automatically merges user roles into `basecamp list`, `basecamp info`, and all scaffolding commands. Custom starter templates can be placed inside `~/.config/basecamp/templates/<role_name>/`.
 
 ---
 
-## 🛠️ Home Manager Configuration
+## Home Manager Configuration
 
 Add Basecamp to your `flake.nix`:
 
@@ -200,49 +189,8 @@ Add Basecamp to your `flake.nix`:
 }
 ```
 
-Once enabled, `basecamp` is directly accessible in your interactive shell.
-
 ---
 
-## 📁 Repository Structure
-
-```text
-Basecamp/
-├── flake.nix               # Flake package & Home Manager module definition
-├── pyproject.toml          # Standard PEP 517 / 621 Python project packaging
-├── MANIFEST.in             # Manifest guaranteeing template asset bundling
-├── LICENSE                 # MIT License
-├── README.md               # Documentation & usage guide
-└── src/
-    └── basecamp/
-        ├── __init__.py         # Package metadata
-        ├── __main__.py         # python -m basecamp entrypoint
-        ├── cli/                # Command handlers & CLI parser
-        ├── core/               # Role models, registry, and environment generator
-        ├── scaffold/           # Asset scaffolding, git staging, and manifests
-        ├── ui/                 # Prism terminal UI facade
-        ├── flake.template      # Base devShell template
-        └── templates/          # Starter project templates for 20+ ecosystems
-        ├── c/
-        ├── cpp/
-        ├── dotnet/
-        ├── elixir/
-        ├── snowpack/
-        ├── gleam/
-        ├── go/
-        ├── haskell/
-        ├── java/
-        ├── julia/
-        ├── barograph/
-        ├── ops/
-        ├── python/
-        ├── rust/
-        ├── ts/
-        └── zig/
-```
-
----
-
-## 📜 License
+## License
 
 MIT © SpanishSyntax
