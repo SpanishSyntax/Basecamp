@@ -41,8 +41,8 @@ basecamp init zig --force
 # Preview all generated files without writing to disk
 basecamp init go --dry-run
 
-# Pin to nixpkgs-unstable
-basecamp init python -c unstable
+# Pull an ad-hoc package from the unstable input
+basecamp init python unstable.ruff
 ```
 
 ### `basecamp shell`
@@ -127,7 +127,8 @@ From this menu, you can interactively select commands, browse roles categorized 
 | :--- | :--- | :--- | :--- |
 | `-f` | `--force` | Overwrite existing files without interactive confirmation. | `false` |
 | `-n` | `--dry-run` | Output generated file contents to stdout without writing to disk. | `false` |
-| `-c` | `--channel` | Nixpkgs channel name or flake URL (`nixos-26.05`, `unstable`, `24.11`). | `nixos-26.05` |
+| `-c` | `--channel` | Stable nixpkgs input: channel name or flake URL (`nixos-26.05`, `24.11`). | `nixos-26.05` |
+| `-u` | `--unstable-channel` | Unstable nixpkgs input: channel name or flake URL (`nixpkgs-unstable`, `nixos-unstable`). | `nixpkgs-unstable` |
 | `-a` | `--active` | Display only active roles detected on the current `flake.nix`. | `false` |
 | `-m` | `--mode MODE` | Operating mode or template target (e.g. `slides`, `paper`, `report`). | Role default |
 | `-t` | `--target TARGET` | Alias for `--mode`. | Role default |
@@ -155,12 +156,22 @@ direnv allow
 
 This single command provisions `cargo`, `rust-analyzer`, Bun, `vtsls`, Docker Compose, and Kubernetes tools in a single development shell.
 
-### Recipe 2: Upgrading to Nixpkgs Unstable
+### Recipe 2: Mixing Stable and Unstable Packages
 
-By default, Basecamp targets `nixos-26.05`. To pin an environment to the latest bleeding-edge channel:
+Every generated flake has two inputs: `nixpkgs` (stable, `nixos-26.05`) and `nixpkgs-unstable`. Packages come from stable unless a role lists them under `unstable_pkgs` (the built-in Snowpack role does this for `typst`, `tinymist`, `typstyle`). Ad-hoc packages opt in with an `unstable.` prefix:
 
 ```bash
-basecamp init python -c unstable
+basecamp init snowpack                 # typst stack from unstable, pandoc/tectonic/texlab from stable
+basecamp init python unstable.ruff     # ruff from unstable, rest stable
+basecamp init python -c unstable       # point the *stable* input at unstable (everything bleeding-edge)
+```
+
+The generated `packages` attribute is split per source:
+
+```nix
+packages =
+  (with pkgs; [pandoc tectonic texlab])
+  ++ (with unstable; [typst tinymist typstyle]);
 ```
 
 ### Recipe 3: Headless Scaffolding in Automated Scripts

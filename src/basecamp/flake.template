@@ -2,22 +2,30 @@
 {
   inputs = {
     nixpkgs.url = "__NIXPKGS_URL__";
+    nixpkgs-unstable.url = "__UNSTABLE_URL__";
     /* __RUST_INPUT__ */
   };
 
-  outputs = {nixpkgs, ...} @ inputs: let
+  outputs = {nixpkgs, nixpkgs-unstable, ...} @ inputs: let
     supportedSystems = ["x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin"];
     forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
   in {
     devShells = forAllSystems (system: let
+      # Stable release: default source for every package.
       pkgs = import nixpkgs {
         inherit system;
         /* __RUST_OVERLAY__ */
       };
+      # Rolling unstable: opt-in per package.
+      unstable = import nixpkgs-unstable {
+        inherit system;
+      };
       libs = with pkgs; [__LIBS_LIST__];
     in {
       default = pkgs.mkShell {
-        packages = with pkgs; [__PKGS_LIST__];
+        packages =
+          (with pkgs; [__PKGS_LIST__])
+          ++ (with unstable; [__UNSTABLE_PKGS_LIST__]);
         buildInputs = libs;
 
         shellHook = ''

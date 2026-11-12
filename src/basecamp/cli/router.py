@@ -24,6 +24,7 @@ from basecamp.core.registry import (
     BUILTIN_ALIASES,
     build_builtin_role_registry,
     resolve_nixpkgs_url,
+    resolve_unstable_url,
 )
 from basecamp.scaffold.engine import resolve_metadata, scaffold_assets
 from basecamp.ui import ui
@@ -320,6 +321,7 @@ def main() -> None:
         sys.exit(1)
 
     nixpkgs_url = resolve_nixpkgs_url(parsed.channel)
+    unstable_url = resolve_unstable_url(parsed.unstable_channel)
 
     doc_metadata = resolve_metadata(project_name=project_name)
 
@@ -333,6 +335,7 @@ def main() -> None:
             template_path=template_path,
             libs_list=libs_list,
             nixpkgs_url=nixpkgs_url,
+            unstable_url=unstable_url,
             force=parsed.force,
             dry_run=parsed.dry_run,
             auto_git=parsed.auto_git,

@@ -27,6 +27,14 @@ pkgs = ["gcc-arm-embedded", "openocd", "picocom", "gdb"]
 hooks = ["export TARGET_ARCH=arm-none-eabi"]
 ignores = ["build/"]
 
+# Mix channels: `pkgs` come from stable (nixos-26.05), `unstable_pkgs` from nixpkgs-unstable.
+# An `unstable.` prefix inside `pkgs` is equivalent (e.g. "unstable.helix").
+[roles.notes]
+category = "Typesetting"
+description = "Typst notes with bleeding-edge compiler"
+pkgs = ["pandoc"]
+unstable_pkgs = ["typst", "tinymist"]
+
 # Define custom aliases
 [aliases]
 ml = "ocaml"

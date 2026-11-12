@@ -33,7 +33,8 @@ def display_role_info(
             "category": role.category,
             "description": role.description,
             "aliases": sorted(rev_aliases),
-            "packages": role.pkgs,
+            "packages": role.channel_pkgs()[0],
+            "unstable_packages": role.channel_pkgs()[1],
             "hooks": role.hooks,
             "targets": role.targets,
             "ignores": role.ignores,
@@ -62,8 +63,11 @@ def display_role_info(
             print(f"    • {ui.cyan(t_name):<10} : {desc}{ui.dim(aliases_str)}")
 
     print(f"\n  {ui.bold('Packages Included in DevShell:')}")
-    for pkg in role.pkgs:
-        print(f"    • {ui.cyan(pkg)}")
+    stable_pkgs, unstable_pkgs = role.channel_pkgs()
+    for pkg in stable_pkgs:
+        print(f"    • {ui.cyan(pkg)} {ui.dim('(stable)')}")
+    for pkg in unstable_pkgs:
+        print(f"    • {ui.cyan(pkg)} {ui.yellow('(unstable)')}")
 
     print(f"\n  {ui.bold('Shell Activation Hooks:')}")
     for hook in role.hooks:

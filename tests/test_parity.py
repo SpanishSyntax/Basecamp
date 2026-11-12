@@ -64,8 +64,9 @@ def test_builtin_registry_completeness():
 
     # Verify Snowpack is a decoupled environment provider
     snowpack = roles["snowpack"]
-    assert "typst" in snowpack.pkgs
-    assert "tinymist" in snowpack.pkgs
+    assert "typst" in snowpack.unstable_pkgs
+    assert "tinymist" in snowpack.unstable_pkgs
+    assert "typst" not in snowpack.pkgs  # typst stack tracks unstable
     assert len(snowpack.targets) == 0
 
 

@@ -39,7 +39,7 @@ The Basecamp execution pipeline operates in three sequential phases:
        │
        ▼
 [Environment Synthesis]
-       ├── Channel Resolution (`resolve_nixpkgs_url`)
+       ├── Channel Resolution (`resolve_nixpkgs_url` stable + `resolve_unstable_url`; per-package split via `collect_channel_packages`)
        ├── Runtime Library Injection (`LD_LIBRARY_PATH`)
        ├── Hook Aggregation
        └── Multi-Platform DevShell Generation (`flake.nix`, `.envrc`, `.gitignore`)

@@ -35,7 +35,7 @@ In arctic exploration, mountaineers never traverse an icefield without first est
 - **Overwrite Protection**: Safeguards existing project files with interactive confirmation prompts unless `-f` / `--force` is specified.
 - **Automatic Git Staging**: Detects Git repositories and automatically stages generated files (`git add flake.nix .envrc .gitignore`) so Nix Flakes recognize them immediately.
 - **Language-Aware Ignore Rules**: Generates targeted `.gitignore` files combining standard Nix ignores (`.direnv/`, `result`) with role-specific build and cache directories (`.venv/`, `target/`, `node_modules/`, `zig-cache/`).
-- **Configurable Nixpkgs Channels**: Switch between `nixos-26.05`, `unstable`, `24.11`, or custom flake URIs via `-c` / `--channel`.
+- **Dual-Channel Flakes**: Every generated flake carries a pinned stable input (`nixos-26.05`) and a `nixpkgs-unstable` input. Roles choose per package via `pkgs` (stable) / `unstable_pkgs`; ad-hoc packages opt in with an `unstable.` prefix. Override either input with `-c` / `--channel` and `-u` / `--unstable-channel`.
 - **Discovery and Inspection**: Interactively browse available roles via `basecamp list` or inspect package lists, language servers, and hooks with `basecamp info <role>`.
 - **Interactive Terminal Selector**: Run `basecamp` without arguments in an interactive terminal to launch the menu-driven stack and command selector.
 - **Extensible User Roles**: Define organization or project roles in `~/.config/basecamp/roles.toml` without modifying Basecamp sources.
@@ -65,8 +65,11 @@ basecamp shell rust next
 # Combine roles: Rust backend + Next.js frontend + DevOps containers
 nix run github:SpanishSyntax/Basecamp -- init rust next ops
 
-# Target nixpkgs-unstable channel
-nix run github:SpanishSyntax/Basecamp -- init go -c unstable
+# Pull an extra ad-hoc package from nixpkgs-unstable
+nix run github:SpanishSyntax/Basecamp -- init go unstable.golangci-lint
+
+# Point the stable input at a different release
+nix run github:SpanishSyntax/Basecamp -- init go -c 25.11
 
 # Dry-run preview without writing files
 nix run github:SpanishSyntax/Basecamp -- init rust --dry-run
@@ -105,7 +108,9 @@ Options:
   --theme THEME        Presentation theme for slides ('dark' or 'light').
   -f, --force          Overwrite existing files without confirmation prompts.
   -n, --dry-run        Preview generated files in stdout without writing.
-  -c, --channel NAME   Nixpkgs channel (default: nixos-26.05, e.g. unstable, 24.11).
+  -c, --channel NAME   Stable nixpkgs input (default: nixos-26.05, e.g. 24.11).
+  -u, --unstable-channel NAME
+                       Unstable nixpkgs input (default: nixpkgs-unstable).
   --no-direnv          Skip generating .envrc and skip 'direnv allow'.
   --no-git             Do not automatically stage generated files with 'git add'.
   --color MODE         Color output mode: auto, always, never (default: auto).

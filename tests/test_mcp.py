@@ -122,8 +122,9 @@ def test_mcp_execute_info_snowpack() -> None:
     res = execute_tool("basecamp_info", {"role": "snowpack"})
     assert res["status"] == "ok"
     assert res["role"] == "snowpack"
-    assert "typst" in res["packages"]
-    assert "tinymist" in res["packages"]
+    assert "typst" in res["unstable_packages"]
+    assert "tinymist" in res["unstable_packages"]
+    assert "pandoc" in res["packages"]
 
 
 def test_mcp_execute_info_invalid() -> None:

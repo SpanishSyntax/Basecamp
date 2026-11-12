@@ -85,9 +85,71 @@ class FlakeWorkspaceDiagnosis:
     project_root: Path
     flake_path: Path
     channel: str | None = None
+    unstable_channel: str | None = None
     active_roles: list[ActiveRoleDiagnostic] = field(default_factory=list)
     extra_packages: list[str] = field(default_factory=list)
     discovered_artifacts: list[str] = field(default_factory=list)
+
+
+def _short_channel(url: str) -> str:
+    """Reduces a standard nixpkgs flake URL to its branch name."""
+    if "nixos-" in url or "nixpkgs-" in url:
+        return url.split("/")[-1]
+    return url
+
+
+def detect_channels(flake_content: str) -> tuple[str | None, str | None]:
+    """Returns (stable, unstable) channel names from the flake inputs."""
+    stable = re.search(r'(?<![\w-])nixpkgs\.url\s*=\s*"([^"]+)";', flake_content)
+    unstable = re.search(r'nixpkgs-unstable\.url\s*=\s*"([^"]+)";', flake_content)
+    return (
+        _short_channel(stable.group(1)) if stable else None,
+        _short_channel(unstable.group(1)) if unstable else None,
+    )
+
+
+def _balanced_list(text: str, open_idx: int) -> str:
+    """Returns the contents of the `[ ... ]` list starting at `open_idx`."""
+    depth = 0
+    for i in range(open_idx, len(text)):
+        ch = text[i]
+        if ch == "[":
+            depth += 1
+        elif ch == "]":
+            depth -= 1
+            if depth == 0:
+                return text[open_idx + 1 : i]
+    return text[open_idx + 1 :]
+
+
+def extract_package_sets(flake_content: str) -> tuple[str, str]:
+    """
+    Extracts raw text of the stable and unstable package lists from the
+    `packages = ...;` attribute. Supports both the dual-channel layout
+    `(with pkgs; [..]) ++ (with unstable; [..])` and legacy `with pkgs; [..]`.
+    """
+    stable_parts: list[str] = []
+    unstable_parts: list[str] = []
+    head = re.search(r"\bpackages\s*=", flake_content)
+    if not head:
+        return "", ""
+    pos = head.end()
+    # Each group: optional `++`, optional `(`, then `with <scope>; [`.
+    pattern = re.compile(r"\s*(?:\+\+\s*)?\(?\s*with\s+([\w-]+)\s*;\s*\[")
+    while True:
+        m = pattern.match(flake_content, pos)
+        if not m:
+            break
+        open_idx = m.end() - 1
+        body = _balanced_list(flake_content, open_idx)
+        scope = m.group(1)
+        (unstable_parts if scope == "unstable" else stable_parts).append(body)
+        pos = open_idx + len(body) + 2
+        # Skip the closing paren of a parenthesised group, if present.
+        close = re.compile(r"\s*\)").match(flake_content, pos)
+        if close:
+            pos = close.end()
+    return " ".join(stable_parts), " ".join(unstable_parts)
 
 
 def detect_active_roles(
@@ -100,20 +162,11 @@ def detect_active_roles(
     Uses a multi-tier resolution strategy:
       1. Explicit Basecamp metadata tag comment: `# [basecamp] roles: <roles>`
       2. Shell hook banner matching: `printf '...⛺  [basecamp]... <name> ...active'`
-      3. Package signature matching from `packages = with pkgs; [...]`
+      3. Package signature matching from `(with pkgs; [...])` / `(with unstable; [...])`
     """
     detected: dict[str, ActiveRoleDiagnostic] = {}
 
-    # Extract channel / nixpkgs URL
-    channel: str | None = None
-    chan_match = re.search(r'nixpkgs\.url\s*=\s*"([^"]+)";', flake_content)
-    if chan_match:
-        url = chan_match.group(1)
-        # Extract short channel name if it's standard nixpkgs
-        if "nixos-" in url or "nixpkgs-" in url:
-            channel = url.split("/")[-1]
-        else:
-            channel = url
+    channel, _ = detect_channels(flake_content)
 
     # 1. Check explicit Basecamp roles metadata comment
     comment_match = re.search(
@@ -164,20 +217,20 @@ def detect_active_roles(
                     )
                     break
 
-    # 3. Extract packages list
-    pkg_match = re.search(
-        r"packages\s*=\s*with\s+pkgs;\s*\[(.*?)\];", flake_content, re.DOTALL
-    )
-    flake_pkgs: set[str] = set()
-    if pkg_match:
-        # Split tokens, strip parentheses, strings, etc.
-        raw_pkgs = pkg_match.group(1)
-        tokens = re.findall(r"[A-Za-z0-9_.-]+", raw_pkgs)
-        flake_pkgs = {
-            t
-            for t in tokens
-            if t not in ("with", "pkgs", "override", "extensions", "rust-bin")
+    # 3. Extract packages lists (stable `with pkgs;` and unstable `with unstable;`)
+    stable_raw, unstable_raw = extract_package_sets(flake_content)
+    ignore_toks = ("with", "pkgs", "unstable", "override", "extensions", "rust-bin")
+
+    def _tokens(raw: str) -> set[str]:
+        # Drop quoted strings (e.g. withPackages names), then split identifiers.
+        cleaned = re.sub(r'"[^"]*"', " ", raw)
+        return {
+            t for t in re.findall(r"[A-Za-z0-9_.-]+", cleaned) if t not in ignore_toks
         }
+
+    stable_pkgs = _tokens(stable_raw)
+    unstable_flake_pkgs = _tokens(unstable_raw)
+    flake_pkgs: set[str] = stable_pkgs | unstable_flake_pkgs
 
     # Distinctive package signatures for fallback matching
     SIGNATURE_PKGS: dict[str, list[str]] = {
@@ -213,12 +266,16 @@ def detect_active_roles(
     # 4. Compute extra standalone packages
     known_role_pkgs: set[str] = set()
     for diag in detected.values():
-        for p in diag.role.pkgs:
+        for p in diag.role.all_pkgs:
             for tok in re.findall(r"[A-Za-z0-9_.-]+", p):
-                if tok not in ("with", "pkgs", "override", "extensions", "rust-bin"):
+                if tok not in ignore_toks:
                     known_role_pkgs.add(tok)
 
-    extra_pkgs = sorted(list(flake_pkgs - known_role_pkgs))
+    # Unstable extras are reported with the `unstable.` prefix (CLI input syntax).
+    extra_pkgs = sorted(
+        [p for p in stable_pkgs - known_role_pkgs]
+        + [f"unstable.{p}" for p in unstable_flake_pkgs - known_role_pkgs]
+    )
 
     return list(detected.values()), extra_pkgs, channel
 
@@ -239,6 +296,7 @@ def diagnose_flake(
         return FlakeWorkspaceDiagnosis(project_root=project_root, flake_path=flake_path)
 
     active_roles, extra_pkgs, channel = detect_active_roles(content, roles_db, aliases)
+    _, unstable_channel = detect_channels(content)
 
     # Detect workspace files
     discovered: list[str] = []
@@ -250,6 +308,7 @@ def diagnose_flake(
         project_root=project_root,
         flake_path=flake_path,
         channel=channel,
+        unstable_channel=unstable_channel,
         active_roles=active_roles,
         extra_packages=extra_pkgs,
         discovered_artifacts=discovered,
@@ -289,6 +348,7 @@ def display_active_roles(
             "project_root": str(diag.project_root),
             "flake_path": str(diag.flake_path),
             "channel": diag.channel,
+            "unstable_channel": diag.unstable_channel,
             "active_roles": [
                 {
                     "role": r.role_key,
@@ -310,11 +370,15 @@ def display_active_roles(
     sep_line = ui.dim("─" * inner_w)
 
     chan_str = diag.channel if diag.channel else ui.dim("custom / unspecified")
+    unstable_str = (
+        diag.unstable_channel if diag.unstable_channel else ui.dim("none (legacy flake)")
+    )
 
     panel_lines: list[str] = [
         f"{ui.bold('Workspace Root:')}  {diag.project_root}",
         f"{ui.bold('Flake Path:')}      {diag.flake_path}",
         f"{ui.bold('Nixpkgs Channel:')} {ui.cyan(chan_str)}",
+        f"{ui.bold('Unstable Input:')}  {ui.cyan(unstable_str)}",
         sep_line,
     ]
 

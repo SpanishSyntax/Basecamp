@@ -35,7 +35,9 @@ Options:
   --toon               Token-Oriented Object Notation (TOON) output mode
   -f, --force          Overwrite existing files without confirmation prompts
   -n, --dry-run        Preview generated files in stdout without writing
-  -c, --channel NAME   Nixpkgs channel (default: nixos-26.05)
+  -c, --channel NAME   Stable nixpkgs input (default: nixos-26.05)
+  -u, --unstable-channel NAME
+                       Unstable nixpkgs input (default: nixpkgs-unstable)
   --no-direnv          Skip generating .envrc and skip 'direnv allow'
   --no-git             Do not automatically stage generated files with 'git add'
   --color MODE         Color output mode: auto, always, never
@@ -68,7 +70,9 @@ Options:
   -a, --active         Show only active roles on current flake.
   -f, --force          Overwrite existing files without confirmation prompts.
   -n, --dry-run        Preview generated files in stdout without writing.
-  -c, --channel NAME   Nixpkgs channel (default: nixos-26.05, e.g. unstable, 24.11).
+  -c, --channel NAME   Stable nixpkgs input (default: nixos-26.05, e.g. 24.11).
+  -u, --unstable-channel NAME
+                       Unstable nixpkgs input (default: nixpkgs-unstable).
   --no-direnv          Skip generating .envrc and skip 'direnv allow'.
   --no-git             Do not automatically stage generated files with 'git add'.
   --color MODE         Color output mode: auto, always, never (default: auto).
@@ -100,6 +104,7 @@ class ParsedArgs:
     auto_git: bool = True
     no_direnv: bool = False
     channel: str | None = None
+    unstable_channel: str | None = None
     target_flag: str | None = None
     active: bool = False
 
@@ -134,6 +139,15 @@ def parse_cli_args(args: list[str]) -> ParsedArgs:
                 sys.exit(1)
         elif arg.startswith("--channel="):
             parsed.channel = arg.split("=", 1)[1]
+        elif arg in ("-u", "--unstable-channel"):
+            if i + 1 < len(args):
+                parsed.unstable_channel = args[i + 1]
+                i += 1
+            else:
+                ui.error("--unstable-channel requires a channel name or url.")
+                sys.exit(1)
+        elif arg.startswith("--unstable-channel="):
+            parsed.unstable_channel = arg.split("=", 1)[1]
         elif arg in ("-m", "--mode", "-t", "--target", "--type"):
             if i + 1 < len(args):
                 parsed.target_flag = args[i + 1]

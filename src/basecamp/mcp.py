@@ -24,6 +24,7 @@ from basecamp.core.registry import (
     BUILTIN_ALIASES,
     build_builtin_role_registry,
     resolve_nixpkgs_url,
+    resolve_unstable_url,
 )
 from basecamp.scaffold.engine import resolve_metadata, scaffold_assets
 
@@ -119,7 +120,11 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
                 },
                 "channel": {
                     "type": "string",
-                    "description": "Nixpkgs channel (default: nixos-26.05).",
+                    "description": "Stable nixpkgs input, default source for packages (default: nixos-26.05).",
+                },
+                "unstable_channel": {
+                    "type": "string",
+                    "description": "Unstable nixpkgs input for roles' unstable_pkgs (default: nixpkgs-unstable).",
                 },
             },
             "required": ["roles"],
@@ -165,13 +170,15 @@ def _handle_list(active_only: bool = False, project_dir: str = ".") -> dict[str,
             "flake_path": str(diag.flake_path) if has_flake else None,
             "has_flake": has_flake,
             "channel": diag.channel,
+            "unstable_channel": diag.unstable_channel,
             "active_roles": [
                 {
                     "role": r.role_key,
                     "category": r.role.category,
                     "description": r.role.description,
                     "detection_method": r.detection_method,
-                    "packages": r.role.pkgs,
+                    "packages": r.role.channel_pkgs()[0],
+                    "unstable_packages": r.role.channel_pkgs()[1],
                 }
                 for r in diag.active_roles
             ],
@@ -185,7 +192,8 @@ def _handle_list(active_only: bool = False, project_dir: str = ".") -> dict[str,
             "category": role.category,
             "description": role.description,
             "aliases": sorted([a for a, target in aliases.items() if target == r_key]),
-            "packages": role.pkgs,
+            "packages": role.channel_pkgs()[0],
+            "unstable_packages": role.channel_pkgs()[1],
             "targets": list(role.targets.keys()) if role.targets else [],
         }
         for r_key, role in sorted(roles_db.items())
@@ -272,7 +280,8 @@ def _handle_info(role: str) -> dict[str, Any]:
         "category": role_def.category,
         "description": role_def.description,
         "aliases": sorted(rev_aliases),
-        "packages": role_def.pkgs,
+        "packages": role_def.channel_pkgs()[0],
+        "unstable_packages": role_def.channel_pkgs()[1],
         "hooks": role_def.hooks,
         "targets": role_def.targets,
         "ignores": role_def.ignores,
@@ -292,6 +301,7 @@ def _handle_init(
     force: bool = False,
     no_direnv: bool = False,
     channel: str | None = None,
+    unstable_channel: str | None = None,
 ) -> dict[str, Any]:
     raw_roles = _normalize_roles(roles)
     if not raw_roles:
@@ -385,6 +395,7 @@ def _handle_init(
         }
 
     nixpkgs_url = resolve_nixpkgs_url(channel)
+    unstable_url = resolve_unstable_url(unstable_channel)
     libs_list = os.environ.get("LIBS_LIST", DEFAULT_RUNTIME_LIBS).replace(",", " ")
 
     doc_metadata = resolve_metadata(
@@ -402,6 +413,7 @@ def _handle_init(
             template_path=template_path,
             libs_list=libs_list,
             nixpkgs_url=nixpkgs_url,
+            unstable_url=unstable_url,
             force=force,
             dry_run=dry_run,
             auto_git=True,
@@ -493,6 +505,7 @@ def execute_tool(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
             force = arguments.get("force", False)
             no_direnv = arguments.get("no_direnv", False)
             channel = arguments.get("channel")
+            unstable_channel = arguments.get("unstable_channel")
             return _handle_init(
                 roles=roles,
                 mode=mode,
@@ -504,6 +517,7 @@ def execute_tool(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
                 force=force,
                 no_direnv=no_direnv,
                 channel=channel,
+                unstable_channel=unstable_channel,
             )
 
         else:

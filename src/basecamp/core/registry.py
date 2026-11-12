@@ -12,10 +12,24 @@ def fmt_status(icon: str, name: str, detail: str = "") -> str:
     )
 
 
+# ----------------------------------------------------------------------------
+# Channel sources
+# ----------------------------------------------------------------------------
+# Every generated flake carries two nixpkgs inputs:
+#   * `nixpkgs`          -> the pinned stable release (STABLE_RELEASE below)
+#   * `nixpkgs-unstable` -> the rolling unstable branch
+# Packages are sourced from stable unless a role lists them in `unstable_pkgs`
+# (or an entry is written with the `unstable.` prefix, e.g. "unstable.typst").
+STABLE_RELEASE = "26.05"
+STABLE_CHANNEL = f"nixos-{STABLE_RELEASE}"
+UNSTABLE_CHANNEL = "nixpkgs-unstable"
+UNSTABLE_PREFIX = "unstable."
+
+
 def resolve_nixpkgs_url(channel: str | None) -> str:
     """Translates a channel alias or full URL into a flake-compatible nixpkgs URL."""
-    if not channel or channel in ("26.05", "nixos-26.05"):
-        return "github:NixOS/nixpkgs/nixos-26.05"
+    if not channel or channel in (STABLE_RELEASE, STABLE_CHANNEL, "stable"):
+        return f"github:NixOS/nixpkgs/{STABLE_CHANNEL}"
     if channel in ("unstable", "nixpkgs-unstable"):
         return "github:NixOS/nixpkgs/nixpkgs-unstable"
     if channel == "nixos-unstable":
@@ -23,6 +37,18 @@ def resolve_nixpkgs_url(channel: str | None) -> str:
     if channel.startswith("github:") or channel.startswith("git+") or "/" in channel:
         return channel
     return f"github:NixOS/nixpkgs/nixos-{channel}"
+
+
+def resolve_unstable_url(channel: str | None) -> str:
+    """Resolves the URL for the secondary `nixpkgs-unstable` flake input."""
+    return resolve_nixpkgs_url(channel or UNSTABLE_CHANNEL)
+
+
+def split_channel_prefix(pkg: str) -> tuple[str, bool]:
+    """Strips an `unstable.` prefix; returns (attr, is_unstable)."""
+    if pkg.startswith(UNSTABLE_PREFIX):
+        return pkg[len(UNSTABLE_PREFIX) :], True
+    return pkg, False
 
 
 def build_builtin_role_registry(folder_name: str) -> dict[str, Role]:
@@ -361,12 +387,15 @@ def build_builtin_role_registry(folder_name: str) -> dict[str, Role]:
             display_name="Snowpack",
             status_detail="Polyglot Document Engine (Typst + LaTeX)",
             pkgs=[
-                "typst",
                 "pandoc",
-                "tinymist",
-                "typstyle",
                 "tectonic",
                 "texlab",
+            ],
+            # Typst stack tracks nixpkgs-unstable (fast-moving compiler + LSP).
+            unstable_pkgs=[
+                "typst",
+                "tinymist",
+                "typstyle",
             ],
             hooks=[
                 'export TYPST_ROOT="$PWD"',

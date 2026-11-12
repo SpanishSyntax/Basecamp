@@ -7,6 +7,7 @@ import sys
 from pathlib import Path
 
 from basecamp.core.models import Role
+from basecamp.core.registry import resolve_unstable_url, split_channel_prefix
 from basecamp.scaffold.git import stage_git_files, update_gitignore
 from basecamp.ui import ui
 
@@ -53,6 +54,35 @@ def build_shell_hooks(
     return lines
 
 
+def collect_channel_packages(
+    resolved_roles: list[str],
+    roles_db: dict[str, Role],
+) -> tuple[list[str], list[str]]:
+    """
+    Partitions packages of the resolved roles into (stable, unstable) lists.
+
+    Roles contribute `pkgs` (stable) and `unstable_pkgs`. Ad-hoc tokens that are
+    not roles become packages; an `unstable.` prefix routes them to unstable.
+    Lists are de-duplicated in order; unstable wins on conflict.
+    """
+    stable: list[str] = []
+    unstable: list[str] = []
+
+    for role_key in resolved_roles:
+        if role_key in roles_db:
+            r_stable, r_unstable = roles_db[role_key].channel_pkgs()
+            stable.extend(r_stable)
+            unstable.extend(r_unstable)
+        else:
+            attr, is_unstable = split_channel_prefix(role_key)
+            (unstable if is_unstable else stable).append(attr)
+
+    unstable_unique = list(dict.fromkeys(unstable))
+    unstable_set = set(unstable_unique)
+    stable_unique = [p for p in dict.fromkeys(stable) if p not in unstable_set]
+    return stable_unique, unstable_unique
+
+
 def prepare_flake_env(
     project_root: Path,
     resolved_roles: list[str],
@@ -64,8 +94,10 @@ def prepare_flake_env(
     dry_run: bool = False,
     auto_git: bool = True,
     no_direnv: bool = False,
+    unstable_url: str | None = None,
 ) -> bool:
     """Generates the flake.nix and .envrc at the project root."""
+    unstable_url = unstable_url or resolve_unstable_url(None)
     flake_out = project_root / "flake.nix"
     envrc_out = project_root / ".envrc"
 
@@ -84,21 +116,14 @@ def prepare_flake_env(
             ui.error(f"{flake_out} already exists. Pass --force to overwrite.")
             sys.exit(1)
 
-    selected_pkgs: list[str] = []
-
-    for role_key in resolved_roles:
-        if role_key in roles_db:
-            role = roles_db[role_key]
-            selected_pkgs.extend(role.pkgs)
-        else:
-            selected_pkgs.append(role_key)
+    selected_pkgs, unstable_pkgs = collect_channel_packages(resolved_roles, roles_db)
 
     selected_hooks = build_shell_hooks(resolved_roles, roles_db)
 
     has_rust = "rust" in resolved_roles
 
     rust_input = (
-        '    rust-overlay.url = "github:oxalica/rust-overlay";\n'
+        'rust-overlay.url = "github:oxalica/rust-overlay";\n'
         '    rust-overlay.inputs.nixpkgs.follows = "nixpkgs";'
         if has_rust
         else ""
@@ -113,12 +138,25 @@ def prepare_flake_env(
 
     template_content = template_path.read_text(encoding="utf-8")
 
+    if unstable_pkgs and "__UNSTABLE_PKGS_LIST__" not in template_content:
+        # Legacy custom template without an unstable package set: degrade to stable.
+        ui.warn(
+            f"Template {template_path} has no __UNSTABLE_PKGS_LIST__ placeholder; "
+            f"sourcing {', '.join(unstable_pkgs)} from stable instead."
+        )
+        selected_pkgs = selected_pkgs + [
+            p for p in unstable_pkgs if p not in selected_pkgs
+        ]
+        unstable_pkgs = []
+
     rendered = (
         template_content.replace("__ROLES_LIST__", " ".join(resolved_roles))
         .replace("__NIXPKGS_URL__", nixpkgs_url)
+        .replace("__UNSTABLE_URL__", unstable_url)
         .replace("/* __RUST_INPUT__ */", rust_input)
         .replace("/* __RUST_OVERLAY__ */", rust_overlay)
         .replace("__LIBS_LIST__", libs_list)
+        .replace("__UNSTABLE_PKGS_LIST__", " ".join(unstable_pkgs))
         .replace("__PKGS_LIST__", " ".join(selected_pkgs))
         .replace("\n          __SHELL_HOOKS__", hooks_block)
         .replace("__SHELL_HOOKS__", "\n          ".join(selected_hooks))
@@ -126,7 +164,8 @@ def prepare_flake_env(
 
     if dry_run:
         ui.subheader(
-            f"[DRY RUN] Generated flake.nix (Channel: {nixpkgs_url})", width=76
+            f"[DRY RUN] Generated flake.nix (stable: {nixpkgs_url}, unstable: {unstable_url})",
+            width=76,
         )
         print(rendered)
         if not no_direnv:

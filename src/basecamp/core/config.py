@@ -25,6 +25,7 @@ def load_user_config() -> tuple[dict[str, Role], dict[str, str], list[Path]]:
             for role_key, role_data in data.get("roles", {}).items():
                 extra_roles[role_key] = Role(
                     pkgs=role_data.get("pkgs", []),
+                    unstable_pkgs=role_data.get("unstable_pkgs", []),
                     hooks=role_data.get("hooks", []),
                     category=role_data.get("category", "Custom"),
                     description=role_data.get("description", "Custom user role"),

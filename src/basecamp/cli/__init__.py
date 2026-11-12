@@ -11,6 +11,7 @@ from basecamp.core.registry import (
     BUILTIN_ALIASES,
     build_builtin_role_registry,
     resolve_nixpkgs_url,
+    resolve_unstable_url,
 )
 from basecamp.mcp import TOOL_DEFINITIONS, StdioMCPServer, execute_tool
 from basecamp.scaffold.engine import scaffold_assets
@@ -24,6 +25,7 @@ __all__ = [
     "resolve_role_target",
     "find_role_for_standalone_target",
     "resolve_nixpkgs_url",
+    "resolve_unstable_url",
     "prepare_flake_env",
     "scaffold_assets",
     "update_gitignore",
