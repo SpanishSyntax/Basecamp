@@ -55,7 +55,7 @@ flowchart TD
 ### 1. Role Resolution
 
 When commands like `basecamp init rust next ops` are invoked:
-- The CLI parses canonical role identifiers and aliases (`rs` $\to$ `rust`, `ex` $\to$ `elixir`, `py` $\to$ `python`).
+- The CLI parses canonical role identifiers and aliases (`rs` → `rust`, `ex` → `elixir`, `py` → `python`).
 - Custom user roles loaded from `~/.config/basecamp/roles.toml` are merged into the registry.
 - Target specifiers (e.g. `snowpack:slides` or `--mode slides`) are resolved against role target definitions.
 
