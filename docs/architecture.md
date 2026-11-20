@@ -28,27 +28,28 @@ Basecamp establishes an insulated outpost before any exploratory code is written
 
 The Basecamp execution pipeline operates in three sequential phases:
 
-```
-[CLI Invocation]
-       │
-       ▼
-[Role & Target Resolution]
-       ├── Builtin Registry (`BUILTIN_ROLES`)
-       ├── User Config (`~/.config/basecamp/roles.toml`)
-       └── Target Expansion (e.g., `snowpack:slides` -> `slides`)
-       │
-       ▼
-[Environment Synthesis]
-       ├── Channel Resolution (`resolve_nixpkgs_url` stable + `resolve_unstable_url`; per-package split via `collect_channel_packages`)
-       ├── Runtime Library Injection (`LD_LIBRARY_PATH`)
-       ├── Hook Aggregation
-       └── Multi-Platform DevShell Generation (`flake.nix`, `.envrc`, `.gitignore`)
-       │
-       ▼
-[Asset Scaffolding]
-       ├── Overwrite Safety Verification
-       ├── Template Parameterization
-       └── Git Automatic Staging (`git add`)
+```mermaid
+flowchart TD
+    CLI["CLI Invocation"] --> RoleRes["Role and Target Resolution"]
+    RoleRes --> Builtin["Builtin Registry (BUILTIN_ROLES)"]
+    RoleRes --> UserCfg["User Config (~/.config/basecamp/roles.toml)"]
+    RoleRes --> TargetExp["Target Expansion (snowpack:slides -> slides)"]
+
+    Builtin --> EnvSynth["Environment Synthesis"]
+    UserCfg --> EnvSynth
+    TargetExp --> EnvSynth
+
+    EnvSynth --> Channels["Channel Resolution (stable + unstable nixpkgs)"]
+    EnvSynth --> LibPath["Runtime Library Injection (LD_LIBRARY_PATH)"]
+    EnvSynth --> DevShell["Multi-Platform DevShell (flake.nix, .envrc, .gitignore)"]
+
+    Channels --> Scaffold["Asset Scaffolding"]
+    LibPath --> Scaffold
+    DevShell --> Scaffold
+
+    Scaffold --> Safety["Overwrite Safety Verification"]
+    Scaffold --> Templates["Template Parameterization"]
+    Scaffold --> GitAdd["Git Automatic Staging (git add)"]
 ```
 
 ### 1. Role Resolution
