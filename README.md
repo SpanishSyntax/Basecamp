@@ -1,6 +1,4 @@
-<p align="center">
-  <img src="assets/banner.png" alt="Expedition basecamp tents pitched on arctic ice" width="100%" />
-</p>
+<img src="assets/banner.png" alt="Expedition basecamp tents pitched on arctic ice" width="100%" />
 
 # Basecamp ⛺
 
